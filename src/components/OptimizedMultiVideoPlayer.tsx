@@ -257,19 +257,29 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
 
   // Seamless video expansion for high performance mode
   const handleVideoClick = useCallback((videoId: string) => {
+    const currentVideo = videoRefs.current[videoId];
+    const currentTime = currentVideo?.currentTime || 0;
+    
     if (performanceMode === 'high') {
-      // High performance mode: seamless transition
-      const isExpanding = !expandedVideo || expandedVideo !== videoId;
+      // High performance mode: preserve playback state and position
       setExpandedVideo(expandedVideo === videoId ? null : videoId);
       
-      // Videos continue playing in background - no pause needed
-      // Time synchronization happens automatically via onTimeUpdate
+      // Maintain synchronization - set current time for the expanded video
+      if (currentVideo) {
+        setCurrentTime(currentTime);
+        // Sync all other videos to this time
+        Object.values(videoRefs.current).forEach(video => {
+          if (video && video !== currentVideo) {
+            video.currentTime = currentTime;
+          }
+        });
+      }
     } else {
-      // Low performance mode: original behavior with pausing
-      if (!expandedVideo && videoRefs.current[videoId]) {
+      // Low performance mode: save state before switching
+      if (!expandedVideo && currentVideo) {
         setVideoTimes(prev => ({
           ...prev,
-          [videoId]: videoRefs.current[videoId]?.currentTime || 0
+          [videoId]: currentTime
         }));
       }
       
@@ -280,7 +290,6 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
         }));
       }
       
-      const isExpanding = !expandedVideo || expandedVideo !== videoId;
       setExpandedVideo(expandedVideo === videoId ? null : videoId);
       
       // Pause all videos in low performance mode
@@ -503,34 +512,26 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
               <X className="h-4 w-4" />
             </Button>
             
-            {/* Expanded video - shared element in high performance mode */}
+            {/* Expanded video */}
             {performanceMode === 'high' ? (
-              // High performance: Use CSS to transform the same video element
+              // High performance: Show only the expanded video
               <div className="w-full h-full relative">
-                {videoConfigs.map(config => {
-                  if (!srcFor(config.id)) return null;
-                  return (
-                    <video
-                      key={`expanded-${config.id}`}
-                      ref={setVideoRef(config.id)}
-                      className={cn(
-                        "absolute inset-0 object-contain rounded-lg transition-all duration-300",
-                        expandedVideo === config.id 
-                          ? "w-full h-full opacity-100 z-10" 
-                          : "w-0 h-0 opacity-0 -z-10"
-                      )}
-                      poster="/placeholder.svg"
-                      muted
-                      preload="metadata"
-                      playsInline
-                      onLoadedMetadata={handleVideoLoadedMetadata(config.id)}
-                      onTimeUpdate={onTimeUpdateFor(config.id)}
-                      onError={handleVideoError(config.id)}
-                    >
-                      <source src={srcFor(config.id)} type="video/mp4" />
-                    </video>
-                  );
-                })}
+                {expandedVideo && (
+                  <video
+                    key={`expanded-${expandedVideo}`}
+                    ref={setVideoRef(expandedVideo)}
+                    className="w-full h-full object-contain rounded-lg"
+                    poster="/placeholder.svg"
+                    muted
+                    preload="metadata"
+                    playsInline
+                    onLoadedMetadata={handleVideoLoadedMetadata(expandedVideo)}
+                    onTimeUpdate={onTimeUpdateFor(expandedVideo)}
+                    onError={handleVideoError(expandedVideo)}
+                  >
+                    <source src={srcFor(expandedVideo)} type="video/mp4" />
+                  </video>
+                )}
               </div>
             ) : (
               // Low performance: Separate video element for expanded view
