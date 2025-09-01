@@ -275,9 +275,9 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
     // Reset loading counters for the new selection
     countedRef.current = {};
     setLoadedVideoCount(0);
-    setAllVideosLoaded(Object.keys(loadedVideos).length === 0);
+    setAllVideosLoaded(totalToLoad === 0);
     setIsPlaying(false);
-  }, [loadedVideos]);
+  }, [loadedVideos, totalToLoad]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
