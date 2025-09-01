@@ -342,6 +342,31 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
     };
   }, [handlePlayPause, handleFrameStep]);
 
+  // Playback watchdog to keep all videos running and in sync
+  useEffect(() => {
+    let interval: number | undefined;
+    if (isPlaying) {
+      interval = window.setInterval(() => {
+        const master = videoRefs.current[expandedVideo || MASTER_ID];
+        const t = master?.currentTime ?? currentTime;
+        Object.values(videoRefs.current).forEach(v => {
+          if (!v) return;
+          if (typeof t === 'number' && !Number.isNaN(t)) {
+            if (Math.abs((v.currentTime || 0) - t) > 0.2) {
+              try { v.currentTime = t; } catch {}
+            }
+          }
+          if (v.paused) {
+            v.play().catch(() => {});
+          }
+        });
+      }, 500);
+    }
+    return () => {
+      if (interval) window.clearInterval(interval);
+    };
+  }, [isPlaying, expandedVideo, MASTER_ID, currentTime]);
+
   const formatTime = (time: number): string => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
