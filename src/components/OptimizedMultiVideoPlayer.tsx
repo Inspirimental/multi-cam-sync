@@ -68,7 +68,6 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
   const [loadedVideoCount, setLoadedVideoCount] = useState(0);
   const [allVideosLoaded, setAllVideosLoaded] = useState(false);
   const hasExternalVideos = Object.keys(videoFiles).length > 0;
-  const wasPlayingBeforeExpandRef = useRef(false);
   const srcFor = useCallback((id: string) => loadedVideos[id] || (hasExternalVideos ? (videoConfigs.find(v => v.id === id)?.src || '') : ''), [loadedVideos, hasExternalVideos, videoConfigs]);
   const totalToLoad = videoConfigs.filter(v => Boolean(srcFor(v.id))).length;
   // Initialize performance monitor
@@ -103,10 +102,8 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
         }
       });
     } else {
-      // In low performance mode, only sync active videos
-      const activeVideos = expandedVideo ? [expandedVideo] : Object.keys(videoRefs.current);
-      activeVideos.forEach(id => {
-        const video = videoRefs.current[id];
+      // In compatibility mode, keep all videos time-aligned as well
+      Object.values(videoRefs.current).forEach(video => {
         if (video) {
           video.currentTime = targetTime;
         }
@@ -207,20 +204,15 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
     
     if (isPlaying) {
       // Brief pause and resume for sync
-      const activeVideos = performanceMode === 'high' 
-        ? Object.values(videoRefs.current)
-        : (expandedVideo ? [videoRefs.current[expandedVideo]] : Object.values(videoRefs.current));
-      
-      activeVideos.forEach(video => {
-        if (video) {
-          video.pause();
-        }
+      const targetVideos = Object.values(videoRefs.current);
+      targetVideos.forEach(v => {
+        if (v) v.pause();
       });
       
       setTimeout(() => {
-        activeVideos.forEach(video => {
-          if (video) {
-            video.play().catch(console.warn);
+        targetVideos.forEach(v => {
+          if (v) {
+            v.play().catch(console.warn);
           }
         });
       }, 50);
@@ -256,71 +248,30 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
     const videoCurrentTime = currentVideo?.currentTime || 0;
     const nextExpanded = expandedVideo === videoId ? null : videoId;
 
-    if (performanceMode === 'high') {
-      // Keep everything in sync and maintain playback state
-      setExpandedVideo(nextExpanded);
+    // Toggle expanded view
+    setExpandedVideo(nextExpanded);
 
-      if (currentVideo) {
-        setCurrentTime(videoCurrentTime);
-        Object.values(videoRefs.current).forEach(v => {
-          if (v && v !== currentVideo) {
-            try { v.currentTime = videoCurrentTime; } catch {}
-            if (isPlaying && v.paused) {
-              v.play().catch(err => {
-                console.warn('resume play failed', err);
-                performanceMonitor.current?.reportFrameDrop();
-              });
-            }
-          }
-        });
-      }
-      return;
-    }
+    // Sync all videos to the selected video's time
+    Object.values(videoRefs.current).forEach(v => {
+      if (!v) return;
+      try { v.currentTime = videoCurrentTime; } catch {}
+    });
 
-    // Compatibility (low) mode behavior
-    if (nextExpanded) {
-      // Expanding
-      wasPlayingBeforeExpandRef.current = isPlaying;
-      Object.entries(videoRefs.current).forEach(([id, v]) => {
-        if (!v) return;
-        if (id === videoId) {
-          try { v.currentTime = videoCurrentTime; } catch {}
-          if (isPlaying) {
-            v.play().catch(err => {
-              console.warn('play expanded failed', err);
-              performanceMonitor.current?.reportFrameDrop();
-            });
-          }
-        } else {
-          v.pause();
-        }
-      });
-      setExpandedVideo(nextExpanded);
-      return;
+    // Maintain playback state across all videos
+    if (isPlaying) {
+      const playPromises = Object.values(videoRefs.current).map(v =>
+        v ? v.play().catch(err => {
+          console.warn('play failed', err);
+          performanceMonitor.current?.reportFrameDrop();
+        }) : Promise.resolve()
+      );
+      Promise.allSettled(playPromises);
     } else {
-      // Collapsing back to grid
-      setExpandedVideo(null);
-      const shouldResume = wasPlayingBeforeExpandRef.current;
-      wasPlayingBeforeExpandRef.current = false;
-
-      if (shouldResume) {
-        const syncTime = currentVideo?.currentTime ?? currentTime;
-        Object.values(videoRefs.current).forEach(v => {
-          if (!v) return;
-          try { v.currentTime = syncTime; } catch {}
-        });
-
-        const playPromises = Object.values(videoRefs.current).map(v =>
-          v ? v.play().catch(err => {
-            console.warn('resume all failed', err);
-            performanceMonitor.current?.reportFrameDrop();
-          }) : Promise.resolve()
-        );
-        Promise.allSettled(playPromises).then(() => setIsPlaying(true));
-      }
-      return;
+      Object.values(videoRefs.current).forEach(v => v?.pause());
     }
-  }, [expandedVideo, performanceMode, isPlaying, currentTime]);
+
+    setCurrentTime(videoCurrentTime);
+  }, [expandedVideo, isPlaying]);
 
   const handleVideoLoad = useCallback((videoId: string, file: File) => {
     const url = URL.createObjectURL(file);
