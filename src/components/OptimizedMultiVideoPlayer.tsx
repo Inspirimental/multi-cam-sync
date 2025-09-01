@@ -117,38 +117,33 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
   // Enhanced play/pause with performance-aware synchronization
   const handlePlayPause = useCallback(async () => {
     if (isPlaying) {
-      // Pause logic differs by performance mode
+      // Pause all videos
       setIsPlaying(false);
-      if (performanceMode === 'high') {
-        // In high performance mode, pause all videos
-        Object.values(videoRefs.current).forEach(video => {
-          if (video) {
-            video.pause();
-          }
-        });
-      } else {
-        // In low performance mode, pause only active videos
-        const activeVideos = expandedVideo ? [expandedVideo] : Object.keys(videoRefs.current);
-        activeVideos.forEach(id => {
-          const video = videoRefs.current[id];
-          if (video) {
-            video.pause();
-          }
-        });
-      }
+      Object.values(videoRefs.current).forEach(video => {
+        if (video) {
+          video.pause();
+        }
+      });
     } else {
-      // Play logic
-      const activeVideos = performanceMode === 'high' 
-        ? videoConfigs.map(v => v.id) // All videos in high performance mode
-        : expandedVideo ? [expandedVideo] : videoConfigs.map(v => v.id); // Active videos only in low performance mode
+      // Play logic - get all available videos including expanded view
+      const allVideoIds = videoConfigs.map(v => v.id);
+      const videoElements: HTMLVideoElement[] = [];
       
-      const videoElements = activeVideos
-        .map(id => videoRefs.current[id])
-        .filter((video): video is HTMLVideoElement => video !== null);
+      // Add grid videos
+      allVideoIds.forEach(id => {
+        const video = videoRefs.current[id];
+        if (video) videoElements.push(video);
+      });
+      
+      // Add expanded video if exists
+      if (expandedVideo) {
+        const expandedVideoElement = videoRefs.current[`${expandedVideo}_expanded`];
+        if (expandedVideoElement) videoElements.push(expandedVideoElement);
+      }
 
       if (videoElements.length === 0) return;
 
-      // Synchronization
+      // Synchronization - use master video or first available
       const masterVideo = videoRefs.current[MASTER_ID] || videoElements[0];
       const syncTime = masterVideo.currentTime;
       
@@ -187,7 +182,7 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
         setIsPlaying(true);
       }
     }
-  }, [isPlaying, expandedVideo, videoConfigs, MASTER_ID, performanceMode]);
+  }, [isPlaying, expandedVideo, videoConfigs, MASTER_ID]);
 
   const handleSeek = useCallback((seconds: number) => {
     const newTime = Math.max(0, Math.min(duration, currentTime + seconds));
@@ -494,18 +489,22 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
               variant="ghost"
               size="icon"
               className="absolute top-4 right-4 z-10 bg-control-bg/80 hover:bg-control-hover text-foreground"
-              onClick={() => { 
-                if (performanceMode === 'low') {
-                  // Save current time before closing in low performance mode
-                  if (expandedVideo && videoRefs.current[expandedVideo]) {
-                    setVideoTimes(prev => ({
-                      ...prev,
-                      [expandedVideo]: videoRefs.current[expandedVideo]?.currentTime || 0
-                    }));
+                onClick={() => { 
+                // Save current time before closing
+                const expandedVideoElement = videoRefs.current[`${expandedVideo}_expanded`];
+                if (expandedVideo && expandedVideoElement) {
+                  setVideoTimes(prev => ({
+                    ...prev,
+                    [expandedVideo]: expandedVideoElement.currentTime || 0
+                  }));
+                  
+                  // Sync time back to grid video
+                  const gridVideo = videoRefs.current[expandedVideo];
+                  if (gridVideo) {
+                    gridVideo.currentTime = expandedVideoElement.currentTime;
                   }
-                  setIsPlaying(false); 
-                  Object.values(videoRefs.current).forEach(v => v?.pause()); 
                 }
+                
                 setExpandedVideo(null); 
               }}
             >
@@ -513,53 +512,45 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
             </Button>
             
             {/* Expanded video */}
-            {performanceMode === 'high' ? (
-              // High performance: Show only the expanded video
-              <div className="w-full h-full relative">
-                {expandedVideo && (
-                  <video
-                    key={`expanded-${expandedVideo}`}
-                    ref={setVideoRef(expandedVideo)}
-                    className="w-full h-full object-contain rounded-lg"
-                    poster="/placeholder.svg"
-                    muted
-                    preload="metadata"
-                    playsInline
-                    onLoadedMetadata={handleVideoLoadedMetadata(expandedVideo)}
-                    onTimeUpdate={onTimeUpdateFor(expandedVideo)}
-                    onError={handleVideoError(expandedVideo)}
-                  >
-                    <source src={srcFor(expandedVideo)} type="video/mp4" />
-                  </video>
-                )}
-              </div>
-            ) : (
-              // Low performance: Separate video element for expanded view
-              <video
-                ref={(ref) => {
-                  if (expandedVideo) {
-                    videoRefs.current[`${expandedVideo}_expanded`] = ref;
+            <video
+              ref={(ref) => {
+                if (expandedVideo && ref) {
+                  videoRefs.current[`${expandedVideo}_expanded`] = ref;
+                  // Copy current state from grid video
+                  const gridVideo = videoRefs.current[expandedVideo];
+                  if (gridVideo) {
+                    // Set current time to match grid video
+                    ref.currentTime = gridVideo.currentTime;
+                    // If playing, start the expanded video too
+                    if (isPlaying && !ref.paused && gridVideo.currentTime > 0) {
+                      ref.play().catch(console.warn);
+                    }
                   }
-                }}
-                className="w-full h-full object-contain rounded-lg animate-scale-in"
-                poster="/placeholder.svg"
-                muted
-                preload="metadata"
-                playsInline
-                onLoadedMetadata={(e) => {
-                  const el = (e.currentTarget as HTMLVideoElement | null);
-                  if (!el || !expandedVideo) return;
-                  if (expandedVideo === MASTER_ID) setDuration(el.duration);
-                  // Restore saved time position
-                  if (videoTimes[expandedVideo] != null) {
-                    try { el.currentTime = videoTimes[expandedVideo]!; } catch {}
-                  }
-                }}
-                onTimeUpdate={onTimeUpdateFor(expandedVideo!)}
-              >
-                <source src={expandedVideo ? srcFor(expandedVideo) : ''} type="video/mp4" />
-              </video>
-            )}
+                }
+              }}
+              className="w-full h-full object-contain rounded-lg"
+              poster="/placeholder.svg"
+              muted
+              preload="metadata"
+              playsInline
+              onLoadedMetadata={(e) => {
+                const el = (e.currentTarget as HTMLVideoElement | null);
+                if (!el || !expandedVideo) return;
+                
+                // Set duration if this is master video
+                if (expandedVideo === MASTER_ID) setDuration(el.duration);
+                
+                // Sync time with grid video
+                const gridVideo = videoRefs.current[expandedVideo];
+                if (gridVideo) {
+                  el.currentTime = gridVideo.currentTime;
+                }
+              }}
+              onTimeUpdate={onTimeUpdateFor(expandedVideo)}
+              onError={handleVideoError(expandedVideo)}
+            >
+              <source src={expandedVideo ? srcFor(expandedVideo) : ''} type="video/mp4" />
+            </video>
             
             <div className="absolute bottom-4 left-4 bg-control-bg/80 px-3 py-1 rounded text-sm text-foreground">
               {videoConfigs.find(v => v.id === expandedVideo)?.title}
