@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Play, Pause, SkipBack, SkipForward, ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import VideoFileImporter from './VideoFileImporter';
+import { VideoCard } from './VideoCard';
 import { VideoPlayerProps, VideoFile } from '@/types/VideoTypes';
 
 interface VideoConfig {
@@ -353,493 +354,262 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
           <div className="flex flex-col gap-3 max-w-6xl mx-auto mb-6 animate-fade-in">
             {/* Row 1: Front Left, Front Camera, Front Right */}
             <div className="flex justify-center items-start gap-3">
-              <div className="w-32">
-                <Card
-                  className={cn(
-                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-                    isPlaying && "animate-pulse-border"
-                  )}
-                  onClick={() => handleVideoClick('NLMVC_front_left')}
-                >
-                  <video
-                    ref={setVideoRef('NLMVC_front_left')}
-                    className="w-full h-full object-contain rounded-lg"
-                    poster="/placeholder.svg"
-                    muted
-                    preload="metadata"
-                    playsInline
-                    onLoadedMetadata={(e) => {
-                      const el = (e.currentTarget as HTMLVideoElement | null);
-                      if (!el) return;
-                      if ('NLMVC_front_left' === MASTER_ID) setDuration(el.duration);
-                    }}
-                     onTimeUpdate={onTimeUpdateFor('NLMVC_front_left')}
-                     onLoadStart={() => {
-                       // Restore saved time when video loads
-                       if (videoTimes['NLMVC_front_left'] && videoRefs.current['NLMVC_front_left']) {
-                         videoRefs.current['NLMVC_front_left']!.currentTime = videoTimes['NLMVC_front_left'];
-                       }
-                     }}
-                  >
-                    <source src={loadedVideos['NLMVC_front_left'] || videoConfigs.find(v => v.id === 'NLMVC_front_left')?.src} type="video/mp4" />
-                  </video>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
-                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
-                    Front Left
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
-                  >
-                    <Maximize2 className="h-3 w-3" />
-                  </Button>
-                </Card>
-              </div>
-              <div className="w-96">
-                <Card
-                  className={cn(
-                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-                    isPlaying && "animate-pulse-border"
-                  )}
-                  onClick={() => handleVideoClick('NCBSC_front')}
-                >
-                  <video
-                    ref={setVideoRef('NCBSC_front')}
-                    className="w-full h-full object-contain rounded-lg"
-                    poster="/placeholder.svg"
-                    muted
-                    preload="metadata"
-                    playsInline
-                    onLoadedMetadata={(e) => {
-                      const el = (e.currentTarget as HTMLVideoElement | null);
-                      if (!el) return;
-                      if ('NCBSC_front' === MASTER_ID) setDuration(el.duration);
-                    }}
-                     onTimeUpdate={onTimeUpdateFor('NCBSC_front')}
-                     onLoadStart={() => {
-                       // Restore saved time when video loads
-                       if (videoTimes['NCBSC_front'] && videoRefs.current['NCBSC_front']) {
-                         videoRefs.current['NCBSC_front']!.currentTime = videoTimes['NCBSC_front'];
-                       }
-                     }}
-                  >
-                    <source src={loadedVideos['NCBSC_front'] || videoConfigs.find(v => v.id === 'NCBSC_front')?.src} type="video/mp4" />
-                  </video>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
-                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
-                    Front Camera
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
-                  >
-                    <Maximize2 className="h-3 w-3" />
-                  </Button>
-                </Card>
-              </div>
-              <div className="w-32">
-                <Card
-                  className={cn(
-                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-                    isPlaying && "animate-pulse-border"
-                  )}
-                  onClick={() => handleVideoClick('NRMVC_front_right')}
-                >
-                  <video
-                    ref={setVideoRef('NRMVC_front_right')}
-                    className="w-full h-full object-contain rounded-lg"
-                    poster="/placeholder.svg"
-                    muted
-                    preload="metadata"
-                    playsInline
-                    onLoadedMetadata={(e) => {
-                      const el = (e.currentTarget as HTMLVideoElement | null);
-                      if (!el) return;
-                      if ('NRMVC_front_right' === MASTER_ID) setDuration(el.duration);
-                    }}
-                     onTimeUpdate={onTimeUpdateFor('NRMVC_front_right')}
-                     onLoadStart={() => {
-                       // Restore saved time when video loads
-                       if (videoTimes['NRMVC_front_right'] && videoRefs.current['NRMVC_front_right']) {
-                         videoRefs.current['NRMVC_front_right']!.currentTime = videoTimes['NRMVC_front_right'];
-                       }
-                     }}
-                  >
-                    <source src={loadedVideos['NRMVC_front_right'] || videoConfigs.find(v => v.id === 'NRMVC_front_right')?.src} type="video/mp4" />
-                  </video>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
-                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
-                    Front Right
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
-                  >
-                    <Maximize2 className="h-3 w-3" />
-                  </Button>
-                </Card>
-              </div>
+              <VideoCard
+                id="NLMVC_front_left"
+                title="Front Left"
+                src={loadedVideos['NLMVC_front_left'] || videoConfigs.find(v => v.id === 'NLMVC_front_left')?.src || ''}
+                width="w-32"
+                isPlaying={isPlaying}
+                onVideoClick={handleVideoClick}
+                onTimeUpdate={onTimeUpdateFor('NLMVC_front_left')}
+                onLoadedMetadata={(e) => {
+                  const el = (e.currentTarget as HTMLVideoElement | null);
+                  if (!el) return;
+                  if ('NLMVC_front_left' === MASTER_ID) setDuration(el.duration);
+                }}
+                onLoadStart={() => {
+                  if (videoTimes['NLMVC_front_left'] && videoRefs.current['NLMVC_front_left']) {
+                    videoRefs.current['NLMVC_front_left']!.currentTime = videoTimes['NLMVC_front_left'];
+                  }
+                }}
+                setVideoRef={setVideoRef}
+                videoTimes={videoTimes}
+                videoRefs={videoRefs}
+              />
+              <VideoCard
+                id="NCBSC_front"
+                title="Front Camera"
+                src={loadedVideos['NCBSC_front'] || videoConfigs.find(v => v.id === 'NCBSC_front')?.src || ''}
+                width="w-96"
+                isPlaying={isPlaying}
+                onVideoClick={handleVideoClick}
+                onTimeUpdate={onTimeUpdateFor('NCBSC_front')}
+                onLoadedMetadata={(e) => {
+                  const el = (e.currentTarget as HTMLVideoElement | null);
+                  if (!el) return;
+                  if ('NCBSC_front' === MASTER_ID) setDuration(el.duration);
+                }}
+                onLoadStart={() => {
+                  if (videoTimes['NCBSC_front'] && videoRefs.current['NCBSC_front']) {
+                    videoRefs.current['NCBSC_front']!.currentTime = videoTimes['NCBSC_front'];
+                  }
+                }}
+                setVideoRef={setVideoRef}
+                videoTimes={videoTimes}
+                videoRefs={videoRefs}
+              />
+              <VideoCard
+                id="NRMVC_front_right"
+                title="Front Right"
+                src={loadedVideos['NRMVC_front_right'] || videoConfigs.find(v => v.id === 'NRMVC_front_right')?.src || ''}
+                width="w-32"
+                isPlaying={isPlaying}
+                onVideoClick={handleVideoClick}
+                onTimeUpdate={onTimeUpdateFor('NRMVC_front_right')}
+                onLoadedMetadata={(e) => {
+                  const el = (e.currentTarget as HTMLVideoElement | null);
+                  if (!el) return;
+                  if ('NRMVC_front_right' === MASTER_ID) setDuration(el.duration);
+                }}
+                onLoadStart={() => {
+                  if (videoTimes['NRMVC_front_right'] && videoRefs.current['NRMVC_front_right']) {
+                    videoRefs.current['NRMVC_front_right']!.currentTime = videoTimes['NRMVC_front_right'];
+                  }
+                }}
+                setVideoRef={setVideoRef}
+                videoTimes={videoTimes}
+                videoRefs={videoRefs}
+              />
             </div>
 
             {/* Row 2: Left Side, Wide Center, Wide Front, Right Side */}
             <div className="flex justify-center items-center gap-3">
-              <div className="w-32">
-                <Card
-                  className={cn(
-                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-                    isPlaying && "animate-pulse-border"
-                  )}
-                  onClick={() => handleVideoClick('NLBSC_left')}
-                >
-                  <video
-                    ref={setVideoRef('NLBSC_left')}
-                    className="w-full h-full object-contain rounded-lg"
-                    poster="/placeholder.svg"
-                    muted
-                    preload="metadata"
-                    playsInline
-                    onLoadedMetadata={(e) => {
-                      const el = (e.currentTarget as HTMLVideoElement | null);
-                      if (!el) return;
-                      if ('NLBSC_left' === MASTER_ID) setDuration(el.duration);
-                    }}
-                     onTimeUpdate={onTimeUpdateFor('NLBSC_left')}
-                     onLoadStart={() => {
-                       // Restore saved time when video loads
-                       if (videoTimes['NLBSC_left'] && videoRefs.current['NLBSC_left']) {
-                         videoRefs.current['NLBSC_left']!.currentTime = videoTimes['NLBSC_left'];
-                       }
-                     }}
-                  >
-                    <source src={loadedVideos['NLBSC_left'] || videoConfigs.find(v => v.id === 'NLBSC_left')?.src} type="video/mp4" />
-                  </video>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
-                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
-                    Left Side
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
-                  >
-                    <Maximize2 className="h-3 w-3" />
-                  </Button>
-                </Card>
-              </div>
-              <div className="w-48">
-                <Card
-                  className={cn(
-                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-                    isPlaying && "animate-pulse-border"
-                  )}
-                  onClick={() => handleVideoClick('WCWVC_front')}
-                >
-                  <video
-                    ref={setVideoRef('WCWVC_front')}
-                    className="w-full h-full object-contain rounded-lg"
-                    poster="/placeholder.svg"
-                    muted
-                    preload="metadata"
-                    playsInline
-                    onLoadedMetadata={(e) => {
-                      const el = (e.currentTarget as HTMLVideoElement | null);
-                      if (!el) return;
-                      if ('WCWVC_front' === MASTER_ID) setDuration(el.duration);
-                    }}
-                     onTimeUpdate={onTimeUpdateFor('WCWVC_front')}
-                     onLoadStart={() => {
-                       // Restore saved time when video loads
-                       if (videoTimes['WCWVC_front'] && videoRefs.current['WCWVC_front']) {
-                         videoRefs.current['WCWVC_front']!.currentTime = videoTimes['WCWVC_front'];
-                       }
-                     }}
-                  >
-                    <source src={loadedVideos['WCWVC_front'] || videoConfigs.find(v => v.id === 'WCWVC_front')?.src} type="video/mp4" />
-                  </video>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
-                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
-                    Wide Center
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
-                  >
-                    <Maximize2 className="h-3 w-3" />
-                  </Button>
-                </Card>
-              </div>
-              <div className="w-48">
-                <Card
-                  className={cn(
-                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-                    isPlaying && "animate-pulse-border"
-                  )}
-                  onClick={() => handleVideoClick('WCNVC_front')}
-                >
-                  <video
-                    ref={setVideoRef('WCNVC_front')}
-                    className="w-full h-full object-contain rounded-lg"
-                    poster="/placeholder.svg"
-                    muted
-                    preload="metadata"
-                    playsInline
-                    onLoadedMetadata={(e) => {
-                      const el = (e.currentTarget as HTMLVideoElement | null);
-                      if (!el) return;
-                      if ('WCNVC_front' === MASTER_ID) setDuration(el.duration);
-                    }}
-                     onTimeUpdate={onTimeUpdateFor('WCNVC_front')}
-                     onLoadStart={() => {
-                       // Restore saved time when video loads
-                       if (videoTimes['WCNVC_front'] && videoRefs.current['WCNVC_front']) {
-                         videoRefs.current['WCNVC_front']!.currentTime = videoTimes['WCNVC_front'];
-                       }
-                     }}
-                  >
-                    <source src={loadedVideos['WCNVC_front'] || videoConfigs.find(v => v.id === 'WCNVC_front')?.src} type="video/mp4" />
-                  </video>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
-                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
-                    Wide Front
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
-                  >
-                    <Maximize2 className="h-3 w-3" />
-                  </Button>
-                </Card>
-              </div>
-              <div className="w-32">
-                <Card
-                  className={cn(
-                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-                    isPlaying && "animate-pulse-border"
-                  )}
-                  onClick={() => handleVideoClick('NRBSC_right')}
-                >
-                  <video
-                    ref={setVideoRef('NRBSC_right')}
-                    className="w-full h-full object-contain rounded-lg"
-                    poster="/placeholder.svg"
-                    muted
-                    preload="metadata"
-                    playsInline
-                    onLoadedMetadata={(e) => {
-                      const el = (e.currentTarget as HTMLVideoElement | null);
-                      if (!el) return;
-                      if ('NRBSC_right' === MASTER_ID) setDuration(el.duration);
-                    }}
-                     onTimeUpdate={onTimeUpdateFor('NRBSC_right')}
-                     onLoadStart={() => {
-                       // Restore saved time when video loads
-                       if (videoTimes['NRBSC_right'] && videoRefs.current['NRBSC_right']) {
-                         videoRefs.current['NRBSC_right']!.currentTime = videoTimes['NRBSC_right'];
-                       }
-                     }}
-                  >
-                    <source src={loadedVideos['NRBSC_right'] || videoConfigs.find(v => v.id === 'NRBSC_right')?.src} type="video/mp4" />
-                  </video>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
-                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
-                    Right Side
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
-                  >
-                    <Maximize2 className="h-3 w-3" />
-                  </Button>
-                </Card>
-              </div>
+              <VideoCard
+                id="NLBSC_left"
+                title="Left Side"
+                src={loadedVideos['NLBSC_left'] || videoConfigs.find(v => v.id === 'NLBSC_left')?.src || ''}
+                width="w-32"
+                isPlaying={isPlaying}
+                onVideoClick={handleVideoClick}
+                onTimeUpdate={onTimeUpdateFor('NLBSC_left')}
+                onLoadedMetadata={(e) => {
+                  const el = (e.currentTarget as HTMLVideoElement | null);
+                  if (!el) return;
+                  if ('NLBSC_left' === MASTER_ID) setDuration(el.duration);
+                }}
+                onLoadStart={() => {
+                  if (videoTimes['NLBSC_left'] && videoRefs.current['NLBSC_left']) {
+                    videoRefs.current['NLBSC_left']!.currentTime = videoTimes['NLBSC_left'];
+                  }
+                }}
+                setVideoRef={setVideoRef}
+                videoTimes={videoTimes}
+                videoRefs={videoRefs}
+              />
+              <VideoCard
+                id="WCWVC_front"
+                title="Wide Center"
+                src={loadedVideos['WCWVC_front'] || videoConfigs.find(v => v.id === 'WCWVC_front')?.src || ''}
+                width="w-48"
+                isPlaying={isPlaying}
+                onVideoClick={handleVideoClick}
+                onTimeUpdate={onTimeUpdateFor('WCWVC_front')}
+                onLoadedMetadata={(e) => {
+                  const el = (e.currentTarget as HTMLVideoElement | null);
+                  if (!el) return;
+                  if ('WCWVC_front' === MASTER_ID) setDuration(el.duration);
+                }}
+                onLoadStart={() => {
+                  if (videoTimes['WCWVC_front'] && videoRefs.current['WCWVC_front']) {
+                    videoRefs.current['WCWVC_front']!.currentTime = videoTimes['WCWVC_front'];
+                  }
+                }}
+                setVideoRef={setVideoRef}
+                videoTimes={videoTimes}
+                videoRefs={videoRefs}
+              />
+              <VideoCard
+                id="WCNVC_front"
+                title="Wide Front"
+                src={loadedVideos['WCNVC_front'] || videoConfigs.find(v => v.id === 'WCNVC_front')?.src || ''}
+                width="w-48"
+                isPlaying={isPlaying}
+                onVideoClick={handleVideoClick}
+                onTimeUpdate={onTimeUpdateFor('WCNVC_front')}
+                onLoadedMetadata={(e) => {
+                  const el = (e.currentTarget as HTMLVideoElement | null);
+                  if (!el) return;
+                  if ('WCNVC_front' === MASTER_ID) setDuration(el.duration);
+                }}
+                onLoadStart={() => {
+                  if (videoTimes['WCNVC_front'] && videoRefs.current['WCNVC_front']) {
+                    videoRefs.current['WCNVC_front']!.currentTime = videoTimes['WCNVC_front'];
+                  }
+                }}
+                setVideoRef={setVideoRef}
+                videoTimes={videoTimes}
+                videoRefs={videoRefs}
+              />
+              <VideoCard
+                id="NRBSC_right"
+                title="Right Side"
+                src={loadedVideos['NRBSC_right'] || videoConfigs.find(v => v.id === 'NRBSC_right')?.src || ''}
+                width="w-32"
+                isPlaying={isPlaying}
+                onVideoClick={handleVideoClick}
+                onTimeUpdate={onTimeUpdateFor('NRBSC_right')}
+                onLoadedMetadata={(e) => {
+                  const el = (e.currentTarget as HTMLVideoElement | null);
+                  if (!el) return;
+                  if ('NRBSC_right' === MASTER_ID) setDuration(el.duration);
+                }}
+                onLoadStart={() => {
+                  if (videoTimes['NRBSC_right'] && videoRefs.current['NRBSC_right']) {
+                    videoRefs.current['NRBSC_right']!.currentTime = videoTimes['NRBSC_right'];
+                  }
+                }}
+                setVideoRef={setVideoRef}
+                videoTimes={videoTimes}
+                videoRefs={videoRefs}
+              />
             </div>
 
             {/* Row 3: Back Center */}
             <div className="flex justify-center">
-              <div className="w-48">
-                <Card
-                  className={cn(
-                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-                    isPlaying && "animate-pulse-border"
-                  )}
-                  onClick={() => handleVideoClick('TCMVC_back')}
-                >
-                  <video
-                    ref={setVideoRef('TCMVC_back')}
-                    className="w-full h-full object-contain rounded-lg"
-                    poster="/placeholder.svg"
-                    muted
-                    preload="metadata"
-                    playsInline
-                    onLoadedMetadata={(e) => {
-                      const el = (e.currentTarget as HTMLVideoElement | null);
-                      if (!el) return;
-                      if ('TCMVC_back' === MASTER_ID) setDuration(el.duration);
-                    }}
-                     onTimeUpdate={onTimeUpdateFor('TCMVC_back')}
-                     onLoadStart={() => {
-                       // Restore saved time when video loads
-                       if (videoTimes['TCMVC_back'] && videoRefs.current['TCMVC_back']) {
-                         videoRefs.current['TCMVC_back']!.currentTime = videoTimes['TCMVC_back'];
-                       }
-                     }}
-                  >
-                    <source src={loadedVideos['TCMVC_back'] || videoConfigs.find(v => v.id === 'TCMVC_back')?.src} type="video/mp4" />
-                  </video>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
-                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
-                    Back Center
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
-                  >
-                    <Maximize2 className="h-3 w-3" />
-                  </Button>
-                </Card>
-              </div>
+              <VideoCard
+                id="TCMVC_back"
+                title="Back Center"
+                src={loadedVideos['TCMVC_back'] || videoConfigs.find(v => v.id === 'TCMVC_back')?.src || ''}
+                width="w-48"
+                isPlaying={isPlaying}
+                onVideoClick={handleVideoClick}
+                onTimeUpdate={onTimeUpdateFor('TCMVC_back')}
+                onLoadedMetadata={(e) => {
+                  const el = (e.currentTarget as HTMLVideoElement | null);
+                  if (!el) return;
+                  if ('TCMVC_back' === MASTER_ID) setDuration(el.duration);
+                }}
+                onLoadStart={() => {
+                  if (videoTimes['TCMVC_back'] && videoRefs.current['TCMVC_back']) {
+                    videoRefs.current['TCMVC_back']!.currentTime = videoTimes['TCMVC_back'];
+                  }
+                }}
+                setVideoRef={setVideoRef}
+                videoTimes={videoTimes}
+                videoRefs={videoRefs}
+              />
             </div>
 
-            {/* Row 5: Back Left, Back Camera, Back Right */}
+            {/* Row 4: Back Left, Back Camera, Back Right */}
             <div className="flex justify-center items-center gap-3">
-              <div className="w-32">
-                <Card
-                  className={cn(
-                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-                    isPlaying && "animate-pulse-border"
-                  )}
-                  onClick={() => handleVideoClick('NLMVC_back_left')}
-                >
-                  <video
-                    ref={setVideoRef('NLMVC_back_left')}
-                    className="w-full h-full object-contain rounded-lg"
-                    poster="/placeholder.svg"
-                    muted
-                    preload="metadata"
-                    playsInline
-                    onLoadedMetadata={(e) => {
-                      const el = (e.currentTarget as HTMLVideoElement | null);
-                      if (!el) return;
-                      if ('NLMVC_back_left' === MASTER_ID) setDuration(el.duration);
-                    }}
-                     onTimeUpdate={onTimeUpdateFor('NLMVC_back_left')}
-                     onLoadStart={() => {
-                       // Restore saved time when video loads
-                       if (videoTimes['NLMVC_back_left'] && videoRefs.current['NLMVC_back_left']) {
-                         videoRefs.current['NLMVC_back_left']!.currentTime = videoTimes['NLMVC_back_left'];
-                       }
-                     }}
-                  >
-                    <source src={loadedVideos['NLMVC_back_left'] || videoConfigs.find(v => v.id === 'NLMVC_back_left')?.src} type="video/mp4" />
-                  </video>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
-                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
-                    Back Left
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
-                  >
-                    <Maximize2 className="h-3 w-3" />
-                  </Button>
-                </Card>
-              </div>
-              <div className="w-96">
-                <Card
-                  className={cn(
-                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-                    isPlaying && "animate-pulse-border"
-                  )}
-                  onClick={() => handleVideoClick('TCBSC_back')}
-                >
-                  <video
-                    ref={setVideoRef('TCBSC_back')}
-                    className="w-full h-full object-contain rounded-lg"
-                    poster="/placeholder.svg"
-                    muted
-                    preload="metadata"
-                    playsInline
-                    onLoadedMetadata={(e) => {
-                      const el = (e.currentTarget as HTMLVideoElement | null);
-                      if (!el) return;
-                      if ('TCBSC_back' === MASTER_ID) setDuration(el.duration);
-                    }}
-                     onTimeUpdate={onTimeUpdateFor('TCBSC_back')}
-                     onLoadStart={() => {
-                       // Restore saved time when video loads
-                       if (videoTimes['TCBSC_back'] && videoRefs.current['TCBSC_back']) {
-                         videoRefs.current['TCBSC_back']!.currentTime = videoTimes['TCBSC_back'];
-                       }
-                     }}
-                  >
-                    <source src={loadedVideos['TCBSC_back'] || videoConfigs.find(v => v.id === 'TCBSC_back')?.src} type="video/mp4" />
-                  </video>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
-                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
-                    Back Camera
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
-                  >
-                    <Maximize2 className="h-3 w-3" />
-                  </Button>
-                </Card>
-              </div>
-              <div className="w-32">
-                <Card
-                  className={cn(
-                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-                    isPlaying && "animate-pulse-border"
-                  )}
-                  onClick={() => handleVideoClick('NRMVC_back_right')}
-                >
-                  <video
-                    ref={setVideoRef('NRMVC_back_right')}
-                    className="w-full h-full object-contain rounded-lg"
-                    poster="/placeholder.svg"
-                    muted
-                    preload="metadata"
-                    playsInline
-                    onLoadedMetadata={(e) => {
-                      const el = (e.currentTarget as HTMLVideoElement | null);
-                      if (!el) return;
-                      if ('NRMVC_back_right' === MASTER_ID) setDuration(el.duration);
-                    }}
-                     onTimeUpdate={onTimeUpdateFor('NRMVC_back_right')}
-                     onLoadStart={() => {
-                       // Restore saved time when video loads
-                       if (videoTimes['NRMVC_back_right'] && videoRefs.current['NRMVC_back_right']) {
-                         videoRefs.current['NRMVC_back_right']!.currentTime = videoTimes['NRMVC_back_right'];
-                       }
-                     }}
-                  >
-                    <source src={loadedVideos['NRMVC_back_right'] || videoConfigs.find(v => v.id === 'NRMVC_back_right')?.src} type="video/mp4" />
-                  </video>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
-                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
-                    Back Right
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
-                  >
-                    <Maximize2 className="h-3 w-3" />
-                  </Button>
-                </Card>
-              </div>
+              <VideoCard
+                id="NLMVC_back_left"
+                title="Back Left"
+                src={loadedVideos['NLMVC_back_left'] || videoConfigs.find(v => v.id === 'NLMVC_back_left')?.src || ''}
+                width="w-32"
+                isPlaying={isPlaying}
+                onVideoClick={handleVideoClick}
+                onTimeUpdate={onTimeUpdateFor('NLMVC_back_left')}
+                onLoadedMetadata={(e) => {
+                  const el = (e.currentTarget as HTMLVideoElement | null);
+                  if (!el) return;
+                  if ('NLMVC_back_left' === MASTER_ID) setDuration(el.duration);
+                }}
+                onLoadStart={() => {
+                  if (videoTimes['NLMVC_back_left'] && videoRefs.current['NLMVC_back_left']) {
+                    videoRefs.current['NLMVC_back_left']!.currentTime = videoTimes['NLMVC_back_left'];
+                  }
+                }}
+                setVideoRef={setVideoRef}
+                videoTimes={videoTimes}
+                videoRefs={videoRefs}
+              />
+              <VideoCard
+                id="TCBSC_back"
+                title="Back Camera"
+                src={loadedVideos['TCBSC_back'] || videoConfigs.find(v => v.id === 'TCBSC_back')?.src || ''}
+                width="w-96"
+                isPlaying={isPlaying}
+                onVideoClick={handleVideoClick}
+                onTimeUpdate={onTimeUpdateFor('TCBSC_back')}
+                onLoadedMetadata={(e) => {
+                  const el = (e.currentTarget as HTMLVideoElement | null);
+                  if (!el) return;
+                  if ('TCBSC_back' === MASTER_ID) setDuration(el.duration);
+                }}
+                onLoadStart={() => {
+                  if (videoTimes['TCBSC_back'] && videoRefs.current['TCBSC_back']) {
+                    videoRefs.current['TCBSC_back']!.currentTime = videoTimes['TCBSC_back'];
+                  }
+                }}
+                setVideoRef={setVideoRef}
+                videoTimes={videoTimes}
+                videoRefs={videoRefs}
+              />
+              <VideoCard
+                id="NRMVC_back_right"
+                title="Back Right"
+                src={loadedVideos['NRMVC_back_right'] || videoConfigs.find(v => v.id === 'NRMVC_back_right')?.src || ''}
+                width="w-32"
+                isPlaying={isPlaying}
+                onVideoClick={handleVideoClick}
+                onTimeUpdate={onTimeUpdateFor('NRMVC_back_right')}
+                onLoadedMetadata={(e) => {
+                  const el = (e.currentTarget as HTMLVideoElement | null);
+                  if (!el) return;
+                  if ('NRMVC_back_right' === MASTER_ID) setDuration(el.duration);
+                }}
+                onLoadStart={() => {
+                  if (videoTimes['NRMVC_back_right'] && videoRefs.current['NRMVC_back_right']) {
+                    videoRefs.current['NRMVC_back_right']!.currentTime = videoTimes['NRMVC_back_right'];
+                  }
+                }}
+                setVideoRef={setVideoRef}
+                videoTimes={videoTimes}
+                videoRefs={videoRefs}
+              />
             </div>
-            </div>
+          </div>
         )}
       </div>
 
