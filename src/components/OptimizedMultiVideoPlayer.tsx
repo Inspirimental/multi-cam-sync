@@ -256,8 +256,16 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
     countedRef.current[videoId] = true;
 
     const el = (e.currentTarget as HTMLVideoElement | null);
-    if (el && isFinite(el.duration) && el.duration > 0) {
-      setDuration(prev => (prev === 0 || el.duration < prev ? el.duration : prev));
+    const dur = el?.duration;
+    if (el && typeof dur === 'number' && isFinite(dur) && dur > 0) {
+      // Prefer MASTER_ID duration; otherwise set once if not set yet
+      if (videoId === MASTER_ID) {
+        setDuration(dur);
+        console.log('[duration] set from MASTER', dur);
+      } else if (duration === 0) {
+        setDuration(dur);
+        console.log('[duration] initial set from', videoId, dur);
+      }
     }
 
     console.log('[video] loaded', videoId);
@@ -266,7 +274,7 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
       if (newCount >= totalToLoad) setAllVideosLoaded(true);
       return newCount;
     });
-  }, [MASTER_ID, totalToLoad]);
+  }, [MASTER_ID, totalToLoad, duration]);
 
   // Count errors as finished to avoid blocking the loader forever
   const handleVideoError = useCallback((videoId: string) => (_e: React.SyntheticEvent<HTMLVideoElement>) => {
