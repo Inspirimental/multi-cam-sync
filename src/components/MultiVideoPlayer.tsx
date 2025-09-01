@@ -35,6 +35,7 @@ const MultiVideoPlayer: React.FC = () => {
   const [duration, setDuration] = useState(0);
   const [expandedVideo, setExpandedVideo] = useState<string | null>(null);
   const [loadedVideos, setLoadedVideos] = useState<{ [key: string]: string }>({});
+  const [videoTimes, setVideoTimes] = useState<{ [key: string]: number }>({});
 
   const setVideoRef = useCallback((id: string) => (ref: HTMLVideoElement | null) => {
     videoRefs.current[id] = ref;
@@ -76,6 +77,13 @@ const MultiVideoPlayer: React.FC = () => {
   }, [handleSeek]);
 
   const handleVideoClick = useCallback((videoId: string) => {
+    // Store current video time before expanding
+    if (!expandedVideo && videoRefs.current[videoId]) {
+      setVideoTimes(prev => ({
+        ...prev,
+        [videoId]: videoRefs.current[videoId]?.currentTime || 0
+      }));
+    }
     setExpandedVideo(expandedVideo === videoId ? null : videoId);
   }, [expandedVideo]);
 
@@ -170,7 +178,7 @@ const MultiVideoPlayer: React.FC = () => {
       {/* Video Grid */}
       <div className="relative flex-1">
         {expandedVideo ? (
-          <Card className="relative w-full aspect-video bg-video-bg border-video-border">
+          <Card className="relative w-full aspect-video bg-video-bg border-video-border animate-fade-in">
             <Button
               variant="ghost"
               size="icon"
@@ -181,16 +189,25 @@ const MultiVideoPlayer: React.FC = () => {
             </Button>
             <video
               ref={setVideoRef(expandedVideo)}
-              className="w-full h-full object-contain rounded-lg"
+              className="w-full h-full object-contain rounded-lg animate-scale-in"
               poster="/placeholder.svg"
               muted
               preload="metadata"
               playsInline
               onLoadedMetadata={(e) => {
                 if (expandedVideo === MASTER_ID) setDuration(e.currentTarget.duration);
+                // Restore saved time position
+                if (videoTimes[expandedVideo]) {
+                  e.currentTarget.currentTime = videoTimes[expandedVideo];
+                }
               }}
               onTimeUpdate={(e) => {
                 if (expandedVideo === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                // Continuously update stored time
+                setVideoTimes(prev => ({
+                  ...prev,
+                  [expandedVideo]: e.currentTarget.currentTime
+                }));
               }}
             >
               <source src={loadedVideos[expandedVideo] || videoConfigs.find(v => v.id === expandedVideo)?.src} type="video/mp4" />
@@ -200,7 +217,7 @@ const MultiVideoPlayer: React.FC = () => {
             </div>
           </Card>
         ) : (
-          <div className="flex flex-col gap-3 max-w-6xl mx-auto mb-6">
+          <div className="flex flex-col gap-3 max-w-6xl mx-auto mb-6 animate-fade-in">
             {/* Row 1: Front Left, Front Camera, Front Right */}
             <div className="flex justify-center items-start gap-3">
               <div className="w-32">
@@ -221,9 +238,20 @@ const MultiVideoPlayer: React.FC = () => {
                     onLoadedMetadata={(e) => {
                       if ('NLMVC_front_left' === MASTER_ID) setDuration(e.currentTarget.duration);
                     }}
-                    onTimeUpdate={(e) => {
-                      if ('NLMVC_front_left' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                    }}
+                     onTimeUpdate={(e) => {
+                       if ('NLMVC_front_left' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                       // Save video time continuously
+                       setVideoTimes(prev => ({
+                         ...prev,
+                         ['NLMVC_front_left']: e.currentTarget.currentTime
+                       }));
+                     }}
+                     onLoadStart={() => {
+                       // Restore saved time when video loads
+                       if (videoTimes['NLMVC_front_left'] && videoRefs.current['NLMVC_front_left']) {
+                         videoRefs.current['NLMVC_front_left']!.currentTime = videoTimes['NLMVC_front_left'];
+                       }
+                     }}
                   >
                     <source src={loadedVideos['NLMVC_front_left'] || videoConfigs.find(v => v.id === 'NLMVC_front_left')?.src} type="video/mp4" />
                   </video>
@@ -258,9 +286,20 @@ const MultiVideoPlayer: React.FC = () => {
                     onLoadedMetadata={(e) => {
                       if ('NCBSC_front' === MASTER_ID) setDuration(e.currentTarget.duration);
                     }}
-                    onTimeUpdate={(e) => {
-                      if ('NCBSC_front' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                    }}
+                     onTimeUpdate={(e) => {
+                       if ('NCBSC_front' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                       // Save video time continuously
+                       setVideoTimes(prev => ({
+                         ...prev,
+                         ['NCBSC_front']: e.currentTarget.currentTime
+                       }));
+                     }}
+                     onLoadStart={() => {
+                       // Restore saved time when video loads
+                       if (videoTimes['NCBSC_front'] && videoRefs.current['NCBSC_front']) {
+                         videoRefs.current['NCBSC_front']!.currentTime = videoTimes['NCBSC_front'];
+                       }
+                     }}
                   >
                     <source src={loadedVideos['NCBSC_front'] || videoConfigs.find(v => v.id === 'NCBSC_front')?.src} type="video/mp4" />
                   </video>
@@ -295,9 +334,20 @@ const MultiVideoPlayer: React.FC = () => {
                     onLoadedMetadata={(e) => {
                       if ('NRMVC_front_right' === MASTER_ID) setDuration(e.currentTarget.duration);
                     }}
-                    onTimeUpdate={(e) => {
-                      if ('NRMVC_front_right' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                    }}
+                     onTimeUpdate={(e) => {
+                       if ('NRMVC_front_right' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                       // Save video time continuously
+                       setVideoTimes(prev => ({
+                         ...prev,
+                         ['NRMVC_front_right']: e.currentTarget.currentTime
+                       }));
+                     }}
+                     onLoadStart={() => {
+                       // Restore saved time when video loads
+                       if (videoTimes['NRMVC_front_right'] && videoRefs.current['NRMVC_front_right']) {
+                         videoRefs.current['NRMVC_front_right']!.currentTime = videoTimes['NRMVC_front_right'];
+                       }
+                     }}
                   >
                     <source src={loadedVideos['NRMVC_front_right'] || videoConfigs.find(v => v.id === 'NRMVC_front_right')?.src} type="video/mp4" />
                   </video>
@@ -336,9 +386,20 @@ const MultiVideoPlayer: React.FC = () => {
                     onLoadedMetadata={(e) => {
                       if ('NLBSC_left' === MASTER_ID) setDuration(e.currentTarget.duration);
                     }}
-                    onTimeUpdate={(e) => {
-                      if ('NLBSC_left' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                    }}
+                     onTimeUpdate={(e) => {
+                       if ('NLBSC_left' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                       // Save video time continuously
+                       setVideoTimes(prev => ({
+                         ...prev,
+                         ['NLBSC_left']: e.currentTarget.currentTime
+                       }));
+                     }}
+                     onLoadStart={() => {
+                       // Restore saved time when video loads
+                       if (videoTimes['NLBSC_left'] && videoRefs.current['NLBSC_left']) {
+                         videoRefs.current['NLBSC_left']!.currentTime = videoTimes['NLBSC_left'];
+                       }
+                     }}
                   >
                     <source src={loadedVideos['NLBSC_left'] || videoConfigs.find(v => v.id === 'NLBSC_left')?.src} type="video/mp4" />
                   </video>
@@ -373,9 +434,20 @@ const MultiVideoPlayer: React.FC = () => {
                     onLoadedMetadata={(e) => {
                       if ('WCWVC_front' === MASTER_ID) setDuration(e.currentTarget.duration);
                     }}
-                    onTimeUpdate={(e) => {
-                      if ('WCWVC_front' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                    }}
+                     onTimeUpdate={(e) => {
+                       if ('WCWVC_front' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                       // Save video time continuously
+                       setVideoTimes(prev => ({
+                         ...prev,
+                         ['WCWVC_front']: e.currentTarget.currentTime
+                       }));
+                     }}
+                     onLoadStart={() => {
+                       // Restore saved time when video loads
+                       if (videoTimes['WCWVC_front'] && videoRefs.current['WCWVC_front']) {
+                         videoRefs.current['WCWVC_front']!.currentTime = videoTimes['WCWVC_front'];
+                       }
+                     }}
                   >
                     <source src={loadedVideos['WCWVC_front'] || videoConfigs.find(v => v.id === 'WCWVC_front')?.src} type="video/mp4" />
                   </video>
@@ -410,9 +482,20 @@ const MultiVideoPlayer: React.FC = () => {
                     onLoadedMetadata={(e) => {
                       if ('WCNVC_front' === MASTER_ID) setDuration(e.currentTarget.duration);
                     }}
-                    onTimeUpdate={(e) => {
-                      if ('WCNVC_front' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                    }}
+                     onTimeUpdate={(e) => {
+                       if ('WCNVC_front' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                       // Save video time continuously
+                       setVideoTimes(prev => ({
+                         ...prev,
+                         ['WCNVC_front']: e.currentTarget.currentTime
+                       }));
+                     }}
+                     onLoadStart={() => {
+                       // Restore saved time when video loads
+                       if (videoTimes['WCNVC_front'] && videoRefs.current['WCNVC_front']) {
+                         videoRefs.current['WCNVC_front']!.currentTime = videoTimes['WCNVC_front'];
+                       }
+                     }}
                   >
                     <source src={loadedVideos['WCNVC_front'] || videoConfigs.find(v => v.id === 'WCNVC_front')?.src} type="video/mp4" />
                   </video>
@@ -447,9 +530,20 @@ const MultiVideoPlayer: React.FC = () => {
                     onLoadedMetadata={(e) => {
                       if ('NRBSC_right' === MASTER_ID) setDuration(e.currentTarget.duration);
                     }}
-                    onTimeUpdate={(e) => {
-                      if ('NRBSC_right' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                    }}
+                     onTimeUpdate={(e) => {
+                       if ('NRBSC_right' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                       // Save video time continuously
+                       setVideoTimes(prev => ({
+                         ...prev,
+                         ['NRBSC_right']: e.currentTarget.currentTime
+                       }));
+                     }}
+                     onLoadStart={() => {
+                       // Restore saved time when video loads
+                       if (videoTimes['NRBSC_right'] && videoRefs.current['NRBSC_right']) {
+                         videoRefs.current['NRBSC_right']!.currentTime = videoTimes['NRBSC_right'];
+                       }
+                     }}
                   >
                     <source src={loadedVideos['NRBSC_right'] || videoConfigs.find(v => v.id === 'NRBSC_right')?.src} type="video/mp4" />
                   </video>
@@ -488,9 +582,20 @@ const MultiVideoPlayer: React.FC = () => {
                     onLoadedMetadata={(e) => {
                       if ('TCMVC_back' === MASTER_ID) setDuration(e.currentTarget.duration);
                     }}
-                    onTimeUpdate={(e) => {
-                      if ('TCMVC_back' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                    }}
+                     onTimeUpdate={(e) => {
+                       if ('TCMVC_back' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                       // Save video time continuously
+                       setVideoTimes(prev => ({
+                         ...prev,
+                         ['TCMVC_back']: e.currentTarget.currentTime
+                       }));
+                     }}
+                     onLoadStart={() => {
+                       // Restore saved time when video loads
+                       if (videoTimes['TCMVC_back'] && videoRefs.current['TCMVC_back']) {
+                         videoRefs.current['TCMVC_back']!.currentTime = videoTimes['TCMVC_back'];
+                       }
+                     }}
                   >
                     <source src={loadedVideos['TCMVC_back'] || videoConfigs.find(v => v.id === 'TCMVC_back')?.src} type="video/mp4" />
                   </video>
@@ -529,9 +634,20 @@ const MultiVideoPlayer: React.FC = () => {
                     onLoadedMetadata={(e) => {
                       if ('NLMVC_back_left' === MASTER_ID) setDuration(e.currentTarget.duration);
                     }}
-                    onTimeUpdate={(e) => {
-                      if ('NLMVC_back_left' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                    }}
+                     onTimeUpdate={(e) => {
+                       if ('NLMVC_back_left' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                       // Save video time continuously
+                       setVideoTimes(prev => ({
+                         ...prev,
+                         ['NLMVC_back_left']: e.currentTarget.currentTime
+                       }));
+                     }}
+                     onLoadStart={() => {
+                       // Restore saved time when video loads
+                       if (videoTimes['NLMVC_back_left'] && videoRefs.current['NLMVC_back_left']) {
+                         videoRefs.current['NLMVC_back_left']!.currentTime = videoTimes['NLMVC_back_left'];
+                       }
+                     }}
                   >
                     <source src={loadedVideos['NLMVC_back_left'] || videoConfigs.find(v => v.id === 'NLMVC_back_left')?.src} type="video/mp4" />
                   </video>
@@ -566,9 +682,20 @@ const MultiVideoPlayer: React.FC = () => {
                     onLoadedMetadata={(e) => {
                       if ('TCBSC_back' === MASTER_ID) setDuration(e.currentTarget.duration);
                     }}
-                    onTimeUpdate={(e) => {
-                      if ('TCBSC_back' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                    }}
+                     onTimeUpdate={(e) => {
+                       if ('TCBSC_back' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                       // Save video time continuously
+                       setVideoTimes(prev => ({
+                         ...prev,
+                         ['TCBSC_back']: e.currentTarget.currentTime
+                       }));
+                     }}
+                     onLoadStart={() => {
+                       // Restore saved time when video loads
+                       if (videoTimes['TCBSC_back'] && videoRefs.current['TCBSC_back']) {
+                         videoRefs.current['TCBSC_back']!.currentTime = videoTimes['TCBSC_back'];
+                       }
+                     }}
                   >
                     <source src={loadedVideos['TCBSC_back'] || videoConfigs.find(v => v.id === 'TCBSC_back')?.src} type="video/mp4" />
                   </video>
@@ -603,9 +730,20 @@ const MultiVideoPlayer: React.FC = () => {
                     onLoadedMetadata={(e) => {
                       if ('NRMVC_back_right' === MASTER_ID) setDuration(e.currentTarget.duration);
                     }}
-                    onTimeUpdate={(e) => {
-                      if ('NRMVC_back_right' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                    }}
+                     onTimeUpdate={(e) => {
+                       if ('NRMVC_back_right' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                       // Save video time continuously
+                       setVideoTimes(prev => ({
+                         ...prev,
+                         ['NRMVC_back_right']: e.currentTarget.currentTime
+                       }));
+                     }}
+                     onLoadStart={() => {
+                       // Restore saved time when video loads
+                       if (videoTimes['NRMVC_back_right'] && videoRefs.current['NRMVC_back_right']) {
+                         videoRefs.current['NRMVC_back_right']!.currentTime = videoTimes['NRMVC_back_right'];
+                       }
+                     }}
                   >
                     <source src={loadedVideos['NRMVC_back_right'] || videoConfigs.find(v => v.id === 'NRMVC_back_right')?.src} type="video/mp4" />
                   </video>
