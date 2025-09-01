@@ -202,7 +202,7 @@ const MultiVideoPlayer: React.FC = () => {
         ) : (
           <div className="flex flex-col gap-3 h-full">
             {/* Row 1: Front Left, Front Camera, Front Right */}
-            <div className="flex gap-2 h-40">
+            <div className="grid grid-cols-[auto,1fr,auto] gap-2 items-center h-40">
               <div className="w-24">
                 <Card
                   className={cn(
@@ -360,7 +360,7 @@ const MultiVideoPlayer: React.FC = () => {
             </div>
 
             {/* Row 3: Left Side, Wide Front, Right Side */}
-            <div className="flex gap-2 h-20">
+            <div className="grid grid-cols-[auto,1fr,auto] gap-2 items-center h-20">
               <div className="w-24">
                 <Card
                   className={cn(
@@ -518,7 +518,7 @@ const MultiVideoPlayer: React.FC = () => {
             </div>
 
             {/* Row 5: Back Left, Back Camera, Back Right */}
-            <div className="flex gap-2 h-40">
+            <div className="grid grid-cols-[auto,1fr,auto] gap-2 items-center h-40">
               <div className="w-24">
                 <Card
                   className={cn(
