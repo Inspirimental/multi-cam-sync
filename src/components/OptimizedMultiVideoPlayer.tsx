@@ -403,8 +403,8 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
   ];
 
   return (
-    <div className="w-full min-h-screen bg-background p-4 space-y-4">
-      <LoadingModal 
+    <div className="w-full bg-background space-y-4">
+      <LoadingModal
         isOpen={!allVideosLoaded && totalToLoad > 0}
         loadedVideos={loadedVideoCount}
         totalVideos={totalToLoad}

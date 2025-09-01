@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Play, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
+import OptimizedMultiVideoPlayer from '@/components/OptimizedMultiVideoPlayer';
 import { VideoStream } from '@/types/VideoTypes';
 
-// Example data with HTTPS test videos - AWS colleague can replace this with real API data
+// Mock data - in real app this would come from API/props/state management
 const mockVideoStreams: VideoStream[] = [
   {
     id: 'stream_1',
@@ -66,54 +67,96 @@ const mockVideoStreams: VideoStream[] = [
   }
 ];
 
-export const VideoStreamExample: React.FC = () => {
+const VideoReview: React.FC = () => {
+  const { streamId } = useParams<{ streamId: string }>();
   const navigate = useNavigate();
-  const [streams, setStreams] = useState<VideoStream[]>(mockVideoStreams);
+  
+  // Find the current stream
+  const currentStream = mockVideoStreams.find(stream => stream.id === streamId);
+  
+  if (!currentStream) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="p-6 text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-4">Stream nicht gefunden</h1>
+          <Button onClick={() => navigate('/')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Zurück zur Übersicht
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
-  const getStatusIcon = (status: VideoStream['status']) => {
-    switch (status) {
-      case 'approved': return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'rejected': return <XCircle className="h-5 w-5 text-red-500" />;
-      default: return <Clock className="h-5 w-5 text-yellow-500" />;
-    }
+  const handleBack = () => {
+    navigate('/');
   };
 
-  const handleReviewClick = (streamId: string) => {
-    navigate(`/video-review/${streamId}`);
+  const handleApprove = () => {
+    // In real app: make API call to approve stream
+    console.log('Approving stream:', streamId);
+    navigate('/');
+  };
+
+  const handleReject = () => {
+    // In real app: make API call to reject stream  
+    console.log('Rejecting stream:', streamId);
+    navigate('/');
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold text-foreground">Video Stream Management</h1>
-      
-      <div className="grid gap-4">
-        {streams.map((stream) => (
-          <Card key={stream.id} className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                {getStatusIcon(stream.status)}
-                <div>
-                  <h3 className="font-semibold text-foreground">{stream.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(stream.date).toLocaleString('de-DE')}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex space-x-2">
-                <Button
-                  onClick={() => handleReviewClick(stream.id)}
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  <Play className="h-4 w-4 mr-2" />
-                  Review
-                </Button>
-              </div>
+    <div className="min-h-screen bg-background">
+      {/* Header with Back Button */}
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border p-4">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost" 
+              size="sm"
+              onClick={handleBack}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Zurück
+            </Button>
+            <div>
+              <h1 className="text-xl font-semibold text-foreground">{currentStream.name}</h1>
+              <p className="text-sm text-muted-foreground">
+                {new Date(currentStream.date).toLocaleString('de-DE')}
+              </p>
             </div>
-          </Card>
-        ))}
+          </div>
+
+          {/* Approval Buttons */}
+          <div className="flex gap-2">
+            <Button
+              onClick={handleApprove}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Freigeben
+            </Button>
+            <Button
+              onClick={handleReject}
+              variant="destructive"
+            >
+              <XCircle className="h-4 w-4 mr-2" />
+              Ablehnen
+            </Button>
+          </div>
+        </div>
       </div>
 
+      {/* Video Player */}
+      <div className="p-4">
+        <OptimizedMultiVideoPlayer
+          videoFiles={currentStream.videoFiles}
+          onClose={handleBack}
+          streamName={currentStream.name}
+        />
+      </div>
     </div>
   );
 };
+
+export default VideoReview;
