@@ -11,6 +11,7 @@ interface VideoCardProps {
   src: string;
   width: string;
   isPlaying: boolean;
+  isExpanded?: boolean;
   onVideoClick: (id: string) => void;
   onTimeUpdate: () => void;
   onLoadedMetadata: (event: React.SyntheticEvent<HTMLVideoElement>) => void;
@@ -27,6 +28,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   src,
   width,
   isPlaying,
+  isExpanded,
   onVideoClick,
   onTimeUpdate,
   onLoadedMetadata,
@@ -156,7 +158,10 @@ export const VideoCard: React.FC<VideoCardProps> = ({
         {hasSrc && (
           <video
             ref={setVideoRef(id)}
-            className="w-full h-full object-contain rounded-lg"
+            className={cn(
+              "w-full h-full object-contain rounded-lg",
+              isExpanded && "fixed inset-0 w-screen h-screen z-[60] object-contain"
+            )}
             poster={thumbnail || undefined}
             muted
             preload="metadata"
