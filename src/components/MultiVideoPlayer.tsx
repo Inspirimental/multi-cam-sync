@@ -165,7 +165,7 @@ const MultiVideoPlayer: React.FC = () => {
             </Button>
             <video
               ref={setVideoRef(expandedVideo)}
-              className="w-full h-full object-cover rounded-lg"
+              className="w-full h-full object-contain rounded-lg"
               poster="/placeholder.svg"
               muted
               preload="metadata"
@@ -197,7 +197,7 @@ const MultiVideoPlayer: React.FC = () => {
               >
                 <video
                   ref={setVideoRef(config.id)}
-                  className="w-full h-full object-cover rounded-lg"
+                  className="w-full h-full object-contain rounded-lg"
                   poster="/placeholder.svg"
                   muted
                   preload="metadata"
