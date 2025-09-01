@@ -194,6 +194,14 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
       }));
     }
     
+    // If closing expanded video, save its current time
+    if (expandedVideo === videoId && videoRefs.current[expandedVideo]) {
+      setVideoTimes(prev => ({
+        ...prev,
+        [expandedVideo]: videoRefs.current[expandedVideo]?.currentTime || 0
+      }));
+    }
+    
     const isExpanding = !expandedVideo || expandedVideo !== videoId;
     setExpandedVideo(expandedVideo === videoId ? null : videoId);
     
@@ -368,7 +376,18 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               variant="ghost"
               size="icon"
               className="absolute top-4 right-4 z-10 bg-control-bg/80 hover:bg-control-hover text-foreground"
-              onClick={() => { setIsPlaying(false); Object.values(videoRefs.current).forEach(v => v?.pause()); setExpandedVideo(null); }}
+              onClick={() => { 
+                // Save current time before closing
+                if (expandedVideo && videoRefs.current[expandedVideo]) {
+                  setVideoTimes(prev => ({
+                    ...prev,
+                    [expandedVideo]: videoRefs.current[expandedVideo]?.currentTime || 0
+                  }));
+                }
+                setIsPlaying(false); 
+                Object.values(videoRefs.current).forEach(v => v?.pause()); 
+                setExpandedVideo(null); 
+              }}
             >
               <X className="h-4 w-4" />
             </Button>
