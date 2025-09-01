@@ -61,23 +61,29 @@ const videoFiles = {
 };
 ```
 
-### Test Data Example
-The current implementation uses real test videos from `http://sharing.timbeck.de/` for immediate testing:
+### Working Test Example
+The current implementation uses working test videos from `https://sharing.timbeck.de/` for immediate testing:
 ```typescript
 const testVideoFiles = {
-  'NCBSC_front': 'http://sharing.timbeck.de/NCBSC_front.mp4',
-  'TCBSC_back': 'http://sharing.timbeck.de/TCBSC_back.mp4',
-  'TCMVC_back': 'http://sharing.timbeck.de/TCMVC_back.mp4',
-  'NLBSC_left': 'http://sharing.timbeck.de/NLBSC_left.mp4',
-  'NLMVC_back_left': 'http://sharing.timbeck.de/NLMVC_back_left.mp4',
-  'NLMVC_front_left': 'http://sharing.timbeck.de/NLMVC_front_left.mp4',
-  'NRBSC_right': 'http://sharing.timbeck.de/NRBSC_right.mp4',
-  'NRMVC_back_right': 'http://sharing.timbeck.de/NRMVC_back_right.mp4',
-  'NRMVC_front_right': 'http://sharing.timbeck.de/NRMVC_front_right.mp4',
-  'WCNVC_front': 'http://sharing.timbeck.de/WCNVC_front.mp4',
-  'WCWVC_front': 'http://sharing.timbeck.de/WCWVC_front.mp4',
+  'NCBSC_front': 'https://sharing.timbeck.de/NCBSC_front.mp4',
+  'TCBSC_back': 'https://sharing.timbeck.de/TCBSC_back.mp4',
+  'TCMVC_back': 'https://sharing.timbeck.de/TCMVC_back.mp4',
+  'NLBSC_left': 'https://sharing.timbeck.de/NLBSC_left.mp4',
+  'NLMVC_back_left': 'https://sharing.timbeck.de/NLMVC_back_left.mp4',
+  'NLMVC_front_left': 'https://sharing.timbeck.de/NLMVC_front_left.mp4',
+  'NRBSC_right': 'https://sharing.timbeck.de/NRBSC_right.mp4',
+  'NRMVC_back_right': 'https://sharing.timbeck.de/NRMVC_back_right.mp4',
+  'NRMVC_front_right': 'https://sharing.timbeck.de/NRMVC_front_right.mp4',
+  'WCNVC_front': 'https://sharing.timbeck.de/WCNVC_front.mp4',
+  'WCWVC_front': 'https://sharing.timbeck.de/WCWVC_front.mp4',
 };
 ```
+
+### Important HTTPS & CORS Requirements
+- **HTTPS Required**: Video URLs MUST use HTTPS protocol (not HTTP) to work in production environments
+- **CORS Configuration**: Your video server must allow cross-origin requests from your app's domain
+- **Range Requests**: Enable HTTP Range headers for video seeking functionality
+- **Content-Type**: Ensure proper video MIME types (video/mp4) are set
 
 ## Integration Steps
 
@@ -119,9 +125,26 @@ const YourStreamList = () => {
 
 ### 2. AWS S3 Integration
 Ensure your video URLs are accessible from the browser:
-- Configure CORS on your S3 bucket
-- Use CloudFront for better performance
-- Set appropriate cache headers
+- **HTTPS Required**: Configure SSL/TLS for your video URLs (HTTPS protocol mandatory)
+- **CORS Configuration**: Configure CORS on your S3 bucket to allow requests from your app domain
+- **Range Requests**: Enable HTTP Range headers for video seeking functionality  
+- **CloudFront Setup**: Use CloudFront for better performance and global distribution
+- **Cache Headers**: Set appropriate cache headers for video files
+- **Content-Type**: Ensure video files serve with correct MIME type (video/mp4)
+
+Example CORS configuration for S3:
+```json
+{
+  "CORSRules": [
+    {
+      "AllowedHeaders": ["*"],
+      "AllowedMethods": ["GET", "HEAD"],
+      "AllowedOrigins": ["https://your-app-domain.com"],
+      "ExposeHeaders": ["Content-Range", "Content-Length"]
+    }
+  ]
+}
+```
 
 ### 3. Video File Organization
 Organize your S3 structure like:
@@ -161,17 +184,32 @@ const handleApprove = async (streamId: string) => {
 };
 ```
 
-## Performance Considerations
+## Troubleshooting
 
-### Large Videos
-- Videos are streamed, not fully cached
-- Recommended max size per video: ~500MB for 11 simultaneous videos
-- Use video compression (H.264, reasonable bitrate)
+### Common Issues
 
-### Browser Limits
-- Modern browsers handle 8-12 simultaneous video streams well
-- Mobile devices may have stricter limits
-- Consider progressive loading for very large files
+#### Videos Not Loading
+- **Mixed Content Error**: Ensure all video URLs use HTTPS protocol
+- **CORS Error**: Configure CORS headers on your video server/CDN
+- **Network Issues**: Check video URLs are accessible from browser
+- **Large Files**: Consider video compression and progressive loading
+
+#### Performance Issues  
+- **Too Many Simultaneous Videos**: Modern browsers handle 8-12 streams well
+- **Mobile Limitations**: Consider reduced video count or quality on mobile
+- **Bandwidth**: Implement adaptive bitrate streaming for varying connections
+
+#### Browser Compatibility
+- **Safari**: May require specific video codecs (H.264)
+- **Firefox**: Check autoplay policies and user interaction requirements
+- **Chrome**: Verify HTTPS requirements and security policies
+
+### Debug Steps
+1. Check browser console for network/CORS errors
+2. Test individual video URLs in browser 
+3. Verify HTTPS protocol for all video sources
+4. Check network tab for failed video requests
+5. Test with smaller video files first
 
 ## Deployment to AWS
 
