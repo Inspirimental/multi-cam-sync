@@ -201,7 +201,7 @@ const MultiVideoPlayer: React.FC = () => {
               variant="ghost"
               size="icon"
               className="absolute top-4 right-4 z-10 bg-control-bg/80 hover:bg-control-hover text-foreground"
-              onClick={() => setExpandedVideo(null)}
+              onClick={() => { setIsPlaying(false); Object.values(videoRefs.current).forEach(v => v?.pause()); setExpandedVideo(null); }}
             >
               <X className="h-4 w-4" />
             </Button>
