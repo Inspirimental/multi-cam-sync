@@ -200,9 +200,9 @@ const MultiVideoPlayer: React.FC = () => {
             </div>
           </Card>
         ) : (
-          <div className="flex flex-col gap-2 h-full max-w-6xl mx-auto">
+          <div className="flex flex-col gap-3 max-w-6xl mx-auto mb-6">
             {/* Row 1: Front Left, Front Camera, Front Right */}
-            <div className="flex justify-center items-center gap-2 h-24">
+            <div className="flex justify-center items-start gap-3">
               <div className="w-32">
                 <Card
                   className={cn(
@@ -317,7 +317,7 @@ const MultiVideoPlayer: React.FC = () => {
             </div>
 
             {/* Row 2: Wide Center and Wide Front */}
-            <div className="flex justify-center gap-2 h-16">
+            <div className="flex justify-center gap-3">
               <div className="w-48">
                 <Card
                   className={cn(
@@ -395,7 +395,7 @@ const MultiVideoPlayer: React.FC = () => {
             </div>
 
             {/* Row 3: Left Side and Right Side */}
-            <div className="flex justify-between items-center h-16">
+            <div className="flex justify-between items-center">
               <div className="w-32">
                 <Card
                   className={cn(
@@ -473,7 +473,7 @@ const MultiVideoPlayer: React.FC = () => {
             </div>
 
             {/* Row 4: Back Center */}
-            <div className="flex justify-center h-16">
+            <div className="flex justify-center">
               <div className="w-48">
                 <Card
                   className={cn(
@@ -514,7 +514,7 @@ const MultiVideoPlayer: React.FC = () => {
             </div>
 
             {/* Row 5: Back Left, Back Camera, Back Right */}
-            <div className="flex justify-center items-center gap-2 h-24">
+            <div className="flex justify-center items-center gap-3">
               <div className="w-32">
                 <Card
                   className={cn(
