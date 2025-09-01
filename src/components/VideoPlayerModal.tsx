@@ -17,7 +17,7 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 overflow-y-auto" aria-describedby="video-player-description">
+      <DialogContent className="fixed inset-4 max-w-none max-h-none w-auto h-auto p-0 overflow-hidden" aria-describedby="video-player-description">
         <VisuallyHidden>
           <DialogTitle>Video Player - {streamName}</DialogTitle>
         </VisuallyHidden>
