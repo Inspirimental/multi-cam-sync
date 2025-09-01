@@ -37,6 +37,7 @@ import MultiVideoPlayer from './components/MultiVideoPlayer';
 - **Real-time Synchronization**: Videos stay in perfect sync during playback
 - **Async Loading**: Waits for all videos to be ready before starting playback
 - **Smart Resume**: Maintains sync when pausing/resuming
+- **Smart Synchronization**: Automatically corrects time drift between videos
 
 ### Interactive Controls
 - **Play/Pause**: Space bar or button with synchronized control
@@ -51,6 +52,23 @@ import MultiVideoPlayer from './components/MultiVideoPlayer';
 - **Hover Effects**: Visual feedback and tooltips
 - **Time Display**: Shows current time and total duration
 - **Smooth Animation**: Fluid progress updates with visual transitions
+- **Time Scrubbing**: Drag or click the progress bar for instant navigation
+
+### Advanced Features
+- **Error Handling**: Graceful handling of failed video loads
+- **Responsive Design**: Adapts to different screen sizes and orientations
+- **Performance Optimized**: Efficient handling of multiple simultaneous video streams
+
+### Approval Workflow
+The example includes approve/reject buttons. Customize these to your needs:
+```tsx
+const handleApprove = async (streamId: string) => {
+  await updateStreamStatus(streamId, 'approved');
+  setStreams(prev => prev.map(stream => 
+    stream.id === streamId ? { ...stream, status: 'approved' } : stream
+  ));
+};
+```
 
 ## Data Structure
 
@@ -182,38 +200,6 @@ your-bucket/
     ...
 ```
 
-## Features
-
-### Keyboard Controls
-- **Spacebar**: Play/Pause (synchronized across all videos)
-- **Left Arrow**: Previous frame (frame-by-frame navigation)
-- **Right Arrow**: Next frame (frame-by-frame navigation)
-
-### Interactive Controls
-- **Synchronized Playback**: All 11 videos play in perfect synchronization
-- **Individual Video Expansion**: Click any video to view it fullscreen
-- **Frame-by-Frame Navigation**: Precise control for detailed analysis
-- **10-Second Seeking**: Quick forward/backward buttons
-- **Interactive Progress Bar**: Click anywhere to jump to specific times
-- **Time Scrubbing**: Drag or click the progress bar for instant navigation
-
-### Advanced Features
-- **Async Video Loading**: Waits for all videos to be ready before starting
-- **Smart Synchronization**: Automatically corrects time drift between videos  
-- **Error Handling**: Graceful handling of failed video loads
-- **Responsive Design**: Adapts to different screen sizes and orientations
-- **Performance Optimized**: Efficient handling of multiple simultaneous video streams
-
-### Approval Workflow
-The example includes approve/reject buttons. Customize these to your needs:
-```tsx
-const handleApprove = async (streamId: string) => {
-  await updateStreamStatus(streamId, 'approved');
-  setStreams(prev => prev.map(stream => 
-    stream.id === streamId ? { ...stream, status: 'approved' } : stream
-  ));
-};
-```
 
 ## Troubleshooting
 
