@@ -43,6 +43,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
   }));
   
   console.log('Processed videoConfigs:', videoConfigs);
+
   const MASTER_ID = videoConfigs[0].id;
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
   const [isPlaying, setIsPlaying] = useState(false);
@@ -56,6 +57,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
     videoRefs.current[id] = ref;
   }, []);
 
+  // Improved synchronization function
   const syncAllVideos = useCallback((targetTime: number) => {
     Object.values(videoRefs.current).forEach(video => {
       if (video) {
@@ -64,20 +66,65 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
     });
   }, []);
 
-  const handlePlayPause = useCallback(() => {
-    const newPlayState = !isPlaying;
-    setIsPlaying(newPlayState);
-    
-    Object.values(videoRefs.current).forEach(video => {
-      if (video) {
-        if (newPlayState) {
-          video.play();
-        } else {
+  // Enhanced play/pause with better synchronization
+  const handlePlayPause = useCallback(async () => {
+    if (isPlaying) {
+      // Pause all videos immediately
+      setIsPlaying(false);
+      Object.values(videoRefs.current).forEach(video => {
+        if (video) {
           video.pause();
         }
+      });
+    } else {
+      // Play with synchronization
+      const activeVideos = expandedVideo ? [expandedVideo] : videoConfigs.map(v => v.id);
+      const videoElements = activeVideos
+        .map(id => videoRefs.current[id])
+        .filter((video): video is HTMLVideoElement => video !== null);
+
+      if (videoElements.length === 0) return;
+
+      // Step 1: Ensure all videos are at the same current time
+      const masterVideo = videoRefs.current[MASTER_ID] || videoElements[0];
+      const syncTime = masterVideo.currentTime;
+      
+      videoElements.forEach(video => {
+        video.currentTime = syncTime;
+      });
+
+      // Step 2: Wait for seek operations to complete and videos to be ready
+      await Promise.all(videoElements.map(video => 
+        new Promise<void>(resolve => {
+          if (video.readyState >= 2) { // HAVE_CURRENT_DATA or better
+            resolve();
+          } else {
+            const handleCanPlay = () => {
+              video.removeEventListener('canplay', handleCanPlay);
+              resolve();
+            };
+            video.addEventListener('canplay', handleCanPlay);
+          }
+        })
+      ));
+
+      // Step 3: Start all videos as simultaneously as possible
+      const playPromises = videoElements.map(video => {
+        return video.play().catch(error => {
+          console.warn(`Video ${video.src} failed to play:`, error);
+        });
+      });
+
+      try {
+        await Promise.all(playPromises);
+        setIsPlaying(true);
+      } catch (error) {
+        console.warn('Some videos failed to start:', error);
+        // Still set playing state as some videos might have started
+        setIsPlaying(true);
       }
-    });
-  }, [isPlaying]);
+    }
+  }, [isPlaying, expandedVideo, videoConfigs, MASTER_ID]);
 
   const handleSeek = useCallback((seconds: number) => {
     const newTime = Math.max(0, Math.min(duration, currentTime + seconds));
