@@ -119,12 +119,6 @@ const testVideoFiles = {
 };
 ```
 
-### Important HTTPS & CORS Requirements
-- **HTTPS Required**: Video URLs MUST use HTTPS protocol (not HTTP) to work in production environments
-- **CORS Configuration**: Your video server must allow cross-origin requests from your app's domain
-- **Range Requests**: Enable HTTP Range headers for video seeking functionality
-- **Content-Type**: Ensure proper video MIME types (video/mp4) are set
-
 ## Integration Steps
 
 ### 1. Replace Mock Data
@@ -165,12 +159,12 @@ const YourStreamList = () => {
 
 ### 2. AWS S3 Integration
 Ensure your video URLs are accessible from the browser:
-- **HTTPS Required**: Configure SSL/TLS for your video URLs (HTTPS protocol mandatory)
+- **HTTPS Required**: Video URLs MUST use HTTPS protocol (not HTTP) to work in production environments
 - **CORS Configuration**: Configure CORS on your S3 bucket to allow requests from your app domain
 - **Range Requests**: Enable HTTP Range headers for video seeking functionality  
 - **CloudFront Setup**: Use CloudFront for better performance and global distribution
 - **Cache Headers**: Set appropriate cache headers for video files
-- **Content-Type**: Ensure video files serve with correct MIME type (video/mp4)
+- **Content-Type**: Ensure proper video MIME types (video/mp4) are set
 
 Example CORS configuration for S3:
 ```json
@@ -207,7 +201,6 @@ your-bucket/
 
 #### Videos Not Loading
 - **Mixed Content Error**: Ensure all video URLs use HTTPS protocol
-- **CORS Error**: Configure CORS headers on your video server/CDN
 - **Network Issues**: Check video URLs are accessible from browser
 - **Large Files**: Consider video compression and progressive loading
 
@@ -219,14 +212,13 @@ your-bucket/
 #### Browser Compatibility
 - **Safari**: May require specific video codecs (H.264)
 - **Firefox**: Check autoplay policies and user interaction requirements
-- **Chrome**: Verify HTTPS requirements and security policies
+- **Chrome**: Verify security policies
 
 ### Debug Steps
-1. Check browser console for network/CORS errors
+1. Check browser console for network errors
 2. Test individual video URLs in browser 
-3. Verify HTTPS protocol for all video sources
-4. Check network tab for failed video requests
-5. Test with smaller video files first
+3. Check network tab for failed video requests
+4. Test with smaller video files first
 
 ## Deployment to AWS
 
@@ -285,15 +277,13 @@ export const videoStreamService = {
 ```
 
 ## Testing
-The current implementation includes a fully working example with real test videos from `https://sharing.timbeck.de/`. 
 
 ### Test Your Integration
 1. **Replace Mock Data**: Replace `VideoStreamExample` with your real API calls
-2. **Verify Video URLs**: Ensure all video URLs are accessible via HTTPS
-3. **Test Synchronization**: Verify all 11 videos start and play in perfect sync
-4. **Test Controls**: Verify play/pause, seeking, and progress bar clicking work
-5. **Test Approval Workflow**: Check approve/reject functionality 
-6. **Performance Testing**: Test with actual video file sizes and quantities
+2. **Test Synchronization**: Verify all 11 videos start and play in perfect sync
+3. **Test Controls**: Verify play/pause, seeking, and progress bar clicking work
+4. **Test Approval Workflow**: Check approve/reject functionality 
+5. **Performance Testing**: Test with actual video file sizes and quantities
 
 ### Interactive Features Testing
 - Click the **progress bar** at different positions to test seek functionality
