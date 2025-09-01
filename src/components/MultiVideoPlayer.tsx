@@ -92,7 +92,19 @@ const MultiVideoPlayer: React.FC = () => {
         [videoId]: videoRefs.current[videoId]?.currentTime || 0
       }));
     }
+    
+    const isExpanding = !expandedVideo || expandedVideo !== videoId;
     setExpandedVideo(expandedVideo === videoId ? null : videoId);
+    
+    // When expanding a video, pause all videos and update the play state
+    if (isExpanding) {
+      setIsPlaying(false);
+      Object.values(videoRefs.current).forEach(video => {
+        if (video) {
+          video.pause();
+        }
+      });
+    }
   }, [expandedVideo]);
 
   const handleVideoLoad = useCallback((videoId: string, file: File) => {
