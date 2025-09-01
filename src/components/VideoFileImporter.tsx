@@ -3,13 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Upload, Check } from 'lucide-react';
-
-interface VideoConfig {
-  id: string;
-  name: string;
-  title: string;
-  position: 'front' | 'back' | 'side';
-}
+import { VideoConfig } from '@/types/VideoTypes';
 
 interface VideoFileImporterProps {
   videoConfigs: VideoConfig[];

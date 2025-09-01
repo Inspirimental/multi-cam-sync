@@ -6,17 +6,10 @@ import { cn } from '@/lib/utils';
 import VideoFileImporter from './VideoFileImporter';
 import { VideoCard } from './VideoCard';
 import { LoadingModal } from './LoadingModal';
-import { VideoPlayerProps, VideoFile } from '@/types/VideoTypes';
+import { VideoPlayerProps, VideoFile, VideoConfig } from '@/types/VideoTypes';
 import { getOptimalPerformanceMode, PerformanceMonitor, type PerformanceMode } from '@/utils/performanceDetection';
 import { useToast } from '@/hooks/use-toast';
-
-interface VideoConfig {
-  id: string;
-  name: string;
-  title: string;
-  position: 'front' | 'back' | 'side';
-  src: string;
-}
+import { formatTime } from '@/utils/videoUtils';
 
 const defaultVideoConfigs: VideoConfig[] = [
   { id: 'NCBSC_front', name: 'NCBSC_front.mp4', title: 'Front Camera', position: 'front', src: '/videos/NCBSC_front.mp4' },
@@ -371,12 +364,6 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
       if (interval) window.clearInterval(interval);
     };
   }, [isPlaying]);
-
-  const formatTime = (time: number): string => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
 
   // Performance mode toggle
   const togglePerformanceMode = useCallback(() => {

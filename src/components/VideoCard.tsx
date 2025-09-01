@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Maximize2, Play, Pause, X, SkipBack, SkipForward, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatTime } from '@/utils/videoUtils';
 
 interface VideoCardProps {
   id: string;
@@ -44,12 +45,6 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   const [duration, setDuration] = useState(0);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const hasSrc = Boolean(src);
-
-  const formatTime = (timeInSeconds: number) => {
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = Math.floor(timeInSeconds % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
 
   const handlePlayPause = () => {
     const video = videoRefs.current[id];

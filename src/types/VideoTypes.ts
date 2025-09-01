@@ -6,6 +6,10 @@ export interface VideoFile {
   src?: string; // Optional - can be provided externally
 }
 
+export interface VideoConfig extends VideoFile {
+  // VideoConfig is now just an alias for VideoFile for backward compatibility
+}
+
 export interface VideoStream {
   id: string;
   name: string;

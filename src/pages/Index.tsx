@@ -1,4 +1,3 @@
-import MultiVideoPlayer from '@/components/MultiVideoPlayer';
 import { VideoStreamExample } from '@/components/VideoStreamExample';
 
 const Index = () => {
