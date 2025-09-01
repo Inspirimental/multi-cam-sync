@@ -26,6 +26,7 @@ const videoConfigs: VideoConfig[] = [
   { id: 'WCNVC_front', name: 'WCNVC_front.mp4', title: 'Wide Front', position: 'front', src: '/videos/WCNVC_front.mp4' },
   { id: 'WCWVC_front', name: 'WCWVC_front.mp4', title: 'Wide Center', position: 'front', src: '/videos/WCWVC_front.mp4' },
 ];
+const MASTER_ID = videoConfigs[0].id;
 
 const MultiVideoPlayer: React.FC = () => {
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
@@ -111,6 +112,15 @@ const MultiVideoPlayer: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => {
+    // Reload videos when new local files are selected
+    Object.keys(loadedVideos).forEach((id) => {
+      const v = videoRefs.current[id];
+      if (v) v.load();
+    });
+    setIsPlaying(false);
+  }, [loadedVideos]);
+
   const formatTime = (time: number): string => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -156,11 +166,19 @@ const MultiVideoPlayer: React.FC = () => {
             <video
               ref={setVideoRef(expandedVideo)}
               className="w-full h-full object-cover rounded-lg"
-              poster="/api/placeholder/1920/1080"
+              poster="/placeholder.svg"
               muted
-                >
-                  <source src={loadedVideos[expandedVideo] || videoConfigs.find(v => v.id === expandedVideo)?.src} type="video/mp4" />
-                </video>
+              preload="metadata"
+              playsInline
+              onLoadedMetadata={(e) => {
+                if (expandedVideo === MASTER_ID) setDuration(e.currentTarget.duration);
+              }}
+              onTimeUpdate={(e) => {
+                if (expandedVideo === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+              }}
+            >
+              <source src={loadedVideos[expandedVideo] || videoConfigs.find(v => v.id === expandedVideo)?.src} type="video/mp4" />
+            </video>
             <div className="absolute bottom-4 left-4 bg-control-bg/80 px-3 py-1 rounded text-sm text-foreground">
               {videoConfigs.find(v => v.id === expandedVideo)?.title}
             </div>
@@ -180,8 +198,16 @@ const MultiVideoPlayer: React.FC = () => {
                 <video
                   ref={setVideoRef(config.id)}
                   className="w-full h-full object-cover rounded-lg"
-                  poster="/api/placeholder/640/480"
+                  poster="/placeholder.svg"
                   muted
+                  preload="metadata"
+                  playsInline
+                  onLoadedMetadata={(e) => {
+                    if (config.id === MASTER_ID) setDuration(e.currentTarget.duration);
+                  }}
+                  onTimeUpdate={(e) => {
+                    if (config.id === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                  }}
                 >
                   <source src={loadedVideos[config.id] || config.src} type="video/mp4" />
                 </video>
