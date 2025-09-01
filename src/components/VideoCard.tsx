@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -38,52 +38,89 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
 
-  // Generate thumbnail from frame 20
+  // Helper: wait for an event with timeout
+  const waitForEvent = (el: HTMLVideoElement, event: keyof HTMLMediaElementEventMap, timeout = 800) => {
+    return new Promise<void>((resolve) => {
+      let resolved = false;
+      const on = () => {
+        if (resolved) return;
+        resolved = true;
+        el.removeEventListener(event, on as any);
+        resolve();
+      };
+      const to = window.setTimeout(() => {
+        if (resolved) return;
+        resolved = true;
+        el.removeEventListener(event, on as any);
+        resolve();
+      }, timeout);
+      el.addEventListener(event, on as any, { once: true });
+    });
+  };
+
+  // Generate thumbnail (try frame 20, fallback to first frame)
   const generateThumbnail = async (video: HTMLVideoElement) => {
     try {
+      // Ensure at least the first frame is available
+      if (video.readyState < 2) {
+        await waitForEvent(video, 'loadeddata', 1200);
+      }
+
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      // Wait for video to be ready and seek to frame 20 (assuming 30fps, frame 20 = ~0.67s)
-      const targetTime = 20 / 30; // Frame 20 at 30fps
-      video.currentTime = targetTime;
-      
-      await new Promise<void>((resolve) => {
-        const onSeeked = () => {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          ctx.drawImage(video, 0, 0);
-          
-          const thumbnailUrl = canvas.toDataURL('image/jpeg', 0.8);
-          setThumbnail(thumbnailUrl);
-          
-          video.removeEventListener('seeked', onSeeked);
-          resolve();
-        };
-        video.addEventListener('seeked', onSeeked);
-      });
+      const prevTime = video.currentTime;
+      const targetTime = 20 / 30; // ~0.67s @30fps
+
+      // Try seeking to target time if possible
+      let drew = false;
+      try {
+        if (
+          video.seekable &&
+          video.seekable.length > 0 &&
+          video.seekable.end(video.seekable.length - 1) >= targetTime
+        ) {
+          video.currentTime = targetTime;
+          await waitForEvent(video, 'seeked', 700);
+        }
+      } catch {}
+
+      try {
+        canvas.width = video.videoWidth || 320;
+        canvas.height = video.videoHeight || 180;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const url = canvas.toDataURL('image/jpeg', 0.8);
+        setThumbnail(url);
+        drew = true;
+      } catch (err) {
+        // Cross-origin or canvas error: silently ignore, we'll just skip thumbnail
+        console.warn(`Thumbnail draw failed for ${id}`, err);
+      }
+
+      // Restore time
+      try {
+        video.currentTime = videoTimes[id] || prevTime || 0;
+      } catch {}
+
+      return drew;
     } catch (error) {
       console.warn(`Failed to generate thumbnail for ${id}:`, error);
+      return false;
     }
   };
 
-  const handleLoadedData = async (event: React.SyntheticEvent<HTMLVideoElement>) => {
+  const handleOnLoadedMetadata = async (event: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = event.currentTarget;
-    
+
     try {
-      // Generate thumbnail
+      // Attempt thumbnail generation but do not block loading indefinitely
       await generateThumbnail(video);
-      
-      // Reset video to start after thumbnail generation
-      video.currentTime = videoTimes[id] || 0;
-      setIsLoading(false);
-    } catch (error) {
-      console.warn(`Error loading video ${id}:`, error);
-      setHasError(true);
+    } finally {
+      // Whether or not thumbnail generation succeeds, reveal the video
       setIsLoading(false);
     }
-    
+
     onLoadedMetadata(event);
   };
 
@@ -102,8 +139,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({
     <div className={width}>
       <Card
         className={cn(
-          "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-          isPlaying && "animate-pulse-border"
+          'relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video',
+          isPlaying && 'animate-pulse-border'
         )}
         onClick={() => onVideoClick(id)}
       >
@@ -130,21 +167,15 @@ export const VideoCard: React.FC<VideoCardProps> = ({
         {/* Video Element */}
         <video
           ref={setVideoRef(id)}
-          className={cn(
-            "w-full h-full object-contain rounded-lg",
-            isLoading && "opacity-0"
-          )}
+          className={cn('w-full h-full object-contain rounded-lg', isLoading && 'opacity-0')}
           poster={thumbnail || undefined}
           muted
           preload="metadata"
           playsInline
-          onLoadedData={handleLoadedData}
+          onLoadedMetadata={handleOnLoadedMetadata}
           onTimeUpdate={onTimeUpdate}
           onLoadStart={handleLoadStart}
           onError={handleError}
-          style={{
-            visibility: isLoading ? 'hidden' : 'visible'
-          }}
         >
           <source src={src} type="video/mp4" />
         </video>

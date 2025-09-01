@@ -17,9 +17,12 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 overflow-y-auto">
+      <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 overflow-y-auto" aria-describedby="video-player-description">
         <VisuallyHidden>
           <DialogTitle>Video Player - {streamName}</DialogTitle>
+        </VisuallyHidden>
+        <VisuallyHidden>
+          <p id="video-player-description">Synchronized multi-camera video review modal with playback controls.</p>
         </VisuallyHidden>
         <MultiVideoPlayer 
           videoFiles={videoFiles}
