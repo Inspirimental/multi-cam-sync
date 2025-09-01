@@ -129,9 +129,9 @@ const MultiVideoPlayer: React.FC = () => {
 
   const getVideoGridClass = (config: VideoConfig): string => {
     if (config.position === 'front' || config.position === 'back') {
-      return 'col-span-2 row-span-2';
+      return 'col-span-2 row-span-2 aspect-video';
     }
-    return 'col-span-1 row-span-1';
+    return 'col-span-1 row-span-1 aspect-video';
   };
 
   return (
@@ -154,7 +154,7 @@ const MultiVideoPlayer: React.FC = () => {
       {/* Video Grid */}
       <div className="relative flex-1">
         {expandedVideo ? (
-          <Card className="relative w-full h-full bg-video-bg border-video-border">
+          <Card className="relative w-full aspect-video bg-video-bg border-video-border">
             <Button
               variant="ghost"
               size="icon"
