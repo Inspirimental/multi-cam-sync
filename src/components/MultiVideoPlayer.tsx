@@ -43,6 +43,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
 
   const MASTER_ID = videoConfigs[0].id;
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
+  const countedRef = useRef<{ [key: string]: boolean }>({});
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -208,27 +209,28 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
 
   // Helper function to handle video metadata loading with progress tracking
   const handleVideoLoadedMetadata = useCallback((videoId: string) => (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    if (countedRef.current[videoId]) return;
+    countedRef.current[videoId] = true;
+
     const el = (e.currentTarget as HTMLVideoElement | null);
-    if (!el) return;
-    
-    if (videoId === MASTER_ID) setDuration(el.duration);
-    
+    if (videoId === MASTER_ID && el) setDuration(el.duration);
+
+    console.log('[video] loaded', videoId);
     setLoadedVideoCount(prev => {
       const newCount = prev + 1;
-      if (newCount >= videoConfigs.length) {
-        setAllVideosLoaded(true);
-      }
+      if (newCount >= videoConfigs.length) setAllVideosLoaded(true);
       return newCount;
     });
   }, [MASTER_ID, videoConfigs.length]);
 
   // Count errors as finished to avoid blocking the loader forever
   const handleVideoError = useCallback((videoId: string) => (_e: React.SyntheticEvent<HTMLVideoElement>) => {
+    if (countedRef.current[videoId]) return;
+    countedRef.current[videoId] = true;
+    console.warn('[video] error', videoId);
     setLoadedVideoCount(prev => {
       const newCount = prev + 1;
-      if (newCount >= videoConfigs.length) {
-        setAllVideosLoaded(true);
-      }
+      if (newCount >= videoConfigs.length) setAllVideosLoaded(true);
       return newCount;
     });
   }, [videoConfigs.length]);

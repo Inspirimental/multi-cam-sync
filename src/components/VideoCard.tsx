@@ -152,7 +152,6 @@ export const VideoCard: React.FC<VideoCardProps> = ({
           </div>
         )}
 
-        {/* Video Element */}
         <video
           ref={setVideoRef(id)}
           className="w-full h-full object-contain rounded-lg"
@@ -160,7 +159,9 @@ export const VideoCard: React.FC<VideoCardProps> = ({
           muted
           preload="metadata"
           playsInline
+          crossOrigin="anonymous"
           onLoadedMetadata={handleOnLoadedMetadata}
+          onLoadedData={handleOnLoadedMetadata}
           onTimeUpdate={onTimeUpdate}
           onLoadStart={handleLoadStart}
           onError={handleError}
