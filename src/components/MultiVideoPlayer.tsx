@@ -378,7 +378,6 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               muted
               preload="metadata"
               playsInline
-              crossOrigin="anonymous"
               onLoadedMetadata={(e) => {
                 const el = (e.currentTarget as HTMLVideoElement | null);
                 if (!el) return;
