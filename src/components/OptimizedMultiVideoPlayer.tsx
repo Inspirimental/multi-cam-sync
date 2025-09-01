@@ -220,49 +220,31 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
     setVideoTimes(prev => ({ ...prev, [id]: t }));
   }, [MASTER_ID, expandedVideo, performanceMode, duration]);
 
-  // Seamless video expansion for high performance mode
-  const handleVideoClick = useCallback(async (videoId: string) => {
+  // Seamless video expansion with explicit stop requirement
+  const handleVideoClick = useCallback((videoId: string) => {
     const currentVideo = videoRefs.current[videoId];
-    const videoCurrentTime = currentVideo?.currentTime || 0;
+    const videoCurrentTime = currentVideo?.currentTime ?? currentTime ?? 0;
     const nextExpanded = expandedVideo === videoId ? null : videoId;
 
-    // Toggle expanded view
-    setExpandedVideo(nextExpanded);
+    // Always stop playback first and require manual resume
+    setIsPlaying(false);
+    Object.values(videoRefs.current).forEach(v => {
+      if (!v) return;
+      try { v.pause(); } catch {}
+    });
 
-    // Sync all videos to the selected video's time
+    // Keep all videos in sync with the clicked video's time
     Object.values(videoRefs.current).forEach(v => {
       if (!v) return;
       try { v.currentTime = videoCurrentTime; } catch {}
     });
 
-    // Maintain playback state across all videos
-    if (isPlaying) {
-      // Ensure all videos are ready before playing
-      const videoElements = Object.values(videoRefs.current).filter(Boolean) as HTMLVideoElement[];
-      
-      // Wait for all videos to be ready
-      await Promise.all(videoElements.map(v => new Promise<void>((resolve) => {
-        if (v.readyState >= 2) return resolve();
-        const onCanPlay = () => { v.removeEventListener('canplay', onCanPlay); resolve(); };
-        v.addEventListener('canplay', onCanPlay);
-        setTimeout(resolve, 100); // Fallback timeout
-      })));
+    // Toggle expanded view after stopping
+    setExpandedVideo(nextExpanded);
 
-      // Start all videos simultaneously
-      const playPromises = videoElements.map(v =>
-        v.play().catch(err => {
-          console.warn('play failed', err);
-          performanceMonitor.current?.reportFrameDrop();
-        })
-      );
-      
-      await Promise.allSettled(playPromises);
-    } else {
-      Object.values(videoRefs.current).forEach(v => v?.pause());
-    }
-
+    // Update displayed time
     setCurrentTime(videoCurrentTime);
-  }, [expandedVideo, isPlaying]);
+  }, [expandedVideo, currentTime]);
 
   const handleVideoLoad = useCallback((videoId: string, file: File) => {
     const url = URL.createObjectURL(file);
