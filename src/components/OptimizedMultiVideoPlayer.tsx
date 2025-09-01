@@ -201,18 +201,24 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
     const el = videoRefs.current[id];
     if (!el) return;
     const t = el.currentTime || 0;
+
+    // Ensure duration is set as soon as it's known
+    const dur = el.duration;
+    if (typeof dur === 'number' && isFinite(dur) && dur > 0) {
+      if (duration === 0 || (id === MASTER_ID && dur !== duration)) {
+        setDuration(dur);
+      }
+    }
     
     // Update main time based on performance mode and active video
     if (performanceMode === 'high') {
-      // In high performance mode, use expanded video or master as time source
       if (id === (expandedVideo || MASTER_ID)) setCurrentTime(t);
     } else {
-      // In low performance mode, use master or expanded video
       if (id === MASTER_ID || id === expandedVideo) setCurrentTime(t);
     }
     
     setVideoTimes(prev => ({ ...prev, [id]: t }));
-  }, [MASTER_ID, expandedVideo, performanceMode]);
+  }, [MASTER_ID, expandedVideo, performanceMode, duration]);
 
   // Seamless video expansion for high performance mode
   const handleVideoClick = useCallback((videoId: string) => {
