@@ -76,6 +76,14 @@ const MultiVideoPlayer: React.FC = () => {
     handleSeek(direction * frameTime);
   }, [handleSeek]);
 
+  const onTimeUpdateFor = useCallback((id: string) => () => {
+    const el = videoRefs.current[id];
+    if (!el) return;
+    const t = el.currentTime || 0;
+    if (id === MASTER_ID) setCurrentTime(t);
+    setVideoTimes(prev => ({ ...prev, [id]: t }));
+  }, []);
+
   const handleVideoClick = useCallback((videoId: string) => {
     // Store current video time before expanding
     if (!expandedVideo && videoRefs.current[videoId]) {
@@ -203,16 +211,7 @@ const MultiVideoPlayer: React.FC = () => {
                   try { el.currentTime = videoTimes[expandedVideo]!; } catch {}
                 }
               }}
-               onTimeUpdate={(e) => {
-                 if (e.currentTarget) {
-                   if (expandedVideo === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                   // Continuously update stored time
-                   setVideoTimes(prev => ({
-                     ...prev,
-                     [expandedVideo]: e.currentTarget.currentTime
-                   }));
-                 }
-               }}
+               onTimeUpdate={onTimeUpdateFor(expandedVideo!)}
             >
               <source src={loadedVideos[expandedVideo] || videoConfigs.find(v => v.id === expandedVideo)?.src} type="video/mp4" />
             </video>
@@ -244,16 +243,7 @@ const MultiVideoPlayer: React.FC = () => {
                       if (!el) return;
                       if ('NLMVC_front_left' === MASTER_ID) setDuration(el.duration);
                     }}
-                     onTimeUpdate={(e) => {
-                       if (e.currentTarget) {
-                         if ('NLMVC_front_left' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                         // Save video time continuously
-                         setVideoTimes(prev => ({
-                           ...prev,
-                           ['NLMVC_front_left']: e.currentTarget.currentTime
-                         }));
-                       }
-                     }}
+                     onTimeUpdate={onTimeUpdateFor('NLMVC_front_left')}
                      onLoadStart={() => {
                        // Restore saved time when video loads
                        if (videoTimes['NLMVC_front_left'] && videoRefs.current['NLMVC_front_left']) {
@@ -296,16 +286,7 @@ const MultiVideoPlayer: React.FC = () => {
                       if (!el) return;
                       if ('NCBSC_front' === MASTER_ID) setDuration(el.duration);
                     }}
-                     onTimeUpdate={(e) => {
-                       if (e.currentTarget) {
-                         if ('NCBSC_front' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                         // Save video time continuously
-                         setVideoTimes(prev => ({
-                           ...prev,
-                           ['NCBSC_front']: e.currentTarget.currentTime
-                         }));
-                       }
-                     }}
+                     onTimeUpdate={onTimeUpdateFor('NCBSC_front')}
                      onLoadStart={() => {
                        // Restore saved time when video loads
                        if (videoTimes['NCBSC_front'] && videoRefs.current['NCBSC_front']) {
@@ -348,16 +329,7 @@ const MultiVideoPlayer: React.FC = () => {
                       if (!el) return;
                       if ('NRMVC_front_right' === MASTER_ID) setDuration(el.duration);
                     }}
-                     onTimeUpdate={(e) => {
-                       if (e.currentTarget) {
-                         if ('NRMVC_front_right' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                         // Save video time continuously
-                         setVideoTimes(prev => ({
-                           ...prev,
-                           ['NRMVC_front_right']: e.currentTarget.currentTime
-                         }));
-                       }
-                     }}
+                     onTimeUpdate={onTimeUpdateFor('NRMVC_front_right')}
                      onLoadStart={() => {
                        // Restore saved time when video loads
                        if (videoTimes['NRMVC_front_right'] && videoRefs.current['NRMVC_front_right']) {
@@ -404,16 +376,7 @@ const MultiVideoPlayer: React.FC = () => {
                       if (!el) return;
                       if ('NLBSC_left' === MASTER_ID) setDuration(el.duration);
                     }}
-                     onTimeUpdate={(e) => {
-                       if (e.currentTarget) {
-                         if ('NLBSC_left' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                         // Save video time continuously
-                         setVideoTimes(prev => ({
-                           ...prev,
-                           ['NLBSC_left']: e.currentTarget.currentTime
-                         }));
-                       }
-                     }}
+                     onTimeUpdate={onTimeUpdateFor('NLBSC_left')}
                      onLoadStart={() => {
                        // Restore saved time when video loads
                        if (videoTimes['NLBSC_left'] && videoRefs.current['NLBSC_left']) {
@@ -456,16 +419,7 @@ const MultiVideoPlayer: React.FC = () => {
                       if (!el) return;
                       if ('WCWVC_front' === MASTER_ID) setDuration(el.duration);
                     }}
-                     onTimeUpdate={(e) => {
-                       if (e.currentTarget) {
-                         if ('WCWVC_front' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                         // Save video time continuously
-                         setVideoTimes(prev => ({
-                           ...prev,
-                           ['WCWVC_front']: e.currentTarget.currentTime
-                         }));
-                       }
-                     }}
+                     onTimeUpdate={onTimeUpdateFor('WCWVC_front')}
                      onLoadStart={() => {
                        // Restore saved time when video loads
                        if (videoTimes['WCWVC_front'] && videoRefs.current['WCWVC_front']) {
@@ -508,16 +462,7 @@ const MultiVideoPlayer: React.FC = () => {
                       if (!el) return;
                       if ('WCNVC_front' === MASTER_ID) setDuration(el.duration);
                     }}
-                     onTimeUpdate={(e) => {
-                       if (e.currentTarget) {
-                         if ('WCNVC_front' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                         // Save video time continuously
-                         setVideoTimes(prev => ({
-                           ...prev,
-                           ['WCNVC_front']: e.currentTarget.currentTime
-                         }));
-                       }
-                     }}
+                     onTimeUpdate={onTimeUpdateFor('WCNVC_front')}
                      onLoadStart={() => {
                        // Restore saved time when video loads
                        if (videoTimes['WCNVC_front'] && videoRefs.current['WCNVC_front']) {
@@ -560,16 +505,7 @@ const MultiVideoPlayer: React.FC = () => {
                       if (!el) return;
                       if ('NRBSC_right' === MASTER_ID) setDuration(el.duration);
                     }}
-                     onTimeUpdate={(e) => {
-                       if (e.currentTarget) {
-                         if ('NRBSC_right' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                         // Save video time continuously
-                         setVideoTimes(prev => ({
-                           ...prev,
-                           ['NRBSC_right']: e.currentTarget.currentTime
-                         }));
-                       }
-                     }}
+                     onTimeUpdate={onTimeUpdateFor('NRBSC_right')}
                      onLoadStart={() => {
                        // Restore saved time when video loads
                        if (videoTimes['NRBSC_right'] && videoRefs.current['NRBSC_right']) {
@@ -616,16 +552,7 @@ const MultiVideoPlayer: React.FC = () => {
                       if (!el) return;
                       if ('TCMVC_back' === MASTER_ID) setDuration(el.duration);
                     }}
-                     onTimeUpdate={(e) => {
-                       if (e.currentTarget) {
-                         if ('TCMVC_back' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                         // Save video time continuously
-                         setVideoTimes(prev => ({
-                           ...prev,
-                           ['TCMVC_back']: e.currentTarget.currentTime
-                         }));
-                       }
-                     }}
+                     onTimeUpdate={onTimeUpdateFor('TCMVC_back')}
                      onLoadStart={() => {
                        // Restore saved time when video loads
                        if (videoTimes['TCMVC_back'] && videoRefs.current['TCMVC_back']) {
@@ -672,16 +599,7 @@ const MultiVideoPlayer: React.FC = () => {
                       if (!el) return;
                       if ('NLMVC_back_left' === MASTER_ID) setDuration(el.duration);
                     }}
-                     onTimeUpdate={(e) => {
-                       if (e.currentTarget) {
-                         if ('NLMVC_back_left' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                         // Save video time continuously
-                         setVideoTimes(prev => ({
-                           ...prev,
-                           ['NLMVC_back_left']: e.currentTarget.currentTime
-                         }));
-                       }
-                     }}
+                     onTimeUpdate={onTimeUpdateFor('NLMVC_back_left')}
                      onLoadStart={() => {
                        // Restore saved time when video loads
                        if (videoTimes['NLMVC_back_left'] && videoRefs.current['NLMVC_back_left']) {
@@ -724,16 +642,7 @@ const MultiVideoPlayer: React.FC = () => {
                       if (!el) return;
                       if ('TCBSC_back' === MASTER_ID) setDuration(el.duration);
                     }}
-                     onTimeUpdate={(e) => {
-                       if (e.currentTarget) {
-                         if ('TCBSC_back' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                         // Save video time continuously
-                         setVideoTimes(prev => ({
-                           ...prev,
-                           ['TCBSC_back']: e.currentTarget.currentTime
-                         }));
-                       }
-                     }}
+                     onTimeUpdate={onTimeUpdateFor('TCBSC_back')}
                      onLoadStart={() => {
                        // Restore saved time when video loads
                        if (videoTimes['TCBSC_back'] && videoRefs.current['TCBSC_back']) {
@@ -776,16 +685,7 @@ const MultiVideoPlayer: React.FC = () => {
                       if (!el) return;
                       if ('NRMVC_back_right' === MASTER_ID) setDuration(el.duration);
                     }}
-                     onTimeUpdate={(e) => {
-                       if (e.currentTarget) {
-                         if ('NRMVC_back_right' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                         // Save video time continuously
-                         setVideoTimes(prev => ({
-                           ...prev,
-                           ['NRMVC_back_right']: e.currentTarget.currentTime
-                         }));
-                       }
-                     }}
+                     onTimeUpdate={onTimeUpdateFor('NRMVC_back_right')}
                      onLoadStart={() => {
                        // Restore saved time when video loads
                        if (videoTimes['NRMVC_back_right'] && videoRefs.current['NRMVC_back_right']) {
