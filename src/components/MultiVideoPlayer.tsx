@@ -316,8 +316,45 @@ const MultiVideoPlayer: React.FC = () => {
               </div>
             </div>
 
-            {/* Row 2: Wide Center and Wide Front */}
-            <div className="flex justify-center gap-3">
+            {/* Row 2: Left Side, Wide Center, Wide Front, Right Side */}
+            <div className="flex justify-center items-center gap-3">
+              <div className="w-32">
+                <Card
+                  className={cn(
+                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
+                    isPlaying && "animate-pulse-border"
+                  )}
+                  onClick={() => handleVideoClick('NLBSC_left')}
+                >
+                  <video
+                    ref={setVideoRef('NLBSC_left')}
+                    className="w-full h-full object-contain rounded-lg"
+                    poster="/placeholder.svg"
+                    muted
+                    preload="metadata"
+                    playsInline
+                    onLoadedMetadata={(e) => {
+                      if ('NLBSC_left' === MASTER_ID) setDuration(e.currentTarget.duration);
+                    }}
+                    onTimeUpdate={(e) => {
+                      if ('NLBSC_left' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                    }}
+                  >
+                    <source src={loadedVideos['NLBSC_left'] || videoConfigs.find(v => v.id === 'NLBSC_left')?.src} type="video/mp4" />
+                  </video>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
+                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
+                    Left Side
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
+                  >
+                    <Maximize2 className="h-3 w-3" />
+                  </Button>
+                </Card>
+              </div>
               <div className="w-48">
                 <Card
                   className={cn(
@@ -392,47 +429,6 @@ const MultiVideoPlayer: React.FC = () => {
                   </Button>
                 </Card>
               </div>
-            </div>
-
-            {/* Row 3: Left Side and Right Side */}
-            <div className="flex justify-between items-center">
-              <div className="w-32">
-                <Card
-                  className={cn(
-                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-                    isPlaying && "animate-pulse-border"
-                  )}
-                  onClick={() => handleVideoClick('NLBSC_left')}
-                >
-                  <video
-                    ref={setVideoRef('NLBSC_left')}
-                    className="w-full h-full object-contain rounded-lg"
-                    poster="/placeholder.svg"
-                    muted
-                    preload="metadata"
-                    playsInline
-                    onLoadedMetadata={(e) => {
-                      if ('NLBSC_left' === MASTER_ID) setDuration(e.currentTarget.duration);
-                    }}
-                    onTimeUpdate={(e) => {
-                      if ('NLBSC_left' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                    }}
-                  >
-                    <source src={loadedVideos['NLBSC_left'] || videoConfigs.find(v => v.id === 'NLBSC_left')?.src} type="video/mp4" />
-                  </video>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
-                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
-                    Left Side
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
-                  >
-                    <Maximize2 className="h-3 w-3" />
-                  </Button>
-                </Card>
-              </div>
               <div className="w-32">
                 <Card
                   className={cn(
@@ -472,7 +468,7 @@ const MultiVideoPlayer: React.FC = () => {
               </div>
             </div>
 
-            {/* Row 4: Back Center */}
+            {/* Row 3: Back Center */}
             <div className="flex justify-center">
               <div className="w-48">
                 <Card
