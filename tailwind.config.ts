@@ -26,7 +26,17 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					glow: 'hsl(var(--primary-glow))'
+				},
+				video: {
+					bg: 'hsl(var(--video-bg))',
+					border: 'hsl(var(--video-border))',
+					active: 'hsl(var(--video-active))'
+				},
+				control: {
+					bg: 'hsl(var(--control-bg))',
+					hover: 'hsl(var(--control-hover))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -84,11 +94,26 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'glow': {
+					'0%, 100%': { boxShadow: '0 0 20px hsl(var(--primary) / 0.3)' },
+					'50%': { boxShadow: '0 0 30px hsl(var(--primary) / 0.5)' }
+				},
+				'pulse-border': {
+					'0%, 100%': { borderColor: 'hsl(var(--video-border))' },
+					'50%': { borderColor: 'hsl(var(--primary))' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'glow': 'glow 2s ease-in-out infinite',
+				'pulse-border': 'pulse-border 2s ease-in-out infinite'
+			},
+			boxShadow: {
+				'video': 'var(--shadow-video)',
+				'control': 'var(--shadow-control)',
+				'glow': 'var(--glow-primary)'
 			}
 		}
 	},
