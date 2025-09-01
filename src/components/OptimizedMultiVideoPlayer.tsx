@@ -343,45 +343,23 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
     return () => { cleanups.forEach(fn => fn()); };
   }, [isPlaying, expandedVideo]);
 
-  // Nudge playback on expand/collapse (workaround for browser pausing when layout changes)
-  useEffect(() => {
-    if (!isPlaying) return;
-    const vids = (Object.values(videoRefs.current).filter(Boolean) as HTMLVideoElement[]);
-    const retry = (delay: number) => window.setTimeout(() => {
-      vids.forEach(v => { if (v.paused && !v.ended) v.play().catch(() => {}); });
-    }, delay);
-    const t1 = retry(0);
-    const t2 = retry(300);
-    const t3 = retry(1000);
-    return () => { window.clearTimeout(t1); window.clearTimeout(t2); window.clearTimeout(t3); };
-  }, [expandedVideo, isPlaying]);
-
-  // Playback watchdog to keep all videos running and in (loose) sync
+  // Playback watchdog: keep videos running without forcing time sync
   useEffect(() => {
     let interval: number | undefined;
     if (isPlaying) {
       interval = window.setInterval(() => {
-        const masterId = expandedVideo || MASTER_ID;
-        const master = videoRefs.current[masterId];
-        const t = master?.currentTime ?? currentTime;
-        Object.entries(videoRefs.current).forEach(([id, v]) => {
-          if (!v) return;
-          if (v.seeking || v.readyState < 2) return;
-          if (typeof t === 'number' && !Number.isNaN(t) && id !== masterId) {
-            if (Math.abs((v.currentTime || 0) - t) > 0.33) {
-              try { v.currentTime = t; } catch {}
-            }
-          }
+        const vids = (Object.values(videoRefs.current).filter(Boolean) as HTMLVideoElement[]);
+        vids.forEach(v => {
           if (v.paused && !v.ended) {
             v.play().catch(() => {});
           }
         });
-      }, 800);
+      }, 1000);
     }
     return () => {
       if (interval) window.clearInterval(interval);
     };
-  }, [isPlaying, expandedVideo, MASTER_ID, currentTime]);
+  }, [isPlaying]);
 
   const formatTime = (time: number): string => {
     const minutes = Math.floor(time / 60);

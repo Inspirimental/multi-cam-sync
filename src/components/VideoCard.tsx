@@ -168,13 +168,17 @@ export const VideoCard: React.FC<VideoCardProps> = ({
               )}
               poster={thumbnail || undefined}
               muted
-              preload="metadata"
+              preload={isExpanded ? 'auto' : 'metadata'}
               playsInline
+              disablePictureInPicture
               onLoadedMetadata={handleOnLoadedMetadata}
               onLoadedData={handleOnLoadedMetadata}
               onTimeUpdate={onTimeUpdate}
               onLoadStart={handleLoadStart}
               onError={handleError}
+              onPause={() => console.log('[video] pause', id)}
+              onWaiting={() => console.log('[video] waiting', id)}
+              onPlaying={() => console.log('[video] playing', id)}
             >
               <source src={src} type="video/mp4" />
             </video>
