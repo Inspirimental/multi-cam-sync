@@ -318,8 +318,8 @@ const MultiVideoPlayer: React.FC = () => {
               </div>
             </div>
 
-            {/* Row 2: Wide Center (centered and half size) */}
-            <div className="flex justify-center h-20">
+            {/* Row 2: Wide Center and Wide Front (side by side) */}
+            <div className="flex justify-center gap-4 h-20">
               <div className="w-56">
                 <Card
                   className={cn(
@@ -357,9 +357,46 @@ const MultiVideoPlayer: React.FC = () => {
                   </Button>
                 </Card>
               </div>
+              <div className="w-56">
+                <Card
+                  className={cn(
+                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
+                    isPlaying && "animate-pulse-border"
+                  )}
+                  onClick={() => handleVideoClick('WCNVC_front')}
+                >
+                  <video
+                    ref={setVideoRef('WCNVC_front')}
+                    className="w-full h-full object-contain rounded-lg"
+                    poster="/placeholder.svg"
+                    muted
+                    preload="metadata"
+                    playsInline
+                    onLoadedMetadata={(e) => {
+                      if ('WCNVC_front' === MASTER_ID) setDuration(e.currentTarget.duration);
+                    }}
+                    onTimeUpdate={(e) => {
+                      if ('WCNVC_front' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                    }}
+                  >
+                    <source src={loadedVideos['WCNVC_front'] || videoConfigs.find(v => v.id === 'WCNVC_front')?.src} type="video/mp4" />
+                  </video>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
+                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
+                    Wide Front
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
+                  >
+                    <Maximize2 className="h-3 w-3" />
+                  </Button>
+                </Card>
+              </div>
             </div>
 
-            {/* Row 3: Left Side, Wide Front, Right Side */}
+            {/* Row 3: Left Side and Right Side */}
             <div className="grid grid-cols-[auto,1fr,auto] gap-2 items-center h-20">
               <div className="w-24">
                 <Card
@@ -398,45 +435,7 @@ const MultiVideoPlayer: React.FC = () => {
                   </Button>
                 </Card>
               </div>
-              <div className="flex justify-center flex-1">
-                <div className="w-56">
-                  <Card
-                    className={cn(
-                      "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-                      isPlaying && "animate-pulse-border"
-                    )}
-                    onClick={() => handleVideoClick('WCNVC_front')}
-                  >
-                    <video
-                      ref={setVideoRef('WCNVC_front')}
-                      className="w-full h-full object-contain rounded-lg"
-                      poster="/placeholder.svg"
-                      muted
-                      preload="metadata"
-                      playsInline
-                      onLoadedMetadata={(e) => {
-                        if ('WCNVC_front' === MASTER_ID) setDuration(e.currentTarget.duration);
-                      }}
-                      onTimeUpdate={(e) => {
-                        if ('WCNVC_front' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                      }}
-                    >
-                      <source src={loadedVideos['WCNVC_front'] || videoConfigs.find(v => v.id === 'WCNVC_front')?.src} type="video/mp4" />
-                    </video>
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
-                    <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
-                      Wide Front
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
-                    >
-                      <Maximize2 className="h-3 w-3" />
-                    </Button>
-                  </Card>
-                </div>
-              </div>
+              <div></div>
               <div className="w-24">
                 <Card
                   className={cn(
