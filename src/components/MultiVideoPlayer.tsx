@@ -132,6 +132,41 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
     syncAllVideos(newTime);
   }, [currentTime, duration, syncAllVideos]);
 
+  // New function for progress bar click navigation
+  const handleProgressBarClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    if (duration === 0) return;
+    
+    const progressBar = event.currentTarget;
+    const rect = progressBar.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const progressWidth = rect.width;
+    
+    // Calculate the percentage of progress bar clicked
+    const percentage = Math.max(0, Math.min(1, clickX / progressWidth));
+    const newTime = percentage * duration;
+    
+    setCurrentTime(newTime);
+    syncAllVideos(newTime);
+    
+    // If playing, briefly pause and resume to ensure sync
+    if (isPlaying) {
+      Object.values(videoRefs.current).forEach(video => {
+        if (video) {
+          video.pause();
+        }
+      });
+      
+      // Small delay to ensure seek completes
+      setTimeout(() => {
+        Object.values(videoRefs.current).forEach(video => {
+          if (video) {
+            video.play().catch(console.warn);
+          }
+        });
+      }, 50);
+    }
+  }, [duration, syncAllVideos, isPlaying]);
+
   const handleFrameStep = useCallback((direction: number) => {
     const frameRate = 30; // Assume 30fps
     const frameTime = 1 / frameRate;
@@ -868,13 +903,34 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
           </Button>
         </div>
 
-        {/* Progress Bar */}
+        {/* Interactive Progress Bar */}
         <div className="mt-4">
-          <div className="w-full bg-muted rounded-full h-2">
+          <div 
+            className="w-full bg-muted rounded-full h-3 cursor-pointer hover:h-4 transition-all duration-200 relative group"
+            onClick={handleProgressBarClick}
+          >
+            {/* Background track */}
+            <div className="absolute inset-0 bg-muted rounded-full" />
+            
+            {/* Progress fill */}
             <div
-              className="bg-primary h-2 rounded-full transition-all duration-100"
+              className="bg-primary h-full rounded-full transition-all duration-100 relative"
               style={{ width: duration > 0 ? `${(currentTime / duration) * 100}%` : '0%' }}
             />
+            
+            {/* Hover indicator */}
+            <div className="absolute inset-0 bg-primary/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+            
+            {/* Time tooltip on hover */}
+            <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              Click to jump to position
+            </div>
+          </div>
+          
+          {/* Time display */}
+          <div className="flex justify-between items-center mt-2 text-sm text-muted-foreground">
+            <span>{formatTime(currentTime)}</span>
+            <span>{formatTime(duration)}</span>
           </div>
         </div>
       </Card>
