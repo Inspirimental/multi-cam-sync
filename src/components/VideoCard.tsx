@@ -34,7 +34,6 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   videoTimes,
   videoRefs
 }) => {
-  const [isLoading, setIsLoading] = useState(true);
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
 
@@ -117,20 +116,16 @@ export const VideoCard: React.FC<VideoCardProps> = ({
       // Attempt thumbnail generation but do not block loading indefinitely
       await generateThumbnail(video);
     } finally {
-      // Whether or not thumbnail generation succeeds, reveal the video
-      setIsLoading(false);
+      // Notify parent that this video has loaded
+      onLoadedMetadata(event);
     }
-
-    onLoadedMetadata(event);
   };
 
   const handleError = () => {
     setHasError(true);
-    setIsLoading(false);
   };
 
   const handleLoadStart = () => {
-    setIsLoading(true);
     setHasError(false);
     onLoadStart();
   };
@@ -144,18 +139,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({
         )}
         onClick={() => onVideoClick(id)}
       >
-        {/* Loading State */}
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-video-bg rounded-lg">
-            <div className="flex flex-col items-center gap-2">
-              <Skeleton className="w-8 h-8 rounded-full animate-spin border-2 border-primary border-t-transparent" />
-              <div className="text-xs text-muted-foreground">Loading...</div>
-            </div>
-          </div>
-        )}
-
         {/* Error State */}
-        {hasError && !isLoading && (
+        {hasError && (
           <div className="absolute inset-0 flex items-center justify-center bg-video-bg rounded-lg">
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <div className="text-xs">Failed to load</div>
@@ -167,7 +152,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
         {/* Video Element */}
         <video
           ref={setVideoRef(id)}
-          className={cn('w-full h-full object-contain rounded-lg', isLoading && 'opacity-0')}
+          className="w-full h-full object-contain rounded-lg"
           poster={thumbnail || undefined}
           muted
           preload="metadata"
@@ -197,12 +182,6 @@ export const VideoCard: React.FC<VideoCardProps> = ({
           <Maximize2 className="h-3 w-3" />
         </Button>
 
-        {/* Loading Indicator Badge */}
-        {isLoading && (
-          <div className="absolute top-2 left-2 bg-primary/80 px-2 py-1 rounded text-xs text-primary-foreground animate-pulse">
-            Loading
-          </div>
-        )}
       </Card>
     </div>
   );

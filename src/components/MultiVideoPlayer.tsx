@@ -5,6 +5,7 @@ import { Play, Pause, SkipBack, SkipForward, ChevronLeft, ChevronRight, Maximize
 import { cn } from '@/lib/utils';
 import VideoFileImporter from './VideoFileImporter';
 import { VideoCard } from './VideoCard';
+import { LoadingModal } from './LoadingModal';
 import { VideoPlayerProps, VideoFile } from '@/types/VideoTypes';
 
 interface VideoConfig {
@@ -48,6 +49,8 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
   const [expandedVideo, setExpandedVideo] = useState<string | null>(null);
   const [loadedVideos, setLoadedVideos] = useState<{ [key: string]: string }>({});
   const [videoTimes, setVideoTimes] = useState<{ [key: string]: number }>({});
+  const [loadedVideoCount, setLoadedVideoCount] = useState(0);
+  const [allVideosLoaded, setAllVideosLoaded] = useState(false);
 
   const setVideoRef = useCallback((id: string) => (ref: HTMLVideoElement | null) => {
     videoRefs.current[id] = ref;
@@ -203,6 +206,22 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
     setLoadedVideos(prev => ({ ...prev, [videoId]: url }));
   }, []);
 
+  // Helper function to handle video metadata loading with progress tracking
+  const handleVideoLoadedMetadata = useCallback((videoId: string) => (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const el = (e.currentTarget as HTMLVideoElement | null);
+    if (!el) return;
+    
+    if (videoId === MASTER_ID) setDuration(el.duration);
+    
+    setLoadedVideoCount(prev => {
+      const newCount = prev + 1;
+      if (newCount >= videoConfigs.length) {
+        setAllVideosLoaded(true);
+      }
+      return newCount;
+    });
+  }, [MASTER_ID, videoConfigs.length]);
+
   useEffect(() => {
     const handleTimeUpdate = () => {
       const firstVideo = Object.values(videoRefs.current)[0];
@@ -297,6 +316,12 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
 
   return (
     <div className="w-full min-h-screen bg-background p-4 space-y-4">
+      <LoadingModal 
+        isOpen={!allVideosLoaded}
+        loadedVideos={loadedVideoCount}
+        totalVideos={videoConfigs.length}
+      />
+      
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">{streamName}</h1>
@@ -362,11 +387,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('NLMVC_front_left')}
-                onLoadedMetadata={(e) => {
-                  const el = (e.currentTarget as HTMLVideoElement | null);
-                  if (!el) return;
-                  if ('NLMVC_front_left' === MASTER_ID) setDuration(el.duration);
-                }}
+                onLoadedMetadata={handleVideoLoadedMetadata('NLMVC_front_left')}
                 onLoadStart={() => {
                   if (videoTimes['NLMVC_front_left'] && videoRefs.current['NLMVC_front_left']) {
                     videoRefs.current['NLMVC_front_left']!.currentTime = videoTimes['NLMVC_front_left'];
@@ -384,11 +405,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('NCBSC_front')}
-                onLoadedMetadata={(e) => {
-                  const el = (e.currentTarget as HTMLVideoElement | null);
-                  if (!el) return;
-                  if ('NCBSC_front' === MASTER_ID) setDuration(el.duration);
-                }}
+                onLoadedMetadata={handleVideoLoadedMetadata('NCBSC_front')}
                 onLoadStart={() => {
                   if (videoTimes['NCBSC_front'] && videoRefs.current['NCBSC_front']) {
                     videoRefs.current['NCBSC_front']!.currentTime = videoTimes['NCBSC_front'];
@@ -406,11 +423,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('NRMVC_front_right')}
-                onLoadedMetadata={(e) => {
-                  const el = (e.currentTarget as HTMLVideoElement | null);
-                  if (!el) return;
-                  if ('NRMVC_front_right' === MASTER_ID) setDuration(el.duration);
-                }}
+                onLoadedMetadata={handleVideoLoadedMetadata('NRMVC_front_right')}
                 onLoadStart={() => {
                   if (videoTimes['NRMVC_front_right'] && videoRefs.current['NRMVC_front_right']) {
                     videoRefs.current['NRMVC_front_right']!.currentTime = videoTimes['NRMVC_front_right'];
@@ -432,11 +445,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('NLBSC_left')}
-                onLoadedMetadata={(e) => {
-                  const el = (e.currentTarget as HTMLVideoElement | null);
-                  if (!el) return;
-                  if ('NLBSC_left' === MASTER_ID) setDuration(el.duration);
-                }}
+                onLoadedMetadata={handleVideoLoadedMetadata('NLBSC_left')}
                 onLoadStart={() => {
                   if (videoTimes['NLBSC_left'] && videoRefs.current['NLBSC_left']) {
                     videoRefs.current['NLBSC_left']!.currentTime = videoTimes['NLBSC_left'];
@@ -454,11 +463,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('WCWVC_front')}
-                onLoadedMetadata={(e) => {
-                  const el = (e.currentTarget as HTMLVideoElement | null);
-                  if (!el) return;
-                  if ('WCWVC_front' === MASTER_ID) setDuration(el.duration);
-                }}
+                onLoadedMetadata={handleVideoLoadedMetadata('WCWVC_front')}
                 onLoadStart={() => {
                   if (videoTimes['WCWVC_front'] && videoRefs.current['WCWVC_front']) {
                     videoRefs.current['WCWVC_front']!.currentTime = videoTimes['WCWVC_front'];
@@ -476,11 +481,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('WCNVC_front')}
-                onLoadedMetadata={(e) => {
-                  const el = (e.currentTarget as HTMLVideoElement | null);
-                  if (!el) return;
-                  if ('WCNVC_front' === MASTER_ID) setDuration(el.duration);
-                }}
+                onLoadedMetadata={handleVideoLoadedMetadata('WCNVC_front')}
                 onLoadStart={() => {
                   if (videoTimes['WCNVC_front'] && videoRefs.current['WCNVC_front']) {
                     videoRefs.current['WCNVC_front']!.currentTime = videoTimes['WCNVC_front'];
@@ -498,11 +499,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('NRBSC_right')}
-                onLoadedMetadata={(e) => {
-                  const el = (e.currentTarget as HTMLVideoElement | null);
-                  if (!el) return;
-                  if ('NRBSC_right' === MASTER_ID) setDuration(el.duration);
-                }}
+                onLoadedMetadata={handleVideoLoadedMetadata('NRBSC_right')}
                 onLoadStart={() => {
                   if (videoTimes['NRBSC_right'] && videoRefs.current['NRBSC_right']) {
                     videoRefs.current['NRBSC_right']!.currentTime = videoTimes['NRBSC_right'];
@@ -524,11 +521,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('TCMVC_back')}
-                onLoadedMetadata={(e) => {
-                  const el = (e.currentTarget as HTMLVideoElement | null);
-                  if (!el) return;
-                  if ('TCMVC_back' === MASTER_ID) setDuration(el.duration);
-                }}
+                onLoadedMetadata={handleVideoLoadedMetadata('TCMVC_back')}
                 onLoadStart={() => {
                   if (videoTimes['TCMVC_back'] && videoRefs.current['TCMVC_back']) {
                     videoRefs.current['TCMVC_back']!.currentTime = videoTimes['TCMVC_back'];
@@ -550,11 +543,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('NLMVC_back_left')}
-                onLoadedMetadata={(e) => {
-                  const el = (e.currentTarget as HTMLVideoElement | null);
-                  if (!el) return;
-                  if ('NLMVC_back_left' === MASTER_ID) setDuration(el.duration);
-                }}
+                onLoadedMetadata={handleVideoLoadedMetadata('NLMVC_back_left')}
                 onLoadStart={() => {
                   if (videoTimes['NLMVC_back_left'] && videoRefs.current['NLMVC_back_left']) {
                     videoRefs.current['NLMVC_back_left']!.currentTime = videoTimes['NLMVC_back_left'];
@@ -572,11 +561,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('TCBSC_back')}
-                onLoadedMetadata={(e) => {
-                  const el = (e.currentTarget as HTMLVideoElement | null);
-                  if (!el) return;
-                  if ('TCBSC_back' === MASTER_ID) setDuration(el.duration);
-                }}
+                onLoadedMetadata={handleVideoLoadedMetadata('TCBSC_back')}
                 onLoadStart={() => {
                   if (videoTimes['TCBSC_back'] && videoRefs.current['TCBSC_back']) {
                     videoRefs.current['TCBSC_back']!.currentTime = videoTimes['TCBSC_back'];
@@ -594,11 +579,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('NRMVC_back_right')}
-                onLoadedMetadata={(e) => {
-                  const el = (e.currentTarget as HTMLVideoElement | null);
-                  if (!el) return;
-                  if ('NRMVC_back_right' === MASTER_ID) setDuration(el.duration);
-                }}
+                onLoadedMetadata={handleVideoLoadedMetadata('NRMVC_back_right')}
                 onLoadStart={() => {
                   if (videoTimes['NRMVC_back_right'] && videoRefs.current['NRMVC_back_right']) {
                     videoRefs.current['NRMVC_back_right']!.currentTime = videoTimes['NRMVC_back_right'];
