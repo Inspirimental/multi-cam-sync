@@ -1,14 +1,12 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Play, Pause, SkipBack, SkipForward, ChevronLeft, ChevronRight, X, Settings } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import VideoFileImporter from './VideoFileImporter';
 import { VideoCard } from './VideoCard';
 import { LoadingModal } from './LoadingModal';
 import { VideoPlayerProps, VideoFile, VideoConfig } from '@/types/VideoTypes';
-import { getOptimalPerformanceMode, PerformanceMonitor, type PerformanceMode } from '@/utils/performanceDetection';
-import { useToast } from '@/hooks/use-toast';
 import { formatTime } from '@/utils/videoUtils';
 
 const defaultVideoConfigs: VideoConfig[] = [
@@ -25,24 +23,11 @@ const defaultVideoConfigs: VideoConfig[] = [
   { id: 'WCWVC_front', name: 'WCWVC_front.mp4', title: 'Wide Center', position: 'front', src: '/videos/WCWVC_front.mp4' },
 ];
 
-interface OptimizedVideoPlayerProps extends VideoPlayerProps {
-  forcePerformanceMode?: PerformanceMode;
-}
-
-const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({ 
+const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({ 
   videoFiles = {}, 
   onClose, 
-  streamName = "Vehicle Camera Monitor",
-  forcePerformanceMode
+  streamName = "Vehicle Camera Monitor"
 }) => {
-  // Performance mode detection and state
-  const [performanceMode, setPerformanceMode] = useState<PerformanceMode>(
-    forcePerformanceMode || getOptimalPerformanceMode()
-  );
-  const [showPerformanceSettings, setShowPerformanceSettings] = useState(false);
-  const performanceMonitor = useRef<PerformanceMonitor>();
-  const { toast } = useToast();
-
   // Merge external video files with default config
   const videoConfigs = defaultVideoConfigs.map(config => ({
     ...config,
@@ -63,23 +48,6 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
   const hasExternalVideos = Object.keys(videoFiles).length > 0;
   const srcFor = useCallback((id: string) => loadedVideos[id] || (hasExternalVideos ? (videoConfigs.find(v => v.id === id)?.src || '') : ''), [loadedVideos, hasExternalVideos, videoConfigs]);
   const totalToLoad = videoConfigs.filter(v => Boolean(srcFor(v.id))).length;
-  // Initialize performance monitor
-  useEffect(() => {
-    if (performanceMode === 'high') {
-      performanceMonitor.current = new PerformanceMonitor(() => {
-        toast({
-          title: "Performance Issue Detected",
-          description: "Switching to compatibility mode for better performance.",
-        });
-        setPerformanceMode('low');
-      });
-      performanceMonitor.current.startMonitoring();
-    }
-
-    return () => {
-      performanceMonitor.current?.stopMonitoring();
-    };
-  }, [performanceMode, toast]);
 
   const setVideoRef = useCallback((id: string) => (ref: HTMLVideoElement | null) => {
     videoRefs.current[id] = ref;
@@ -87,22 +55,13 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
 
   // Improved synchronization function
   const syncAllVideos = useCallback((targetTime: number) => {
-    if (performanceMode === 'high') {
-      // In high performance mode, sync all videos including background ones
-      Object.values(videoRefs.current).forEach(video => {
-        if (video) {
-          video.currentTime = targetTime;
-        }
-      });
-    } else {
-      // In compatibility mode, keep all videos time-aligned as well
-      Object.values(videoRefs.current).forEach(video => {
-        if (video) {
-          video.currentTime = targetTime;
-        }
-      });
-    }
-  }, [performanceMode, expandedVideo]);
+    // Sync all videos for optimal playback
+    Object.values(videoRefs.current).forEach(video => {
+      if (video) {
+        video.currentTime = targetTime;
+      }
+    });
+  }, []);
 
   // Enhanced play/pause with performance-aware synchronization
   const handlePlayPause = useCallback(async () => {
@@ -134,7 +93,6 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
       // Start all
       const playPromises = videoElements.map(v => v.play().catch(err => {
         console.warn('Video failed to play', err);
-        performanceMonitor.current?.reportFrameDrop();
       }));
 
       try {
@@ -182,7 +140,7 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
         });
       }, 50);
     }
-  }, [duration, syncAllVideos, isPlaying, performanceMode, expandedVideo]);
+  }, [duration, syncAllVideos, isPlaying]);
 
   const handleFrameStep = useCallback((direction: number) => {
     const frameRate = 30;
@@ -203,15 +161,11 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
       }
     }
     
-    // Update main time based on performance mode and active video
-    if (performanceMode === 'high') {
-      if (id === (expandedVideo || MASTER_ID)) setCurrentTime(t);
-    } else {
-      if (id === MASTER_ID || id === expandedVideo) setCurrentTime(t);
-    }
+    // Update main time based on active video
+    if (id === (expandedVideo || MASTER_ID)) setCurrentTime(t);
     
     setVideoTimes(prev => ({ ...prev, [id]: t }));
-  }, [MASTER_ID, expandedVideo, performanceMode, duration]);
+  }, [MASTER_ID, expandedVideo, duration]);
 
   // Seamless video expansion with explicit stop requirement
   const handleVideoClick = useCallback((videoId: string) => {
@@ -275,7 +229,6 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
     if (countedRef.current[videoId]) return;
     countedRef.current[videoId] = true;
     console.warn('[video] error', videoId);
-    performanceMonitor.current?.reportFrameDrop();
     setLoadedVideoCount(prev => {
       const newCount = prev + 1;
       if (newCount >= totalToLoad) setAllVideosLoaded(true);
@@ -365,16 +318,6 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
     };
   }, [isPlaying]);
 
-  // Performance mode toggle
-  const togglePerformanceMode = useCallback(() => {
-    const newMode: PerformanceMode = performanceMode === 'high' ? 'low' : 'high';
-    setPerformanceMode(newMode);
-    toast({
-      title: "Performance Mode Changed",
-      description: `Switched to ${newMode === 'high' ? 'High Performance' : 'Compatibility'} mode.`,
-    });
-  }, [performanceMode, toast]);
-
   const videoLayout = [
     { id: 'NLMVC_front_left', title: 'Front Left', size: 'small' },
     { id: 'NCBSC_front', title: 'Front Camera', size: 'large' },
@@ -397,45 +340,13 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
         totalVideos={totalToLoad}
       />
       
-      {/* Header with Performance Indicator */}
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold text-foreground">{streamName}</h1>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowPerformanceSettings(!showPerformanceSettings)}
-              className="text-xs"
-            >
-              <Settings className="h-3 w-3 mr-1" />
-              {performanceMode === 'high' ? 'High Performance' : 'Compatibility'}
-            </Button>
-          </div>
-        </div>
+        <h1 className="text-2xl font-bold text-foreground">{streamName}</h1>
         <div className="text-sm text-muted-foreground">
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
       </div>
-
-      {/* Performance Settings */}
-      {showPerformanceSettings && (
-        <Card className="p-4 bg-muted/50">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold">Performance Mode</h3>
-              <p className="text-sm text-muted-foreground">
-                {performanceMode === 'high' 
-                  ? 'All videos run continuously for seamless playback' 
-                  : 'Videos pause in background to save resources'}
-              </p>
-            </div>
-            <Button onClick={togglePerformanceMode} variant="outline">
-              Switch to {performanceMode === 'high' ? 'Compatibility' : 'High Performance'}
-            </Button>
-          </div>
-        </Card>
-      )}
 
       {/* Video File Importer */}
       {Object.keys(videoFiles).length === 0 && (
@@ -446,7 +357,7 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
         />
       )}
 
-      {/* Video Grid with Performance-Aware Rendering */}
+      {/* Multi-Video Grid - High Performance */}
       <div className="relative flex-1">
         {/* Always render the grid; expand by reusing the same DOM video element via CSS */}
         <div className="flex flex-col gap-3 max-w-6xl mx-auto mb-6 animate-fade-in">
