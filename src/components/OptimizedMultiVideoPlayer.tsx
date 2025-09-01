@@ -122,64 +122,36 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
         }
       });
     } else {
-      // Play logic - get all available videos including expanded view
-      const allVideoIds = videoConfigs.map(v => v.id);
-      const videoElements: HTMLVideoElement[] = [];
-      
-      // Add grid videos
-      allVideoIds.forEach(id => {
-        const video = videoRefs.current[id];
-        if (video) videoElements.push(video);
-      });
-      
-      // Add expanded video if exists
-      if (expandedVideo) {
-        const expandedVideoElement = videoRefs.current[`${expandedVideo}_expanded`];
-        if (expandedVideoElement) videoElements.push(expandedVideoElement);
-      }
-
+      // Play logic - play all available grid videos
+      const videoElements: HTMLVideoElement[] = Object.values(videoRefs.current).filter(Boolean) as HTMLVideoElement[];
       if (videoElements.length === 0) return;
 
-      // Synchronization - use master video or first available
+      // Synchronize to master or first available
       const masterVideo = videoRefs.current[MASTER_ID] || videoElements[0];
       const syncTime = masterVideo.currentTime;
-      
-      videoElements.forEach(video => {
-        video.currentTime = syncTime;
-      });
+      videoElements.forEach(v => { try { v.currentTime = syncTime; } catch {} });
 
-      // Wait for videos to be ready
-      await Promise.all(videoElements.map(video => 
-        new Promise<void>(resolve => {
-          if (video.readyState >= 2) {
-            resolve();
-          } else {
-            const handleCanPlay = () => {
-              video.removeEventListener('canplay', handleCanPlay);
-              resolve();
-            };
-            video.addEventListener('canplay', handleCanPlay);
-          }
-        })
-      ));
+      // Ensure readiness
+      await Promise.all(videoElements.map(v => new Promise<void>((resolve) => {
+        if (v.readyState >= 2) return resolve();
+        const onCanPlay = () => { v.removeEventListener('canplay', onCanPlay); resolve(); };
+        v.addEventListener('canplay', onCanPlay);
+      })));
 
-      // Start videos
-      const playPromises = videoElements.map(video => {
-        return video.play().catch(error => {
-          console.warn(`Video ${video.src} failed to play:`, error);
-          performanceMonitor.current?.reportFrameDrop();
-        });
-      });
+      // Start all
+      const playPromises = videoElements.map(v => v.play().catch(err => {
+        console.warn('Video failed to play', err);
+        performanceMonitor.current?.reportFrameDrop();
+      }));
 
       try {
-        await Promise.all(playPromises);
+        await Promise.allSettled(playPromises);
         setIsPlaying(true);
-      } catch (error) {
-        console.warn('Some videos failed to start:', error);
+      } catch {
         setIsPlaying(true);
       }
     }
-  }, [isPlaying, expandedVideo, videoConfigs, MASTER_ID]);
+  }, [isPlaying, MASTER_ID]);
 
   const handleSeek = useCallback((seconds: number) => {
     const newTime = Math.max(0, Math.min(duration, currentTime + seconds));
