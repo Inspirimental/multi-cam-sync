@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Play, Pause, SkipBack, SkipForward, ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import VideoFileImporter from './VideoFileImporter';
 
 interface VideoConfig {
   id: string;
@@ -21,7 +22,7 @@ const videoConfigs: VideoConfig[] = [
   { id: 'NLMVC_front_left', name: 'NLMVC_front_left.mp4', title: 'Front Left', position: 'side', src: '/videos/NLMVC_front_left.mp4' },
   { id: 'NRBSC_right', name: 'NRBSC_right.mp4', title: 'Right Side', position: 'side', src: '/videos/NRBSC_right.mp4' },
   { id: 'NRMVC_back_right', name: 'NRMVC_back_right.mp4', title: 'Back Right', position: 'side', src: '/videos/NRMVC_back_right.mp4' },
-  { id: 'NRMVC_front_right', name: 'NRMVC_front _right.mp4', title: 'Front Right', position: 'side', src: '/videos/NRMVC_front _right.mp4' },
+  { id: 'NRMVC_front_right', name: 'NRMVC_front_right.mp4', title: 'Front Right', position: 'side', src: '/videos/NRMVC_front_right.mp4' },
   { id: 'WCNVC_front', name: 'WCNVC_front.mp4', title: 'Wide Front', position: 'front', src: '/videos/WCNVC_front.mp4' },
   { id: 'WCWVC_front', name: 'WCWVC_front.mp4', title: 'Wide Center', position: 'front', src: '/videos/WCWVC_front.mp4' },
 ];
@@ -32,6 +33,7 @@ const MultiVideoPlayer: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [expandedVideo, setExpandedVideo] = useState<string | null>(null);
+  const [loadedVideos, setLoadedVideos] = useState<{ [key: string]: string }>({});
 
   const setVideoRef = useCallback((id: string) => (ref: HTMLVideoElement | null) => {
     videoRefs.current[id] = ref;
@@ -76,6 +78,11 @@ const MultiVideoPlayer: React.FC = () => {
     setExpandedVideo(expandedVideo === videoId ? null : videoId);
   }, [expandedVideo]);
 
+  const handleVideoLoad = useCallback((videoId: string, file: File) => {
+    const url = URL.createObjectURL(file);
+    setLoadedVideos(prev => ({ ...prev, [videoId]: url }));
+  }, []);
+
   useEffect(() => {
     const handleTimeUpdate = () => {
       const firstVideo = Object.values(videoRefs.current)[0];
@@ -118,7 +125,7 @@ const MultiVideoPlayer: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-screen bg-background p-4 space-y-4">
+    <div className="w-full min-h-screen bg-background p-4 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Vehicle Camera Monitor</h1>
@@ -126,6 +133,13 @@ const MultiVideoPlayer: React.FC = () => {
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
       </div>
+
+      {/* Video File Importer */}
+      <VideoFileImporter
+        videoConfigs={videoConfigs}
+        loadedVideos={loadedVideos}
+        onVideoLoad={handleVideoLoad}
+      />
 
       {/* Video Grid */}
       <div className="relative flex-1">
@@ -144,9 +158,9 @@ const MultiVideoPlayer: React.FC = () => {
               className="w-full h-full object-cover rounded-lg"
               poster="/api/placeholder/1920/1080"
               muted
-            >
-              <source src={videoConfigs.find(v => v.id === expandedVideo)?.src} type="video/mp4" />
-            </video>
+                >
+                  <source src={loadedVideos[expandedVideo] || videoConfigs.find(v => v.id === expandedVideo)?.src} type="video/mp4" />
+                </video>
             <div className="absolute bottom-4 left-4 bg-control-bg/80 px-3 py-1 rounded text-sm text-foreground">
               {videoConfigs.find(v => v.id === expandedVideo)?.title}
             </div>
@@ -169,7 +183,7 @@ const MultiVideoPlayer: React.FC = () => {
                   poster="/api/placeholder/640/480"
                   muted
                 >
-                  <source src={config.src} type="video/mp4" />
+                  <source src={loadedVideos[config.id] || config.src} type="video/mp4" />
                 </video>
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
                 <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
