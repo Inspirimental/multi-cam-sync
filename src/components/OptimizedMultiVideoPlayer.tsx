@@ -256,7 +256,9 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
     countedRef.current[videoId] = true;
 
     const el = (e.currentTarget as HTMLVideoElement | null);
-    if (videoId === MASTER_ID && el) setDuration(el.duration);
+    if (el && isFinite(el.duration) && el.duration > 0) {
+      setDuration(prev => (prev === 0 || el.duration < prev ? el.duration : prev));
+    }
 
     console.log('[video] loaded', videoId);
     setLoadedVideoCount(prev => {
