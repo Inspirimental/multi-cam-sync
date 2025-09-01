@@ -147,6 +147,32 @@ const MultiVideoPlayer: React.FC = () => {
     setIsPlaying(false);
   }, [loadedVideos]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevent default browser behavior for space and arrow keys
+      if (e.code === 'Space' || e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+        e.preventDefault();
+      }
+
+      switch (e.code) {
+        case 'Space':
+          handlePlayPause();
+          break;
+        case 'ArrowLeft':
+          handleFrameStep(-1);
+          break;
+        case 'ArrowRight':
+          handleFrameStep(1);
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handlePlayPause, handleFrameStep]);
+
   const formatTime = (time: number): string => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
