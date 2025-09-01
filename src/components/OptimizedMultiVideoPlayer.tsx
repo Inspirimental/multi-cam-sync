@@ -279,32 +279,7 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
     });
   }, [totalToLoad]);
 
-  useEffect(() => {
-    const handleTimeUpdate = () => {
-      const firstVideo = Object.values(videoRefs.current)[0];
-      if (firstVideo) {
-        setCurrentTime(firstVideo.currentTime);
-      }
-    };
-
-    const handleLoadedMetadata = () => {
-      const firstVideo = Object.values(videoRefs.current)[0];
-      if (firstVideo) {
-        setDuration(firstVideo.duration);
-      }
-    };
-
-    const firstVideo = Object.values(videoRefs.current)[0];
-    if (firstVideo) {
-      firstVideo.addEventListener('timeupdate', handleTimeUpdate);
-      firstVideo.addEventListener('loadedmetadata', handleLoadedMetadata);
-      
-      return () => {
-        firstVideo.removeEventListener('timeupdate', handleTimeUpdate);
-        firstVideo.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      };
-    }
-  }, []);
+  // Removed redundant firstVideo listeners to prevent desynchronization with expanded/master source
 
   useEffect(() => {
     Object.keys(loadedVideos).forEach((id) => {
@@ -342,25 +317,66 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
     };
   }, [handlePlayPause, handleFrameStep]);
 
-  // Playback watchdog to keep all videos running and in sync
+  // Auto-resume safeguards and synchronization helpers
+  useEffect(() => {
+    const attach = (v: HTMLVideoElement) => {
+      const onPause = () => {
+        if (isPlaying && !v.ended) {
+          v.play().catch(() => {});
+        }
+      };
+      const onWaiting = () => {
+        if (isPlaying && !v.ended) {
+          v.play().catch(() => {});
+        }
+      };
+      v.addEventListener('pause', onPause);
+      v.addEventListener('waiting', onWaiting);
+      return () => {
+        v.removeEventListener('pause', onPause);
+        v.removeEventListener('waiting', onWaiting);
+      };
+    };
+
+    const cleanups: Array<() => void> = [];
+    Object.values(videoRefs.current).forEach(v => { if (v) cleanups.push(attach(v)); });
+    return () => { cleanups.forEach(fn => fn()); };
+  }, [isPlaying, expandedVideo]);
+
+  // Nudge playback on expand/collapse (workaround for browser pausing when layout changes)
+  useEffect(() => {
+    if (!isPlaying) return;
+    const vids = (Object.values(videoRefs.current).filter(Boolean) as HTMLVideoElement[]);
+    const retry = (delay: number) => window.setTimeout(() => {
+      vids.forEach(v => { if (v.paused && !v.ended) v.play().catch(() => {}); });
+    }, delay);
+    const t1 = retry(0);
+    const t2 = retry(300);
+    const t3 = retry(1000);
+    return () => { window.clearTimeout(t1); window.clearTimeout(t2); window.clearTimeout(t3); };
+  }, [expandedVideo, isPlaying]);
+
+  // Playback watchdog to keep all videos running and in (loose) sync
   useEffect(() => {
     let interval: number | undefined;
     if (isPlaying) {
       interval = window.setInterval(() => {
-        const master = videoRefs.current[expandedVideo || MASTER_ID];
+        const masterId = expandedVideo || MASTER_ID;
+        const master = videoRefs.current[masterId];
         const t = master?.currentTime ?? currentTime;
-        Object.values(videoRefs.current).forEach(v => {
+        Object.entries(videoRefs.current).forEach(([id, v]) => {
           if (!v) return;
-          if (typeof t === 'number' && !Number.isNaN(t)) {
-            if (Math.abs((v.currentTime || 0) - t) > 0.2) {
+          if (v.seeking || v.readyState < 2) return;
+          if (typeof t === 'number' && !Number.isNaN(t) && id !== masterId) {
+            if (Math.abs((v.currentTime || 0) - t) > 0.33) {
               try { v.currentTime = t; } catch {}
             }
           }
-          if (v.paused) {
+          if (v.paused && !v.ended) {
             v.play().catch(() => {});
           }
         });
-      }, 500);
+      }, 800);
     }
     return () => {
       if (interval) window.clearInterval(interval);
