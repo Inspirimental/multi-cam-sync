@@ -18,8 +18,21 @@ import { VideoPlayerModal } from './components/VideoPlayerModal';
 />
 ```
 
-### 2. MultiVideoPlayer
-Core player component with synchronized playback and interactive controls
+### 2. OptimizedMultiVideoPlayer (Recommended)
+Core player component with performance-aware synchronization and adaptive streaming
+```tsx
+import OptimizedMultiVideoPlayer from './components/OptimizedMultiVideoPlayer';
+
+<OptimizedMultiVideoPlayer 
+  videoFiles={videoFiles}
+  onClose={handleClose}
+  streamName="Custom Stream Name"
+  forcePerformanceMode="high" // optional: 'high' | 'low'
+/>
+```
+
+### 3. MultiVideoPlayer (Legacy)
+Legacy component for compatibility - use OptimizedMultiVideoPlayer for new implementations
 ```tsx
 import MultiVideoPlayer from './components/MultiVideoPlayer';
 
@@ -31,6 +44,13 @@ import MultiVideoPlayer from './components/MultiVideoPlayer';
 ```
 
 ## Features
+
+### Performance Modes (New!)
+- **High Performance Mode**: Seamless video expansion with continuous background playback
+- **Compatibility Mode**: Resource-efficient with pause-resume logic for slower devices
+- **Adaptive Detection**: Automatically selects optimal mode based on device capabilities
+- **Manual Override**: Users can switch between performance modes via UI settings
+- **Performance Monitoring**: Real-time frame-drop detection with automatic fallback
 
 ### Video Synchronization
 - **Perfect Sync Start**: All 11 videos start simultaneously using Promise.all()
@@ -58,6 +78,10 @@ import MultiVideoPlayer from './components/MultiVideoPlayer';
 - **Error Handling**: Graceful handling of failed video loads
 - **Responsive Design**: Adapts to different screen sizes and orientations
 - **Performance Optimized**: Efficient handling of multiple simultaneous video streams
+- **Seamless Video Expansion**: Videos can be enlarged without reloading (High Performance mode)
+- **Background Playback**: Videos continue playing when not in focus to maintain synchronization
+- **Device Detection**: Automatic optimization based on CPU cores, RAM, and device type
+- **Performance Monitoring**: Real-time monitoring with automatic fallback to compatibility mode
 
 ### Approval Workflow
 The example includes approve/reject buttons. Customize these to your needs:
@@ -205,9 +229,11 @@ your-bucket/
 - **Large Files**: Consider video compression and progressive loading
 
 #### Performance Issues  
-- **Too Many Simultaneous Videos**: Modern browsers handle 8-12 streams well
-- **Mobile Limitations**: Consider reduced video count or quality on mobile
-- **Bandwidth**: Implement adaptive bitrate streaming for varying connections
+- **Device Limitations**: Automatically handled by performance mode detection
+- **High Performance Mode**: All videos run continuously - requires 4+ CPU cores and 4GB+ RAM
+- **Compatibility Mode**: Pauses background videos to save resources on slower devices
+- **Manual Override**: Users can force performance mode via settings panel
+- **Bandwidth**: Consider adaptive bitrate streaming for varying connections
 
 #### Browser Compatibility
 - **Safari**: May require specific video codecs (H.264)
@@ -225,11 +251,13 @@ your-bucket/
 ### Required Files to Transfer
 Copy these files to your AWS project:
 
-#### Core Components
-- `src/components/MultiVideoPlayer.tsx` - Main player component with sync controls
-- `src/components/VideoPlayerModal.tsx` - Modal wrapper component  
+#### Core Components (Updated)
+- `src/components/OptimizedMultiVideoPlayer.tsx` - **NEW**: Performance-aware player with adaptive streaming  
+- `src/components/MultiVideoPlayer.tsx` - Legacy player component (for compatibility)
+- `src/components/VideoPlayerModal.tsx` - Modal wrapper component (updated to use OptimizedMultiVideoPlayer)
 - `src/components/VideoStreamExample.tsx` - Integration example with working test data
 - `src/types/VideoTypes.ts` - TypeScript interfaces for video data structures
+- `src/utils/performanceDetection.ts` - **NEW**: Performance detection and monitoring utilities
 
 #### UI Components (shadcn/ui - copy all files)
 - `src/components/ui/dialog.tsx` - Modal dialog component
@@ -293,6 +321,14 @@ export const videoStreamService = {
 - Check **frame-by-frame** navigation precision
 
 ### Performance Benchmarks  
+#### High Performance Mode
 - **Recommended**: 11 videos × 100-500MB each (MP4, H.264)
-- **Network**: Minimum 25 Mbps for smooth 11-video playback
-- **Browser**: Modern browsers handle 8-12 simultaneous streams optimally
+- **Network**: Minimum 25 Mbps for smooth 11-video playbook
+- **Hardware**: 4+ CPU cores, 4GB+ RAM, modern GPU
+- **Browser**: Chrome 80+, Firefox 75+, Safari 13+
+
+#### Compatibility Mode  
+- **Network**: 15 Mbps minimum for synchronized playback
+- **Hardware**: 2+ CPU cores, 2GB+ RAM sufficient
+- **Mobile**: Optimized for phones and tablets
+- **Browser**: All modern browsers, IE11+ (with polyfills)

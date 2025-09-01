@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import MultiVideoPlayer from './MultiVideoPlayer';
+import OptimizedMultiVideoPlayer from './OptimizedMultiVideoPlayer';
 import { VideoPlayerProps } from '@/types/VideoTypes';
 
 interface VideoPlayerModalProps extends VideoPlayerProps {
@@ -24,7 +24,7 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
         <VisuallyHidden>
           <p id="video-player-description">Synchronized multi-camera video review modal with playback controls.</p>
         </VisuallyHidden>
-        <MultiVideoPlayer 
+        <OptimizedMultiVideoPlayer 
           videoFiles={videoFiles}
           onClose={onClose}
           streamName={streamName}
