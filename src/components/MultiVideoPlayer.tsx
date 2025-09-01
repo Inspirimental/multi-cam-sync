@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Play, Pause, SkipBack, SkipForward, ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import VideoFileImporter from './VideoFileImporter';
+import { VideoPlayerProps, VideoFile } from '@/types/VideoTypes';
 
 interface VideoConfig {
   id: string;
@@ -13,7 +14,7 @@ interface VideoConfig {
   src: string;
 }
 
-const videoConfigs: VideoConfig[] = [
+const defaultVideoConfigs: VideoConfig[] = [
   { id: 'NCBSC_front', name: 'NCBSC_front.mp4', title: 'Front Camera', position: 'front', src: '/videos/NCBSC_front.mp4' },
   { id: 'TCBSC_back', name: 'TCBSC_back.mp4', title: 'Back Camera', position: 'back', src: '/videos/TCBSC_back.mp4' },
   { id: 'TCMVC_back', name: 'TCMVC_back.mp4', title: 'Back Center', position: 'back', src: '/videos/TCMVC_back.mp4' },
@@ -26,9 +27,18 @@ const videoConfigs: VideoConfig[] = [
   { id: 'WCNVC_front', name: 'WCNVC_front.mp4', title: 'Wide Front', position: 'front', src: '/videos/WCNVC_front.mp4' },
   { id: 'WCWVC_front', name: 'WCWVC_front.mp4', title: 'Wide Center', position: 'front', src: '/videos/WCWVC_front.mp4' },
 ];
-const MASTER_ID = videoConfigs[0].id;
 
-const MultiVideoPlayer: React.FC = () => {
+const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({ 
+  videoFiles = {}, 
+  onClose, 
+  streamName = "Vehicle Camera Monitor" 
+}) => {
+  // Merge external video files with default config
+  const videoConfigs = defaultVideoConfigs.map(config => ({
+    ...config,
+    src: videoFiles[config.id] || config.src
+  }));
+  const MASTER_ID = videoConfigs[0].id;
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -206,18 +216,30 @@ const MultiVideoPlayer: React.FC = () => {
     <div className="w-full min-h-screen bg-background p-4 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Vehicle Camera Monitor</h1>
+        <h1 className="text-2xl font-bold text-foreground">{streamName}</h1>
+        {onClose && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="bg-control-bg/80 hover:bg-control-hover text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
         <div className="text-sm text-muted-foreground">
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
       </div>
 
-      {/* Video File Importer */}
-      <VideoFileImporter
-        videoConfigs={videoConfigs}
-        loadedVideos={loadedVideos}
-        onVideoLoad={handleVideoLoad}
-      />
+      {/* Video File Importer - Only show if no external video files provided */}
+      {Object.keys(videoFiles).length === 0 && (
+        <VideoFileImporter
+          videoConfigs={videoConfigs}
+          loadedVideos={loadedVideos}
+          onVideoLoad={handleVideoLoad}
+        />
+      )}
 
       {/* Video Grid */}
       <div className="relative flex-1">
