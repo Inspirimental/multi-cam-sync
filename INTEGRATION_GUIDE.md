@@ -61,6 +61,24 @@ const videoFiles = {
 };
 ```
 
+### Test Data Example
+The current implementation uses real test videos from `http://sharing.timbeck.de/` for immediate testing:
+```typescript
+const testVideoFiles = {
+  'NCBSC_front': 'http://sharing.timbeck.de/NCBSC_front.mp4',
+  'TCBSC_back': 'http://sharing.timbeck.de/TCBSC_back.mp4',
+  'TCMVC_back': 'http://sharing.timbeck.de/TCMVC_back.mp4',
+  'NLBSC_left': 'http://sharing.timbeck.de/NLBSC_left.mp4',
+  'NLMVC_back_left': 'http://sharing.timbeck.de/NLMVC_back_left.mp4',
+  'NLMVC_front_left': 'http://sharing.timbeck.de/NLMVC_front_left.mp4',
+  'NRBSC_right': 'http://sharing.timbeck.de/NRBSC_right.mp4',
+  'NRMVC_back_right': 'http://sharing.timbeck.de/NRMVC_back_right.mp4',
+  'NRMVC_front_right': 'http://sharing.timbeck.de/NRMVC_front_right.mp4',
+  'WCNVC_front': 'http://sharing.timbeck.de/WCNVC_front.mp4',
+  'WCWVC_front': 'http://sharing.timbeck.de/WCWVC_front.mp4',
+};
+```
+
 ## Integration Steps
 
 ### 1. Replace Mock Data
