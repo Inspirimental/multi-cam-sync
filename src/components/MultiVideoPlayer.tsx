@@ -358,7 +358,7 @@ const MultiVideoPlayer: React.FC = () => {
             </div>
 
             {/* Row 3: Left Side, Wide Front, Right Side */}
-            <div className="flex gap-3 h-24">
+            <div className="flex gap-3 h-20">
               <div className="w-32">
                 <Card
                   className={cn(
