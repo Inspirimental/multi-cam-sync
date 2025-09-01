@@ -1,98 +1,87 @@
-# Video Player Integration Guide
+# Video Review System - Integration Guide
 
 ## Overview
-This video player system has been refactored to be easily integrated into existing AWS applications. The player supports 11 synchronized video streams and can be embedded as a modal dialog.
+This video review system provides a complete solution for reviewing and approving multi-video streams. The system features a **page-based architecture** with a dedicated review page, optimized 11-video grid layout, and advanced video controls for frame-accurate analysis.
 
-## Key Components
+## Architecture Changes (v2.0)
 
-### 1. VideoPlayerModal
-Modal wrapper for the video player with enhanced accessibility
+### 🔄 New Page-Based Architecture  
+The system has moved from modal-based to **separate page navigation**:
+- **Main Overview Page** (`/`) - Lists all video streams with preview cards
+- **Dedicated Review Page** (`/video-review/:streamId`) - Full video analysis interface
+- **Individual Video Modals** - Expandable fullscreen view with complete controls
+
+### Key Benefits
+- **Better Performance**: Dedicated page resources for video processing
+- **Improved UX**: Sticky navigation, more screen space, browser history support
+- **Enhanced Controls**: Frame-by-frame navigation, time jumping, progress seeking
+
+## Core Components (Updated)
+
+### 1. Video Review Page (NEW)
+Main component for video stream analysis with sticky header and navigation
 ```tsx
-import { VideoPlayerModal } from './components/VideoPlayerModal';
+// Route: /video-review/:streamId
+import VideoReview from './pages/VideoReview';
 
-<VideoPlayerModal
-  isOpen={showPlayer}
-  onClose={() => setShowPlayer(false)}
-  videoFiles={videoFilesForThisStream}
-  streamName="2024-01-15 Vormittag"
-/>
+// Automatic routing via React Router
+// Provides: Navigation, Approve/Reject buttons, Full video interface
 ```
 
-### 2. OptimizedMultiVideoPlayer (Recommended)
-Core player component with performance-aware synchronization and adaptive streaming
+### 2. OptimizedMultiVideoPlayer (Enhanced)
+Core 11-video grid player with intelligent layout arrangement
 ```tsx
 import OptimizedMultiVideoPlayer from './components/OptimizedMultiVideoPlayer';
 
 <OptimizedMultiVideoPlayer 
   videoFiles={videoFiles}
   onClose={handleClose}
-  streamName="Custom Stream Name"
-  forcePerformanceMode="high" // optional: 'high' | 'low'
+  streamName="Stream Name"
 />
 ```
 
-### 3. MultiVideoPlayer (Legacy)
-Legacy component for compatibility - use OptimizedMultiVideoPlayer for new implementations
+### 3. VideoCard with Modal Controls (Enhanced)  
+Individual video components with expandable fullscreen modals
 ```tsx
-import MultiVideoPlayer from './components/MultiVideoPlayer';
+import { VideoCard } from './components/VideoCard';
 
-<MultiVideoPlayer 
-  videoFiles={videoFiles}
-  onClose={handleClose}
-  streamName="Custom Stream Name"
-/>
+// Features: Click to expand, full video controls in modal
+// Controls: Play/Pause, Frame navigation, Time jumping, Progress seeking
 ```
 
-## Features
-
-### Performance Modes (New!)
-- **High Performance Mode**: Seamless video expansion with continuous background playback
-- **Compatibility Mode**: Resource-efficient with pause-resume logic for slower devices
-- **Adaptive Detection**: Automatically selects optimal mode based on device capabilities
-- **Manual Override**: Users can switch between performance modes via UI settings
-- **Performance Monitoring**: Real-time frame-drop detection with automatic fallback
-
-### Video Synchronization
-- **Perfect Sync Start**: All 11 videos start simultaneously using Promise.all()
-- **Real-time Synchronization**: Videos stay in perfect sync during playback
-- **Async Loading**: Waits for all videos to be ready before starting playback
-- **Smart Resume**: Maintains sync when pausing/resuming
-- **Smart Synchronization**: Automatically corrects time drift between videos
-
-### Interactive Controls
-- **Play/Pause**: Space bar or button with synchronized control
-- **Frame Navigation**: Left/Right arrows for frame-by-frame stepping  
-- **10-Second Seek**: Quick forward/backward buttons
-- **Interactive Progress Bar**: Click anywhere on the progress bar to jump to that position
-- **Individual Video Expansion**: Click any video to view it fullscreen
-- **Keyboard Shortcuts**: Space, Arrow keys for quick control
-
-### Progress Bar Features
-- **Click Navigation**: Click anywhere on the bar to jump to that time
-- **Hover Effects**: Visual feedback and tooltips
-- **Time Display**: Shows current time and total duration
-- **Smooth Animation**: Fluid progress updates with visual transitions
-- **Time Scrubbing**: Drag or click the progress bar for instant navigation
-
-### Advanced Features
-- **Error Handling**: Graceful handling of failed video loads
-- **Responsive Design**: Adapts to different screen sizes and orientations
-- **Performance Optimized**: Efficient handling of multiple simultaneous video streams
-- **Seamless Video Expansion**: Videos can be enlarged without reloading (High Performance mode)
-- **Background Playback**: Videos continue playing when not in focus to maintain synchronization
-- **Device Detection**: Automatic optimization based on CPU cores, RAM, and device type
-- **Performance Monitoring**: Real-time monitoring with automatic fallback to compatibility mode
-
-### Approval Workflow
-The example includes approve/reject buttons. Customize these to your needs:
+### 4. Navigation Integration
 ```tsx
-const handleApprove = async (streamId: string) => {
-  await updateStreamStatus(streamId, 'approved');
-  setStreams(prev => prev.map(stream => 
-    stream.id === streamId ? { ...stream, status: 'approved' } : stream
-  ));
-};
+import VideoStreamExample from './components/VideoStreamExample';
+
+// Provides: Stream list, navigation to review pages
+// Usage: Replace with your actual API data
 ```
+
+## Enhanced Features (v2.0)
+
+### 🎮 Advanced Video Controls (Modal)
+When a video is expanded to fullscreen modal:
+- **Play/Pause Control**: Space bar or button
+- **Frame Navigation**: Left/Right arrows (1/30 second precision)  
+- **10-Second Jumping**: Fast forward/backward buttons
+- **Interactive Progress Bar**: Click anywhere to jump to time
+- **Time Display**: Current time / Total duration
+- **Close Button**: Return to grid view
+
+### 🎯 Optimized Video Layout
+**Intelligent 4-Row Grid System**:
+```
+Row 1: [Wide Center] [Wide Front]     # Side-by-side, reduced size
+Row 2: [Front] [Back]                 # Centered, standard size  
+Row 3: [Left] [Back Center] [Right]   # Evenly distributed
+Row 4: [Back Left] [Back Cam] [Back Right] # Bottom row
+```
+
+### 🚀 Performance & Synchronization  
+- **Perfect Sync Start**: All videos synchronized using Promise.all()
+- **Adaptive Performance**: Automatic device capability detection
+- **Smart Resource Management**: Background/foreground video optimization
+- **Error Recovery**: Graceful handling of failed video loads
 
 ## Data Structure
 
@@ -143,45 +132,100 @@ const testVideoFiles = {
 };
 ```
 
-## Integration Steps
+## Integration Steps (Updated for v2.0)
 
-### 1. Replace Mock Data
-In your existing list component, replace the VideoStreamExample with your real API data:
+### 1. Setup React Router (Required)
+The new page-based architecture requires React Router setup:
 
 ```tsx
-// Your existing list component
-const YourStreamList = () => {
+// App.tsx
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Index from './pages/Index';
+import VideoReview from './pages/VideoReview';
+import NotFound from './pages/NotFound';
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/video-review/:streamId" element={<VideoReview />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
+  );
+}
+```
+
+### 2. Replace Mock Data with Real API
+Replace VideoStreamExample with your actual API integration:
+
+```tsx
+// Your main streams list page
+import { useNavigate } from 'react-router-dom';
+
+const YourStreamsList = () => {
   const [streams, setStreams] = useState<VideoStream[]>([]);
-  const [selectedStream, setSelectedStream] = useState<VideoStream | null>(null);
+  const navigate = useNavigate();
   
-  // Fetch your streams from API
   useEffect(() => {
+    // Fetch your real streams from API
     fetchStreamsFromAPI().then(setStreams);
   }, []);
 
+  const handleReviewStream = (streamId: string) => {
+    // Navigate to dedicated review page
+    navigate(`/video-review/${streamId}`);
+  };
+
   return (
-    <div>
+    <div className="grid gap-4">
       {streams.map(stream => (
-        <div key={stream.id}>
-          <Button onClick={() => setSelectedStream(stream)}>
-            <Play /> Review {stream.name}
-          </Button>
-        </div>
+        <Card key={stream.id} className="p-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3>{stream.name}</h3>
+              <p className="text-sm text-muted-foreground">{stream.date}</p>
+            </div>
+            <Button onClick={() => handleReviewStream(stream.id)}>
+              <Play className="mr-2 h-4 w-4" />
+              Review Videos
+            </Button>
+          </div>
+        </Card>
       ))}
-      
-      {/* Video Player Modal */}
-      <VideoPlayerModal
-        isOpen={!!selectedStream}
-        onClose={() => setSelectedStream(null)}
-        videoFiles={selectedStream?.videoFiles || {}}
-        streamName={selectedStream?.name}
-      />
     </div>
   );
 };
 ```
 
-### 2. AWS S3 Integration
+### 3. Update Video Review Page Integration
+Customize the VideoReview page for your workflow:
+
+```tsx
+// pages/VideoReview.tsx - Customize approval workflow
+const handleApprove = async () => {
+  try {
+    await videoStreamService.updateStreamStatus(streamId!, 'approved');
+    toast.success('Stream approved successfully');
+    navigate('/'); // Return to main list
+  } catch (error) {
+    toast.error('Failed to approve stream');
+  }
+};
+
+const handleReject = async () => {
+  try {
+    await videoStreamService.updateStreamStatus(streamId!, 'rejected');
+    toast.success('Stream rejected');
+    navigate('/');
+  } catch (error) {
+    toast.error('Failed to reject stream');
+  }
+};
+```
+
+### 4. AWS S3 Integration
 Ensure your video URLs are accessible from the browser:
 - **HTTPS Required**: Video URLs MUST use HTTPS protocol (not HTTP) to work in production environments
 - **CORS Configuration**: Configure CORS on your S3 bucket to allow requests from your app domain
@@ -204,7 +248,7 @@ Example CORS configuration for S3:
 }
 ```
 
-### 3. Video File Organization
+### 5. Video File Organization
 Organize your S3 structure like:
 ```
 your-bucket/
@@ -218,55 +262,32 @@ your-bucket/
     ...
 ```
 
-
-## Troubleshooting
-
-### Common Issues
-
-#### Videos Not Loading
-- **Mixed Content Error**: Ensure all video URLs use HTTPS protocol
-- **Network Issues**: Check video URLs are accessible from browser
-- **Large Files**: Consider video compression and progressive loading
-
-#### Performance Issues  
-- **Device Limitations**: Automatically handled by performance mode detection
-- **High Performance Mode**: All videos run continuously - requires 4+ CPU cores and 4GB+ RAM
-- **Compatibility Mode**: Pauses background videos to save resources on slower devices
-- **Manual Override**: Users can force performance mode via settings panel
-- **Bandwidth**: Consider adaptive bitrate streaming for varying connections
-
-#### Browser Compatibility
-- **Safari**: May require specific video codecs (H.264)
-- **Firefox**: Check autoplay policies and user interaction requirements
-- **Chrome**: Verify security policies
-
-### Debug Steps
-1. Check browser console for network errors
-2. Test individual video URLs in browser 
-3. Check network tab for failed video requests
-4. Test with smaller video files first
-
-## Deployment to AWS
+## Deployment to AWS (Updated v2.0)
 
 ### Required Files to Transfer
 Copy these files to your AWS project:
 
+#### Page Components (NEW Architecture)
+- `src/pages/Index.tsx` - Main streams overview page
+- `src/pages/VideoReview.tsx` - **NEW**: Dedicated video review page with sticky navigation
+- `src/pages/NotFound.tsx` - 404 error page for routing
+- `src/App.tsx` - **UPDATED**: Router configuration for new page structure
+
 #### Core Components (Updated)
-- `src/components/OptimizedMultiVideoPlayer.tsx` - **NEW**: Performance-aware player with adaptive streaming  
-- `src/components/MultiVideoPlayer.tsx` - Legacy player component (for compatibility)
-- `src/components/VideoPlayerModal.tsx` - Modal wrapper component (updated to use OptimizedMultiVideoPlayer)
-- `src/components/VideoStreamExample.tsx` - Integration example with working test data
+- `src/components/OptimizedMultiVideoPlayer.tsx` - **ENHANCED**: 11-video grid with optimized layout
+- `src/components/VideoCard.tsx` - **ENHANCED**: Individual video cards with modal controls
+- `src/components/VideoStreamExample.tsx` - Navigation integration example
 - `src/types/VideoTypes.ts` - TypeScript interfaces for video data structures
-- `src/utils/performanceDetection.ts` - **NEW**: Performance detection and monitoring utilities
+- `src/utils/performanceDetection.ts` - Performance detection utilities
 
 #### UI Components (shadcn/ui - copy all files)
-- `src/components/ui/dialog.tsx` - Modal dialog component
+- `src/components/ui/dialog.tsx` - Modal dialog component  
 - `src/components/ui/button.tsx` - Button component with variants
 - `src/components/ui/card.tsx` - Card layout component
 - `src/lib/utils.ts` - Utility functions for styling
 
-#### Optional (if using file import feature)
-- `src/components/VideoFileImporter.tsx` - Local video file upload functionality
+#### Optional Components
+- `src/components/VideoFileImporter.tsx` - Local video file upload functionality (if needed)
 
 ### Environment Setup
 The player requires these dependencies:

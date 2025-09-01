@@ -1,73 +1,125 @@
-# Welcome to your Lovable project
+# Video Review System
 
-## Project info
+Ein professionelles System zur Überprüfung und Genehmigung von Multi-Video-Streams mit optimierter Benutzeroberfläche und präzisen Steuerungselementen.
+
+## Projektübersicht
 
 **URL**: https://lovable.dev/projects/5f5d362e-b93a-4794-8256-46bc9b4f15da
 
-## How can I edit this code?
+Dieses System ermöglicht die gleichzeitige Wiedergabe und Bewertung von 11 synchronisierten Video-Streams in einem intelligenten Layout mit separaten Seiten für Übersicht und detaillierte Bewertung.
 
-There are several ways of editing your application.
+## Hauptfunktionen
 
-**Use Lovable**
+### 🎥 Multi-Video-System
+- **11 synchronisierte Video-Streams** in optimiertem Grid-Layout
+- **Separate Bewertungsseite** für fokussierte Videoanalyse  
+- **Intelligente Layout-Anordnung** mit reduzierten Größen für Wide Center/Front Videos
+- **Frame-für-Frame Navigation** für präzise Videoanalyse
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/5f5d362e-b93a-4794-8256-46bc9b4f15da) and start prompting.
+### 🎮 Erweiterte Video-Steuerung
+- **Modal-Video-Player** mit vollständigen Kontrollelementen
+- **Play/Pause** mit Echtzeit-Synchronisation
+- **10-Sekunden vor/zurück** für schnelle Navigation
+- **Frame-Navigation** (1/30 Sekunde Schritte)
+- **Interaktiver Fortschrittsbalken** mit Zeitanzeige
+- **Vollbild-Modus** für einzelne Videos
 
-Changes made via Lovable will be committed automatically to this repo.
+### 📱 Moderne Benutzeroberfläche
+- **Responsive Design** für alle Bildschirmgrößen
+- **Sticky Header** mit Navigation und Aktions-Buttons
+- **Optimierte Performance** mit adaptiver Ressourcenverwaltung
+- **Intuitive Tastaturkürzel** (Leertaste, Pfeiltasten)
 
-**Use your preferred IDE**
+## Technologie-Stack
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Frontend**: React 18+ mit TypeScript
+- **Styling**: Tailwind CSS mit shadcn/ui Komponenten
+- **Build-Tool**: Vite für schnelle Entwicklung
+- **Icons**: Lucide React für moderne Icon-Bibliothek
+- **Routing**: React Router für Seitennavigation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Architektur
 
-Follow these steps:
+### Haupt-Komponenten
+```
+src/
+├── pages/
+│   ├── Index.tsx          # Haupt-Übersichtsseite mit Video-Streams
+│   └── VideoReview.tsx    # Separate Bewertungsseite für Video-Analyse
+├── components/
+│   ├── OptimizedMultiVideoPlayer.tsx  # Kern-Player mit 11-Video-Grid
+│   ├── VideoCard.tsx                  # Einzelne Video-Komponente mit Modal
+│   └── VideoStreamExample.tsx         # Demo-Daten und Navigation
+└── types/
+    └── VideoTypes.ts                   # TypeScript Interfaces
+```
+
+### Routing-System
+- `/` - Hauptseite mit Video-Stream-Übersicht
+- `/video-review/:streamId` - Detaillierte Bewertungsseite
+
+## Video-Layout
+
+Das System verwendet ein intelligentes 4-Reihen-Layout:
+
+**Reihe 1**: Wide Center und Wide Front (nebeneinander, reduzierte Größe)
+**Reihe 2**: Front und Back (zentriert)  
+**Reihe 3**: Left Side, Back Center, Right Side (gleichmäßig verteilt)
+**Reihe 4**: Back Left, Back Camera, Back Right (untere Reihe)
+
+## Installation und Entwicklung
+
+### Voraussetzungen
+- Node.js & npm ([Installation mit nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
+- Moderne Browser-Unterstützung (Chrome 80+, Firefox 75+, Safari 13+)
+
+### Lokale Entwicklung
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Repository klonen
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# In Projektverzeichnis wechseln
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Abhängigkeiten installieren
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Entwicklungsserver starten
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Bearbeitung in Lovable
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Besuche einfach das [Lovable Project](https://lovable.dev/projects/5f5d362e-b93a-4794-8256-46bc9b4f15da) und beginne mit der Eingabe von Änderungswünschen.
 
-**Use GitHub Codespaces**
+Alle Änderungen über Lovable werden automatisch in dieses Repository übertragen.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Andere Bearbeitungsmöglichkeiten
 
-## What technologies are used for this project?
+- **Direkt in GitHub**: Dateien direkt im Browser bearbeiten
+- **GitHub Codespaces**: Vollständige Entwicklungsumgebung im Browser
+- **Lokale IDE**: Klone das Repository und arbeite mit deiner bevorzugten IDE
 
-This project is built with:
+## Deployment
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Lovable Hosting
+Öffne [Lovable](https://lovable.dev/projects/5f5d362e-b93a-4794-8256-46bc9b4f15da) und klicke auf Share → Publish.
 
-## How can I deploy this project?
+### Custom Domain
+Um eine eigene Domain zu verbinden:
+- Navigiere zu Project > Settings > Domains
+- Klicke auf "Connect Domain"
+- [Detaillierte Anleitung](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
 
-Simply open [Lovable](https://lovable.dev/projects/5f5d362e-b93a-4794-8256-46bc9b4f15da) and click on Share -> Publish.
+## Demo-Daten
 
-## Can I connect a custom domain to my Lovable project?
+Das System verwendet Testvideos von `https://sharing.timbeck.de/` für sofortige Funktionsprüfung. Für die Produktion können diese durch echte Video-URLs ersetzt werden.
 
-Yes, you can!
+## Browser-Kompatibilität
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- **Chrome**: 80+ (empfohlen für beste Performance)
+- **Firefox**: 75+ 
+- **Safari**: 13+
+- **Edge**: 80+
+- **Mobile**: iOS Safari 13+, Chrome Mobile 80+
