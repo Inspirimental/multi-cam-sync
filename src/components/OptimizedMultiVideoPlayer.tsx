@@ -221,7 +221,7 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
   }, [MASTER_ID, expandedVideo, performanceMode, duration]);
 
   // Seamless video expansion for high performance mode
-  const handleVideoClick = useCallback((videoId: string) => {
+  const handleVideoClick = useCallback(async (videoId: string) => {
     const currentVideo = videoRefs.current[videoId];
     const videoCurrentTime = currentVideo?.currentTime || 0;
     const nextExpanded = expandedVideo === videoId ? null : videoId;
@@ -237,13 +237,26 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
 
     // Maintain playback state across all videos
     if (isPlaying) {
-      const playPromises = Object.values(videoRefs.current).map(v =>
-        v ? v.play().catch(err => {
+      // Ensure all videos are ready before playing
+      const videoElements = Object.values(videoRefs.current).filter(Boolean) as HTMLVideoElement[];
+      
+      // Wait for all videos to be ready
+      await Promise.all(videoElements.map(v => new Promise<void>((resolve) => {
+        if (v.readyState >= 2) return resolve();
+        const onCanPlay = () => { v.removeEventListener('canplay', onCanPlay); resolve(); };
+        v.addEventListener('canplay', onCanPlay);
+        setTimeout(resolve, 100); // Fallback timeout
+      })));
+
+      // Start all videos simultaneously
+      const playPromises = videoElements.map(v =>
+        v.play().catch(err => {
           console.warn('play failed', err);
           performanceMonitor.current?.reportFrameDrop();
-        }) : Promise.resolve()
+        })
       );
-      Promise.allSettled(playPromises);
+      
+      await Promise.allSettled(playPromises);
     } else {
       Object.values(videoRefs.current).forEach(v => v?.pause());
     }
