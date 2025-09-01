@@ -38,6 +38,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
 }) => {
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
+  const hasSrc = Boolean(src);
 
   // Helper: wait for an event with timeout
   const waitForEvent = (el: HTMLVideoElement, event: keyof HTMLMediaElementEventMap, timeout = 800) => {
@@ -140,7 +141,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
           'relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video',
           isPlaying && 'animate-pulse-border'
         )}
-        onClick={() => onVideoClick(id)}
+        onClick={() => hasSrc && onVideoClick(id)}
       >
         {/* Error State */}
         {hasError && (
@@ -152,22 +153,23 @@ export const VideoCard: React.FC<VideoCardProps> = ({
           </div>
         )}
 
-        <video
-          ref={setVideoRef(id)}
-          className="w-full h-full object-contain rounded-lg"
-          poster={thumbnail || undefined}
-          muted
-          preload="metadata"
-          playsInline
-          crossOrigin="anonymous"
-          onLoadedMetadata={handleOnLoadedMetadata}
-          onLoadedData={handleOnLoadedMetadata}
-          onTimeUpdate={onTimeUpdate}
-          onLoadStart={handleLoadStart}
-          onError={handleError}
-        >
-          <source src={src} type="video/mp4" />
-        </video>
+        {hasSrc && (
+          <video
+            ref={setVideoRef(id)}
+            className="w-full h-full object-contain rounded-lg"
+            poster={thumbnail || undefined}
+            muted
+            preload="metadata"
+            playsInline
+            onLoadedMetadata={handleOnLoadedMetadata}
+            onLoadedData={handleOnLoadedMetadata}
+            onTimeUpdate={onTimeUpdate}
+            onLoadStart={handleLoadStart}
+            onError={handleError}
+          >
+            <source src={src} type="video/mp4" />
+          </video>
+        )}
 
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />

@@ -52,6 +52,9 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
   const [videoTimes, setVideoTimes] = useState<{ [key: string]: number }>({});
   const [loadedVideoCount, setLoadedVideoCount] = useState(0);
   const [allVideosLoaded, setAllVideosLoaded] = useState(false);
+  const hasExternalVideos = Object.keys(videoFiles).length > 0;
+  const srcFor = useCallback((id: string) => loadedVideos[id] || (hasExternalVideos ? (videoConfigs.find(v => v.id === id)?.src || '') : ''), [loadedVideos, hasExternalVideos, videoConfigs]);
+  const totalToLoad = videoConfigs.filter(v => Boolean(srcFor(v.id))).length;
 
   const setVideoRef = useCallback((id: string) => (ref: HTMLVideoElement | null) => {
     videoRefs.current[id] = ref;
@@ -218,10 +221,10 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
     console.log('[video] loaded', videoId);
     setLoadedVideoCount(prev => {
       const newCount = prev + 1;
-      if (newCount >= videoConfigs.length) setAllVideosLoaded(true);
+      if (newCount >= totalToLoad) setAllVideosLoaded(true);
       return newCount;
     });
-  }, [MASTER_ID, videoConfigs.length]);
+  }, [MASTER_ID, totalToLoad]);
 
   // Count errors as finished to avoid blocking the loader forever
   const handleVideoError = useCallback((videoId: string) => (_e: React.SyntheticEvent<HTMLVideoElement>) => {
@@ -230,10 +233,10 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
     console.warn('[video] error', videoId);
     setLoadedVideoCount(prev => {
       const newCount = prev + 1;
-      if (newCount >= videoConfigs.length) setAllVideosLoaded(true);
+      if (newCount >= totalToLoad) setAllVideosLoaded(true);
       return newCount;
     });
-  }, [videoConfigs.length]);
+  }, [totalToLoad]);
 
   useEffect(() => {
     const handleTimeUpdate = () => {
@@ -269,6 +272,10 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
       const v = videoRefs.current[id];
       if (v) v.load();
     });
+    // Reset loading counters for the new selection
+    countedRef.current = {};
+    setLoadedVideoCount(0);
+    setAllVideosLoaded(Object.keys(loadedVideos).length === 0);
     setIsPlaying(false);
   }, [loadedVideos]);
 
@@ -330,9 +337,9 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
   return (
     <div className="w-full min-h-screen bg-background p-4 space-y-4">
       <LoadingModal 
-        isOpen={!allVideosLoaded}
+        isOpen={!allVideosLoaded && totalToLoad > 0}
         loadedVideos={loadedVideoCount}
-        totalVideos={videoConfigs.length}
+        totalVideos={totalToLoad}
       />
       
       {/* Header */}
@@ -371,6 +378,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               muted
               preload="metadata"
               playsInline
+              crossOrigin="anonymous"
               onLoadedMetadata={(e) => {
                 const el = (e.currentTarget as HTMLVideoElement | null);
                 if (!el) return;
@@ -382,7 +390,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               }}
                onTimeUpdate={onTimeUpdateFor(expandedVideo!)}
             >
-              <source src={loadedVideos[expandedVideo] || videoConfigs.find(v => v.id === expandedVideo)?.src} type="video/mp4" />
+              <source src={expandedVideo ? srcFor(expandedVideo) : ''} type="video/mp4" />
             </video>
             <div className="absolute bottom-4 left-4 bg-control-bg/80 px-3 py-1 rounded text-sm text-foreground">
               {videoConfigs.find(v => v.id === expandedVideo)?.title}
@@ -395,7 +403,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               <VideoCard
                 id="NLMVC_front_left"
                 title="Front Left"
-                src={loadedVideos['NLMVC_front_left'] || videoConfigs.find(v => v.id === 'NLMVC_front_left')?.src || ''}
+                src={srcFor('NLMVC_front_left')}
                 width="w-32"
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
@@ -414,7 +422,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               <VideoCard
                 id="NCBSC_front"
                 title="Front Camera"
-                src={loadedVideos['NCBSC_front'] || videoConfigs.find(v => v.id === 'NCBSC_front')?.src || ''}
+                src={srcFor('NCBSC_front')}
                 width="w-96"
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
@@ -433,7 +441,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               <VideoCard
                 id="NRMVC_front_right"
                 title="Front Right"
-                src={loadedVideos['NRMVC_front_right'] || videoConfigs.find(v => v.id === 'NRMVC_front_right')?.src || ''}
+                src={srcFor('NRMVC_front_right')}
                 width="w-32"
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
@@ -456,7 +464,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               <VideoCard
                 id="NLBSC_left"
                 title="Left Side"
-                src={loadedVideos['NLBSC_left'] || videoConfigs.find(v => v.id === 'NLBSC_left')?.src || ''}
+                src={srcFor('NLBSC_left')}
                 width="w-32"
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
@@ -475,7 +483,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               <VideoCard
                 id="WCWVC_front"
                 title="Wide Center"
-                src={loadedVideos['WCWVC_front'] || videoConfigs.find(v => v.id === 'WCWVC_front')?.src || ''}
+                src={srcFor('WCWVC_front')}
                 width="w-48"
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
@@ -494,7 +502,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               <VideoCard
                 id="WCNVC_front"
                 title="Wide Front"
-                src={loadedVideos['WCNVC_front'] || videoConfigs.find(v => v.id === 'WCNVC_front')?.src || ''}
+                src={srcFor('WCNVC_front')}
                 width="w-48"
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
@@ -513,7 +521,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               <VideoCard
                 id="NRBSC_right"
                 title="Right Side"
-                src={loadedVideos['NRBSC_right'] || videoConfigs.find(v => v.id === 'NRBSC_right')?.src || ''}
+                src={srcFor('NRBSC_right')}
                 width="w-32"
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
@@ -536,7 +544,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               <VideoCard
                 id="TCMVC_back"
                 title="Back Center"
-                src={loadedVideos['TCMVC_back'] || videoConfigs.find(v => v.id === 'TCMVC_back')?.src || ''}
+                src={srcFor('TCMVC_back')}
                 width="w-48"
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
@@ -559,7 +567,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               <VideoCard
                 id="NLMVC_back_left"
                 title="Back Left"
-                src={loadedVideos['NLMVC_back_left'] || videoConfigs.find(v => v.id === 'NLMVC_back_left')?.src || ''}
+                src={srcFor('NLMVC_back_left')}
                 width="w-32"
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
@@ -578,7 +586,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               <VideoCard
                 id="TCBSC_back"
                 title="Back Camera"
-                src={loadedVideos['TCBSC_back'] || videoConfigs.find(v => v.id === 'TCBSC_back')?.src || ''}
+                src={srcFor('TCBSC_back')}
                 width="w-96"
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
@@ -597,7 +605,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               <VideoCard
                 id="NRMVC_back_right"
                 title="Back Right"
-                src={loadedVideos['NRMVC_back_right'] || videoConfigs.find(v => v.id === 'NRMVC_back_right')?.src || ''}
+                src={srcFor('NRMVC_back_right')}
                 width="w-32"
                 isPlaying={isPlaying}
                 onVideoClick={handleVideoClick}
