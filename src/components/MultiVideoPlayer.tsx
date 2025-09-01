@@ -195,10 +195,12 @@ const MultiVideoPlayer: React.FC = () => {
               preload="metadata"
               playsInline
               onLoadedMetadata={(e) => {
-                if (expandedVideo === MASTER_ID) setDuration(e.currentTarget.duration);
+                const el = (e.currentTarget as HTMLVideoElement | null);
+                if (!el) return;
+                if (expandedVideo === MASTER_ID) setDuration(el.duration);
                 // Restore saved time position
-                if (videoTimes[expandedVideo]) {
-                  e.currentTarget.currentTime = videoTimes[expandedVideo];
+                if (videoTimes[expandedVideo] != null) {
+                  try { el.currentTime = videoTimes[expandedVideo]!; } catch {}
                 }
               }}
                onTimeUpdate={(e) => {
@@ -238,7 +240,9 @@ const MultiVideoPlayer: React.FC = () => {
                     preload="metadata"
                     playsInline
                     onLoadedMetadata={(e) => {
-                      if ('NLMVC_front_left' === MASTER_ID) setDuration(e.currentTarget.duration);
+                      const el = (e.currentTarget as HTMLVideoElement | null);
+                      if (!el) return;
+                      if ('NLMVC_front_left' === MASTER_ID) setDuration(el.duration);
                     }}
                      onTimeUpdate={(e) => {
                        if (e.currentTarget) {
@@ -288,7 +292,9 @@ const MultiVideoPlayer: React.FC = () => {
                     preload="metadata"
                     playsInline
                     onLoadedMetadata={(e) => {
-                      if ('NCBSC_front' === MASTER_ID) setDuration(e.currentTarget.duration);
+                      const el = (e.currentTarget as HTMLVideoElement | null);
+                      if (!el) return;
+                      if ('NCBSC_front' === MASTER_ID) setDuration(el.duration);
                     }}
                      onTimeUpdate={(e) => {
                        if (e.currentTarget) {
@@ -338,7 +344,9 @@ const MultiVideoPlayer: React.FC = () => {
                     preload="metadata"
                     playsInline
                     onLoadedMetadata={(e) => {
-                      if ('NRMVC_front_right' === MASTER_ID) setDuration(e.currentTarget.duration);
+                      const el = (e.currentTarget as HTMLVideoElement | null);
+                      if (!el) return;
+                      if ('NRMVC_front_right' === MASTER_ID) setDuration(el.duration);
                     }}
                      onTimeUpdate={(e) => {
                        if (e.currentTarget) {
@@ -392,7 +400,9 @@ const MultiVideoPlayer: React.FC = () => {
                     preload="metadata"
                     playsInline
                     onLoadedMetadata={(e) => {
-                      if ('NLBSC_left' === MASTER_ID) setDuration(e.currentTarget.duration);
+                      const el = (e.currentTarget as HTMLVideoElement | null);
+                      if (!el) return;
+                      if ('NLBSC_left' === MASTER_ID) setDuration(el.duration);
                     }}
                      onTimeUpdate={(e) => {
                        if (e.currentTarget) {
@@ -442,7 +452,9 @@ const MultiVideoPlayer: React.FC = () => {
                     preload="metadata"
                     playsInline
                     onLoadedMetadata={(e) => {
-                      if ('WCWVC_front' === MASTER_ID) setDuration(e.currentTarget.duration);
+                      const el = (e.currentTarget as HTMLVideoElement | null);
+                      if (!el) return;
+                      if ('WCWVC_front' === MASTER_ID) setDuration(el.duration);
                     }}
                      onTimeUpdate={(e) => {
                        if (e.currentTarget) {
@@ -492,7 +504,9 @@ const MultiVideoPlayer: React.FC = () => {
                     preload="metadata"
                     playsInline
                     onLoadedMetadata={(e) => {
-                      if ('WCNVC_front' === MASTER_ID) setDuration(e.currentTarget.duration);
+                      const el = (e.currentTarget as HTMLVideoElement | null);
+                      if (!el) return;
+                      if ('WCNVC_front' === MASTER_ID) setDuration(el.duration);
                     }}
                      onTimeUpdate={(e) => {
                        if (e.currentTarget) {
@@ -542,7 +556,9 @@ const MultiVideoPlayer: React.FC = () => {
                     preload="metadata"
                     playsInline
                     onLoadedMetadata={(e) => {
-                      if ('NRBSC_right' === MASTER_ID) setDuration(e.currentTarget.duration);
+                      const el = (e.currentTarget as HTMLVideoElement | null);
+                      if (!el) return;
+                      if ('NRBSC_right' === MASTER_ID) setDuration(el.duration);
                     }}
                      onTimeUpdate={(e) => {
                        if (e.currentTarget) {
@@ -596,7 +612,9 @@ const MultiVideoPlayer: React.FC = () => {
                     preload="metadata"
                     playsInline
                     onLoadedMetadata={(e) => {
-                      if ('TCMVC_back' === MASTER_ID) setDuration(e.currentTarget.duration);
+                      const el = (e.currentTarget as HTMLVideoElement | null);
+                      if (!el) return;
+                      if ('TCMVC_back' === MASTER_ID) setDuration(el.duration);
                     }}
                      onTimeUpdate={(e) => {
                        if (e.currentTarget) {
@@ -650,7 +668,9 @@ const MultiVideoPlayer: React.FC = () => {
                     preload="metadata"
                     playsInline
                     onLoadedMetadata={(e) => {
-                      if ('NLMVC_back_left' === MASTER_ID) setDuration(e.currentTarget.duration);
+                      const el = (e.currentTarget as HTMLVideoElement | null);
+                      if (!el) return;
+                      if ('NLMVC_back_left' === MASTER_ID) setDuration(el.duration);
                     }}
                      onTimeUpdate={(e) => {
                        if (e.currentTarget) {
@@ -700,7 +720,9 @@ const MultiVideoPlayer: React.FC = () => {
                     preload="metadata"
                     playsInline
                     onLoadedMetadata={(e) => {
-                      if ('TCBSC_back' === MASTER_ID) setDuration(e.currentTarget.duration);
+                      const el = (e.currentTarget as HTMLVideoElement | null);
+                      if (!el) return;
+                      if ('TCBSC_back' === MASTER_ID) setDuration(el.duration);
                     }}
                      onTimeUpdate={(e) => {
                        if (e.currentTarget) {
@@ -750,7 +772,9 @@ const MultiVideoPlayer: React.FC = () => {
                     preload="metadata"
                     playsInline
                     onLoadedMetadata={(e) => {
-                      if ('NRMVC_back_right' === MASTER_ID) setDuration(e.currentTarget.duration);
+                      const el = (e.currentTarget as HTMLVideoElement | null);
+                      if (!el) return;
+                      if ('NRMVC_back_right' === MASTER_ID) setDuration(el.duration);
                     }}
                      onTimeUpdate={(e) => {
                        if (e.currentTarget) {
