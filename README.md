@@ -27,7 +27,7 @@ Dieses System ermöglicht die gleichzeitige Wiedergabe und Bewertung von 11 sync
 ### 📱 Moderne Benutzeroberfläche
 - **Responsive Design** für alle Bildschirmgrößen
 - **Sticky Header** mit Navigation und Aktions-Buttons
-- **Optimierte Performance** mit adaptiver Ressourcenverwaltung
+- **High Performance** für flüssige Multi-Video-Wiedergabe
 - **Intuitive Tastaturkürzel** (Leertaste, Pfeiltasten)
 
 ## Technologie-Stack
@@ -71,7 +71,7 @@ Das System verwendet ein intelligentes 4-Reihen-Layout:
 
 ### Voraussetzungen
 - Node.js & npm ([Installation mit nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
-- Moderne Browser-Unterstützung (Chrome 80+, Firefox 75+, Safari 13+)
+- Moderner Browser für Multi-Video-Performance
 
 ### Lokale Entwicklung
 
@@ -116,10 +116,16 @@ Um eine eigene Domain zu verbinden:
 
 Das System verwendet Testvideos von `https://sharing.timbeck.de/` für sofortige Funktionsprüfung. Für die Produktion können diese durch echte Video-URLs ersetzt werden.
 
-## Browser-Kompatibilität
+## System-Anforderungen
 
-- **Chrome**: 80+ (empfohlen für beste Performance)
+### Browser-Support
+- **Chrome**: 80+
 - **Firefox**: 75+ 
 - **Safari**: 13+
 - **Edge**: 80+
 - **Mobile**: iOS Safari 13+, Chrome Mobile 80+
+
+### Empfohlene Hardware
+- **4+ CPU Kerne** für optimale Performance
+- **4GB+ RAM** für flüssige 11-Video-Wiedergabe
+- **Stabile Internetverbindung** (25+ Mbps empfohlen)
