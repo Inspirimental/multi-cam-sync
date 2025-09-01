@@ -16,7 +16,7 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0">
+      <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 overflow-y-auto">
         <MultiVideoPlayer 
           videoFiles={videoFiles}
           onClose={onClose}

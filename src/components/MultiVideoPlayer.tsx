@@ -217,16 +217,6 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">{streamName}</h1>
-        {onClose && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="bg-control-bg/80 hover:bg-control-hover text-foreground"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        )}
         <div className="text-sm text-muted-foreground">
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
