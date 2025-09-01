@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Maximize2, Play, Pause, X, Volume2, VolumeX } from 'lucide-react';
+import { Maximize2, Play, Pause, X, SkipBack, SkipForward, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface VideoCardProps {
@@ -43,8 +43,6 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(true);
   const hasSrc = Boolean(src);
 
   const formatTime = (timeInSeconds: number) => {
@@ -75,22 +73,34 @@ export const VideoCard: React.FC<VideoCardProps> = ({
     setCurrentTime(newTime);
   };
 
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const skip10SecondsBack = () => {
     const video = videoRefs.current[id];
     if (!video) return;
     
-    const newVolume = parseFloat(e.target.value);
-    video.volume = newVolume;
-    setVolume(newVolume);
-    setIsMuted(newVolume === 0);
+    video.currentTime = Math.max(0, video.currentTime - 10);
   };
 
-  const toggleMute = () => {
+  const skip10SecondsForward = () => {
     const video = videoRefs.current[id];
     if (!video) return;
     
-    video.muted = !video.muted;
-    setIsMuted(video.muted);
+    video.currentTime = Math.min(video.duration, video.currentTime + 10);
+  };
+
+  const frameBack = () => {
+    const video = videoRefs.current[id];
+    if (!video) return;
+    
+    // Assuming 30fps, one frame = 1/30 second
+    video.currentTime = Math.max(0, video.currentTime - (1/30));
+  };
+
+  const frameForward = () => {
+    const video = videoRefs.current[id];
+    if (!video) return;
+    
+    // Assuming 30fps, one frame = 1/30 second
+    video.currentTime = Math.min(video.duration, video.currentTime + (1/30));
   };
 
   const closeModal = () => {
@@ -284,7 +294,36 @@ export const VideoCard: React.FC<VideoCardProps> = ({
 
                   {/* Control Buttons and Time */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      {/* 10 seconds back */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-white hover:bg-white/20"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          skip10SecondsBack();
+                        }}
+                        title="10 Sekunden zurück"
+                      >
+                        <SkipBack className="h-4 w-4" />
+                      </Button>
+
+                      {/* Frame back */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-white hover:bg-white/20"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          frameBack();
+                        }}
+                        title="Ein Frame zurück"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+
+                      {/* Play/Pause */}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -297,27 +336,33 @@ export const VideoCard: React.FC<VideoCardProps> = ({
                         {isVideoPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
                       </Button>
 
+                      {/* Frame forward */}
                       <Button
                         variant="ghost"
                         size="icon"
                         className="text-white hover:bg-white/20"
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleMute();
+                          frameForward();
                         }}
+                        title="Ein Frame vor"
                       >
-                        {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+                        <ChevronRight className="h-4 w-4" />
                       </Button>
 
-                      <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        value={isMuted ? 0 : volume}
-                        onChange={handleVolumeChange}
-                        className="w-20 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer"
-                      />
+                      {/* 10 seconds forward */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-white hover:bg-white/20"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          skip10SecondsForward();
+                        }}
+                        title="10 Sekunden vor"
+                      >
+                        <SkipForward className="h-4 w-4" />
+                      </Button>
                     </div>
 
                     <div className="text-white text-sm">
