@@ -200,10 +200,10 @@ const MultiVideoPlayer: React.FC = () => {
             </div>
           </Card>
         ) : (
-          <div className="flex flex-col gap-3 h-full">
+          <div className="flex flex-col gap-2 h-full max-w-6xl mx-auto">
             {/* Row 1: Front Left, Front Camera, Front Right */}
-            <div className="grid grid-cols-[auto,1fr,auto] gap-2 items-center h-40">
-              <div className="w-24">
+            <div className="flex justify-center items-center gap-2 h-24">
+              <div className="w-32">
                 <Card
                   className={cn(
                     "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
@@ -240,46 +240,44 @@ const MultiVideoPlayer: React.FC = () => {
                   </Button>
                 </Card>
               </div>
-              <div className="flex justify-center flex-1">
-                <div className="w-64">
-                  <Card
-                    className={cn(
-                      "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-                      isPlaying && "animate-pulse-border"
-                    )}
-                    onClick={() => handleVideoClick('NCBSC_front')}
+              <div className="w-96">
+                <Card
+                  className={cn(
+                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
+                    isPlaying && "animate-pulse-border"
+                  )}
+                  onClick={() => handleVideoClick('NCBSC_front')}
+                >
+                  <video
+                    ref={setVideoRef('NCBSC_front')}
+                    className="w-full h-full object-contain rounded-lg"
+                    poster="/placeholder.svg"
+                    muted
+                    preload="metadata"
+                    playsInline
+                    onLoadedMetadata={(e) => {
+                      if ('NCBSC_front' === MASTER_ID) setDuration(e.currentTarget.duration);
+                    }}
+                    onTimeUpdate={(e) => {
+                      if ('NCBSC_front' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                    }}
                   >
-                    <video
-                      ref={setVideoRef('NCBSC_front')}
-                      className="w-full h-full object-contain rounded-lg"
-                      poster="/placeholder.svg"
-                      muted
-                      preload="metadata"
-                      playsInline
-                      onLoadedMetadata={(e) => {
-                        if ('NCBSC_front' === MASTER_ID) setDuration(e.currentTarget.duration);
-                      }}
-                      onTimeUpdate={(e) => {
-                        if ('NCBSC_front' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                      }}
-                    >
-                      <source src={loadedVideos['NCBSC_front'] || videoConfigs.find(v => v.id === 'NCBSC_front')?.src} type="video/mp4" />
-                    </video>
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
-                    <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
-                      Front Camera
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
-                    >
-                      <Maximize2 className="h-3 w-3" />
-                    </Button>
-                  </Card>
-                </div>
+                    <source src={loadedVideos['NCBSC_front'] || videoConfigs.find(v => v.id === 'NCBSC_front')?.src} type="video/mp4" />
+                  </video>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
+                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
+                    Front Camera
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
+                  >
+                    <Maximize2 className="h-3 w-3" />
+                  </Button>
+                </Card>
               </div>
-              <div className="w-24">
+              <div className="w-32">
                 <Card
                   className={cn(
                     "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
@@ -318,9 +316,9 @@ const MultiVideoPlayer: React.FC = () => {
               </div>
             </div>
 
-            {/* Row 2: Wide Center and Wide Front (side by side) */}
-            <div className="flex justify-center gap-4 h-20">
-              <div className="w-56">
+            {/* Row 2: Wide Center and Wide Front */}
+            <div className="flex justify-center gap-2 h-16">
+              <div className="w-48">
                 <Card
                   className={cn(
                     "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
@@ -357,7 +355,7 @@ const MultiVideoPlayer: React.FC = () => {
                   </Button>
                 </Card>
               </div>
-              <div className="w-56">
+              <div className="w-48">
                 <Card
                   className={cn(
                     "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
@@ -397,8 +395,8 @@ const MultiVideoPlayer: React.FC = () => {
             </div>
 
             {/* Row 3: Left Side and Right Side */}
-            <div className="grid grid-cols-[auto,1fr,auto] gap-2 items-center h-20">
-              <div className="w-24">
+            <div className="flex justify-between items-center h-16">
+              <div className="w-32">
                 <Card
                   className={cn(
                     "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
@@ -435,8 +433,7 @@ const MultiVideoPlayer: React.FC = () => {
                   </Button>
                 </Card>
               </div>
-              <div></div>
-              <div className="w-24">
+              <div className="w-32">
                 <Card
                   className={cn(
                     "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
@@ -475,9 +472,9 @@ const MultiVideoPlayer: React.FC = () => {
               </div>
             </div>
 
-            {/* Row 4: Back Center (centered and half size) */}
-            <div className="flex justify-center h-20">
-              <div className="w-56">
+            {/* Row 4: Back Center */}
+            <div className="flex justify-center h-16">
+              <div className="w-48">
                 <Card
                   className={cn(
                     "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
@@ -517,8 +514,8 @@ const MultiVideoPlayer: React.FC = () => {
             </div>
 
             {/* Row 5: Back Left, Back Camera, Back Right */}
-            <div className="grid grid-cols-[auto,1fr,auto] gap-2 items-center h-40">
-              <div className="w-24">
+            <div className="flex justify-center items-center gap-2 h-24">
+              <div className="w-32">
                 <Card
                   className={cn(
                     "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
@@ -555,46 +552,44 @@ const MultiVideoPlayer: React.FC = () => {
                   </Button>
                 </Card>
               </div>
-              <div className="flex justify-center flex-1">
-                <div className="w-64">
-                  <Card
-                    className={cn(
-                      "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
-                      isPlaying && "animate-pulse-border"
-                    )}
-                    onClick={() => handleVideoClick('TCBSC_back')}
+              <div className="w-96">
+                <Card
+                  className={cn(
+                    "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
+                    isPlaying && "animate-pulse-border"
+                  )}
+                  onClick={() => handleVideoClick('TCBSC_back')}
+                >
+                  <video
+                    ref={setVideoRef('TCBSC_back')}
+                    className="w-full h-full object-contain rounded-lg"
+                    poster="/placeholder.svg"
+                    muted
+                    preload="metadata"
+                    playsInline
+                    onLoadedMetadata={(e) => {
+                      if ('TCBSC_back' === MASTER_ID) setDuration(e.currentTarget.duration);
+                    }}
+                    onTimeUpdate={(e) => {
+                      if ('TCBSC_back' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
+                    }}
                   >
-                    <video
-                      ref={setVideoRef('TCBSC_back')}
-                      className="w-full h-full object-contain rounded-lg"
-                      poster="/placeholder.svg"
-                      muted
-                      preload="metadata"
-                      playsInline
-                      onLoadedMetadata={(e) => {
-                        if ('TCBSC_back' === MASTER_ID) setDuration(e.currentTarget.duration);
-                      }}
-                      onTimeUpdate={(e) => {
-                        if ('TCBSC_back' === MASTER_ID) setCurrentTime(e.currentTarget.currentTime);
-                      }}
-                    >
-                      <source src={loadedVideos['TCBSC_back'] || videoConfigs.find(v => v.id === 'TCBSC_back')?.src} type="video/mp4" />
-                    </video>
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
-                    <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
-                      Back Camera
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
-                    >
-                      <Maximize2 className="h-3 w-3" />
-                    </Button>
-                  </Card>
-                </div>
+                    <source src={loadedVideos['TCBSC_back'] || videoConfigs.find(v => v.id === 'TCBSC_back')?.src} type="video/mp4" />
+                  </video>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
+                  <div className="absolute bottom-2 left-2 bg-control-bg/80 px-2 py-1 rounded text-xs text-foreground">
+                    Back Camera
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-control-bg/80 hover:bg-control-hover"
+                  >
+                    <Maximize2 className="h-3 w-3" />
+                  </Button>
+                </Card>
               </div>
-              <div className="w-24">
+              <div className="w-32">
                 <Card
                   className={cn(
                     "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
