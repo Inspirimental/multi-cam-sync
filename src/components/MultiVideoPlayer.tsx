@@ -222,6 +222,17 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
     });
   }, [MASTER_ID, videoConfigs.length]);
 
+  // Count errors as finished to avoid blocking the loader forever
+  const handleVideoError = useCallback((videoId: string) => (_e: React.SyntheticEvent<HTMLVideoElement>) => {
+    setLoadedVideoCount(prev => {
+      const newCount = prev + 1;
+      if (newCount >= videoConfigs.length) {
+        setAllVideosLoaded(true);
+      }
+      return newCount;
+    });
+  }, [videoConfigs.length]);
+
   useEffect(() => {
     const handleTimeUpdate = () => {
       const firstVideo = Object.values(videoRefs.current)[0];
@@ -388,6 +399,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('NLMVC_front_left')}
                 onLoadedMetadata={handleVideoLoadedMetadata('NLMVC_front_left')}
+                onError={handleVideoError('NLMVC_front_left')}
                 onLoadStart={() => {
                   if (videoTimes['NLMVC_front_left'] && videoRefs.current['NLMVC_front_left']) {
                     videoRefs.current['NLMVC_front_left']!.currentTime = videoTimes['NLMVC_front_left'];
@@ -406,6 +418,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('NCBSC_front')}
                 onLoadedMetadata={handleVideoLoadedMetadata('NCBSC_front')}
+                onError={handleVideoError('NCBSC_front')}
                 onLoadStart={() => {
                   if (videoTimes['NCBSC_front'] && videoRefs.current['NCBSC_front']) {
                     videoRefs.current['NCBSC_front']!.currentTime = videoTimes['NCBSC_front'];
@@ -424,6 +437,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('NRMVC_front_right')}
                 onLoadedMetadata={handleVideoLoadedMetadata('NRMVC_front_right')}
+                onError={handleVideoError('NRMVC_front_right')}
                 onLoadStart={() => {
                   if (videoTimes['NRMVC_front_right'] && videoRefs.current['NRMVC_front_right']) {
                     videoRefs.current['NRMVC_front_right']!.currentTime = videoTimes['NRMVC_front_right'];
@@ -446,6 +460,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('NLBSC_left')}
                 onLoadedMetadata={handleVideoLoadedMetadata('NLBSC_left')}
+                onError={handleVideoError('NLBSC_left')}
                 onLoadStart={() => {
                   if (videoTimes['NLBSC_left'] && videoRefs.current['NLBSC_left']) {
                     videoRefs.current['NLBSC_left']!.currentTime = videoTimes['NLBSC_left'];
@@ -464,6 +479,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('WCWVC_front')}
                 onLoadedMetadata={handleVideoLoadedMetadata('WCWVC_front')}
+                onError={handleVideoError('WCWVC_front')}
                 onLoadStart={() => {
                   if (videoTimes['WCWVC_front'] && videoRefs.current['WCWVC_front']) {
                     videoRefs.current['WCWVC_front']!.currentTime = videoTimes['WCWVC_front'];
@@ -482,6 +498,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('WCNVC_front')}
                 onLoadedMetadata={handleVideoLoadedMetadata('WCNVC_front')}
+                onError={handleVideoError('WCNVC_front')}
                 onLoadStart={() => {
                   if (videoTimes['WCNVC_front'] && videoRefs.current['WCNVC_front']) {
                     videoRefs.current['WCNVC_front']!.currentTime = videoTimes['WCNVC_front'];
@@ -500,6 +517,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('NRBSC_right')}
                 onLoadedMetadata={handleVideoLoadedMetadata('NRBSC_right')}
+                onError={handleVideoError('NRBSC_right')}
                 onLoadStart={() => {
                   if (videoTimes['NRBSC_right'] && videoRefs.current['NRBSC_right']) {
                     videoRefs.current['NRBSC_right']!.currentTime = videoTimes['NRBSC_right'];
@@ -522,6 +540,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('TCMVC_back')}
                 onLoadedMetadata={handleVideoLoadedMetadata('TCMVC_back')}
+                onError={handleVideoError('TCMVC_back')}
                 onLoadStart={() => {
                   if (videoTimes['TCMVC_back'] && videoRefs.current['TCMVC_back']) {
                     videoRefs.current['TCMVC_back']!.currentTime = videoTimes['TCMVC_back'];
@@ -544,6 +563,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('NLMVC_back_left')}
                 onLoadedMetadata={handleVideoLoadedMetadata('NLMVC_back_left')}
+                onError={handleVideoError('NLMVC_back_left')}
                 onLoadStart={() => {
                   if (videoTimes['NLMVC_back_left'] && videoRefs.current['NLMVC_back_left']) {
                     videoRefs.current['NLMVC_back_left']!.currentTime = videoTimes['NLMVC_back_left'];
@@ -562,6 +582,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('TCBSC_back')}
                 onLoadedMetadata={handleVideoLoadedMetadata('TCBSC_back')}
+                onError={handleVideoError('TCBSC_back')}
                 onLoadStart={() => {
                   if (videoTimes['TCBSC_back'] && videoRefs.current['TCBSC_back']) {
                     videoRefs.current['TCBSC_back']!.currentTime = videoTimes['TCBSC_back'];
@@ -580,6 +601,7 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
                 onVideoClick={handleVideoClick}
                 onTimeUpdate={onTimeUpdateFor('NRMVC_back_right')}
                 onLoadedMetadata={handleVideoLoadedMetadata('NRMVC_back_right')}
+                onError={handleVideoError('NRMVC_back_right')}
                 onLoadStart={() => {
                   if (videoTimes['NRMVC_back_right'] && videoRefs.current['NRMVC_back_right']) {
                     videoRefs.current['NRMVC_back_right']!.currentTime = videoTimes['NRMVC_back_right'];

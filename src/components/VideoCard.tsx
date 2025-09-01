@@ -18,6 +18,7 @@ interface VideoCardProps {
   setVideoRef: (id: string) => (ref: HTMLVideoElement | null) => void;
   videoTimes: { [key: string]: number };
   videoRefs: React.MutableRefObject<{ [key: string]: HTMLVideoElement | null }>;
+  onError?: (event: React.SyntheticEvent<HTMLVideoElement, Event>) => void;
 }
 
 export const VideoCard: React.FC<VideoCardProps> = ({
@@ -32,7 +33,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   onLoadStart,
   setVideoRef,
   videoTimes,
-  videoRefs
+  videoRefs,
+  onError,
 }) => {
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
@@ -121,8 +123,9 @@ export const VideoCard: React.FC<VideoCardProps> = ({
     }
   };
 
-  const handleError = () => {
+  const handleError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
     setHasError(true);
+    onError?.(e);
   };
 
   const handleLoadStart = () => {
