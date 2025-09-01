@@ -8,7 +8,7 @@ const Index = () => {
       <VideoStreamExample />
       
       {/* Original Player - for testing */}
-      {/* <MultiVideoPlayer /> */}
+      <MultiVideoPlayer />
     </>
   );
 };
