@@ -5,7 +5,7 @@ import { Play, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { VideoPlayerModal } from './VideoPlayerModal';
 import { VideoStream } from '@/types/VideoTypes';
 
-// Example data with real test videos - AWS colleague can replace this with real API data
+// Example data with working test videos - AWS colleague can replace this with real API data
 const mockVideoStreams: VideoStream[] = [
   {
     id: 'stream_1',
@@ -13,17 +13,17 @@ const mockVideoStreams: VideoStream[] = [
     date: '2024-01-15T08:00:00Z',
     status: 'pending',
     videoFiles: {
-      'NCBSC_front': 'http://sharing.timbeck.de/NCBSC_front.mp4',
-      'TCBSC_back': 'http://sharing.timbeck.de/TCBSC_back.mp4',
-      'TCMVC_back': 'http://sharing.timbeck.de/TCMVC_back.mp4',
-      'NLBSC_left': 'http://sharing.timbeck.de/NLBSC_left.mp4',
-      'NLMVC_back_left': 'http://sharing.timbeck.de/NLMVC_back_left.mp4',
-      'NLMVC_front_left': 'http://sharing.timbeck.de/NLMVC_front_left.mp4',
-      'NRBSC_right': 'http://sharing.timbeck.de/NRBSC_right.mp4',
-      'NRMVC_back_right': 'http://sharing.timbeck.de/NRMVC_back_right.mp4',
-      'NRMVC_front_right': 'http://sharing.timbeck.de/NRMVC_front_right.mp4',
-      'WCNVC_front': 'http://sharing.timbeck.de/WCNVC_front.mp4',
-      'WCWVC_front': 'http://sharing.timbeck.de/WCWVC_front.mp4',
+      'NCBSC_front': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      'TCBSC_back': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      'TCMVC_back': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+      'NLBSC_left': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+      'NLMVC_back_left': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+      'NLMVC_front_left': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+      'NRBSC_right': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+      'NRMVC_back_right': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+      'NRMVC_front_right': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
+      'WCNVC_front': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+      'WCWVC_front': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4',
     }
   },
   {
@@ -32,17 +32,17 @@ const mockVideoStreams: VideoStream[] = [
     date: '2024-01-15T14:00:00Z',
     status: 'approved',
     videoFiles: {
-      'NCBSC_front': 'http://sharing.timbeck.de/NCBSC_front.mp4',
-      'TCBSC_back': 'http://sharing.timbeck.de/TCBSC_back.mp4',
-      'TCMVC_back': 'http://sharing.timbeck.de/TCMVC_back.mp4',
-      'NLBSC_left': 'http://sharing.timbeck.de/NLBSC_left.mp4',
-      'NLMVC_back_left': 'http://sharing.timbeck.de/NLMVC_back_left.mp4',
-      'NLMVC_front_left': 'http://sharing.timbeck.de/NLMVC_front_left.mp4',
-      'NRBSC_right': 'http://sharing.timbeck.de/NRBSC_right.mp4',
-      'NRMVC_back_right': 'http://sharing.timbeck.de/NRMVC_back_right.mp4',
-      'NRMVC_front_right': 'http://sharing.timbeck.de/NRMVC_front_right.mp4',
-      'WCNVC_front': 'http://sharing.timbeck.de/WCNVC_front.mp4',
-      'WCWVC_front': 'http://sharing.timbeck.de/WCWVC_front.mp4',
+      'NCBSC_front': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      'TCBSC_back': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      'TCMVC_back': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+      'NLBSC_left': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+      'NLMVC_back_left': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+      'NLMVC_front_left': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+      'NRBSC_right': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+      'NRMVC_back_right': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+      'NRMVC_front_right': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
+      'WCNVC_front': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+      'WCWVC_front': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4',
     }
   },
   {
@@ -51,17 +51,17 @@ const mockVideoStreams: VideoStream[] = [
     date: '2024-01-16T09:00:00Z',
     status: 'rejected',
     videoFiles: {
-      'NCBSC_front': 'http://sharing.timbeck.de/NCBSC_front.mp4',
-      'TCBSC_back': 'http://sharing.timbeck.de/TCBSC_back.mp4',
-      'TCMVC_back': 'http://sharing.timbeck.de/TCMVC_back.mp4',
-      'NLBSC_left': 'http://sharing.timbeck.de/NLBSC_left.mp4',
-      'NLMVC_back_left': 'http://sharing.timbeck.de/NLMVC_back_left.mp4',
-      'NLMVC_front_left': 'http://sharing.timbeck.de/NLMVC_front_left.mp4',
-      'NRBSC_right': 'http://sharing.timbeck.de/NRBSC_right.mp4',
-      'NRMVC_back_right': 'http://sharing.timbeck.de/NRMVC_back_right.mp4',
-      'NRMVC_front_right': 'http://sharing.timbeck.de/NRMVC_front_right.mp4',
-      'WCNVC_front': 'http://sharing.timbeck.de/WCNVC_front.mp4',
-      'WCWVC_front': 'http://sharing.timbeck.de/WCWVC_front.mp4',
+      'NCBSC_front': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      'TCBSC_back': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      'TCMVC_back': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+      'NLBSC_left': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+      'NLMVC_back_left': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+      'NLMVC_front_left': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+      'NRBSC_right': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+      'NRMVC_back_right': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+      'NRMVC_front_right': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
+      'WCNVC_front': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+      'WCWVC_front': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4',
     }
   }
 ];

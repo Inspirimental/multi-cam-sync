@@ -33,11 +33,16 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
   onClose, 
   streamName = "Vehicle Camera Monitor" 
 }) => {
+  // Debug: Log received video files
+  console.log('MultiVideoPlayer received videoFiles:', videoFiles);
+  
   // Merge external video files with default config
   const videoConfigs = defaultVideoConfigs.map(config => ({
     ...config,
     src: videoFiles[config.id] || config.src
   }));
+  
+  console.log('Processed videoConfigs:', videoConfigs);
   const MASTER_ID = videoConfigs[0].id;
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
   const [isPlaying, setIsPlaying] = useState(false);
