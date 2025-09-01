@@ -156,24 +156,29 @@ export const VideoCard: React.FC<VideoCardProps> = ({
         )}
 
         {hasSrc && (
-          <video
-            ref={setVideoRef(id)}
-            className={cn(
-              "w-full h-full object-contain rounded-lg",
-              isExpanded && "fixed inset-0 w-screen h-screen z-[60] object-contain"
+          <>
+            {isExpanded && (
+              <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80" />
             )}
-            poster={thumbnail || undefined}
-            muted
-            preload="metadata"
-            playsInline
-            onLoadedMetadata={handleOnLoadedMetadata}
-            onLoadedData={handleOnLoadedMetadata}
-            onTimeUpdate={onTimeUpdate}
-            onLoadStart={handleLoadStart}
-            onError={handleError}
-          >
-            <source src={src} type="video/mp4" />
-          </video>
+            <video
+              ref={setVideoRef(id)}
+              className={cn(
+                "w-full h-full object-contain rounded-lg",
+                isExpanded && "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[61] max-w-[90vw] max-h-[90vh]"
+              )}
+              poster={thumbnail || undefined}
+              muted
+              preload="metadata"
+              playsInline
+              onLoadedMetadata={handleOnLoadedMetadata}
+              onLoadedData={handleOnLoadedMetadata}
+              onTimeUpdate={onTimeUpdate}
+              onLoadStart={handleLoadStart}
+              onError={handleError}
+            >
+              <source src={src} type="video/mp4" />
+            </video>
+          </>
         )}
 
         {/* Hover Overlay */}
