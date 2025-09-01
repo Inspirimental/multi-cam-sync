@@ -527,13 +527,13 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
             />
           </div>
 
-          {/* Row 2: Wide Center (centered) */}
-          <div className="flex justify-center">
+          {/* Row 2: Wide Center and Wide Front (side by side, smaller) */}
+          <div className="flex justify-center items-start gap-3">
             <VideoCard
               id="WCWVC_front"
               title="Wide Center"
               src={srcFor('WCWVC_front')}
-              width="w-64"
+              width="w-48"
               isPlaying={isPlaying}
               isExpanded={expandedVideo === 'WCWVC_front'}
               onVideoClick={handleVideoClick}
@@ -549,9 +549,29 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
               videoTimes={videoTimes}
               videoRefs={videoRefs}
             />
+            <VideoCard
+              id="WCNVC_front"
+              title="Wide Front"
+              src={srcFor('WCNVC_front')}
+              width="w-48"
+              isPlaying={isPlaying}
+              isExpanded={expandedVideo === 'WCNVC_front'}
+              onVideoClick={handleVideoClick}
+              onTimeUpdate={onTimeUpdateFor('WCNVC_front')}
+              onLoadedMetadata={handleVideoLoadedMetadata('WCNVC_front')}
+              onError={handleVideoError('WCNVC_front')}
+              onLoadStart={() => {
+                if (videoTimes['WCNVC_front'] && videoRefs.current['WCNVC_front']) {
+                  videoRefs.current['WCNVC_front']!.currentTime = videoTimes['WCNVC_front'];
+                }
+              }}
+              setVideoRef={setVideoRef}
+              videoTimes={videoTimes}
+              videoRefs={videoRefs}
+            />
           </div>
 
-          {/* Row 3: Left Side, Wide Front, Right Side */}
+          {/* Row 3: Left Side, Right Side */}
           <div className="flex justify-center items-start gap-3">
             <VideoCard
               id="NLBSC_left"
@@ -567,26 +587,6 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
               onLoadStart={() => {
                 if (videoTimes['NLBSC_left'] && videoRefs.current['NLBSC_left']) {
                   videoRefs.current['NLBSC_left']!.currentTime = videoTimes['NLBSC_left'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-            <VideoCard
-              id="WCNVC_front"
-              title="Wide Front"
-              src={srcFor('WCNVC_front')}
-              width="w-64"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'WCNVC_front'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('WCNVC_front')}
-              onLoadedMetadata={handleVideoLoadedMetadata('WCNVC_front')}
-              onError={handleVideoError('WCNVC_front')}
-              onLoadStart={() => {
-                if (videoTimes['WCNVC_front'] && videoRefs.current['WCNVC_front']) {
-                  videoRefs.current['WCNVC_front']!.currentTime = videoTimes['WCNVC_front'];
                 }
               }}
               setVideoRef={setVideoRef}
