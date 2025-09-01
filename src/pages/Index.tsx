@@ -3,13 +3,12 @@ import { VideoStreamExample } from '@/components/VideoStreamExample';
 
 const Index = () => {
   return (
-    <>
-      {/* Example Integration - AWS colleague can replace this */}
-      <VideoStreamExample />
-      
-      {/* Original Player - for testing */}
-      <MultiVideoPlayer />
-    </>
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-foreground mb-4">Vehicle Camera Monitor</h1>
+        <p className="text-muted-foreground">Ready for integration</p>
+      </div>
+    </div>
   );
 };
 
