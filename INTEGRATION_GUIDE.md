@@ -40,6 +40,74 @@ import OptimizedMultiVideoPlayer from './components/OptimizedMultiVideoPlayer';
 />
 ```
 
+## Standalone Player Usage (Direct Integration)
+
+### Using the Player Without Review System
+The `OptimizedMultiVideoPlayer` can be used independently without the page-based review system. This is perfect for direct video playback scenarios.
+
+#### Simple Direct Integration
+```tsx
+import React, { useState } from 'react';
+import OptimizedMultiVideoPlayer from './components/OptimizedMultiVideoPlayer';
+
+const SimpleVideoViewer = () => {
+  const [showPlayer, setShowPlayer] = useState(false);
+  
+  // Your video URLs - replace with your actual links
+  const myVideoFiles = {
+    'NCBSC_front': 'https://your-domain.com/videos/front-camera.mp4',
+    'TCBSC_back': 'https://your-domain.com/videos/back-camera.mp4',
+    'TCMVC_back': 'https://your-domain.com/videos/back-center.mp4',
+    'NLBSC_left': 'https://your-domain.com/videos/left-side.mp4',
+    'NLMVC_back_left': 'https://your-domain.com/videos/back-left.mp4',
+    'NLMVC_front_left': 'https://your-domain.com/videos/front-left.mp4',
+    'NRBSC_right': 'https://your-domain.com/videos/right-side.mp4',
+    'NRMVC_back_right': 'https://your-domain.com/videos/back-right.mp4',
+    'NRMVC_front_right': 'https://your-domain.com/videos/front-right.mp4',
+    'WCNVC_front': 'https://your-domain.com/videos/wide-front.mp4',
+    'WCWVC_front': 'https://your-domain.com/videos/wide-center.mp4',
+  };
+
+  return (
+    <div>
+      <button onClick={() => setShowPlayer(true)}>
+        Play Videos
+      </button>
+      
+      {showPlayer && (
+        <OptimizedMultiVideoPlayer
+          videoFiles={myVideoFiles}
+          onClose={() => setShowPlayer(false)}
+          streamName="My Custom Stream"
+        />
+      )}
+    </div>
+  );
+};
+```
+
+#### Flexible Video Mapping
+You can use any video URLs and even skip videos by omitting them:
+```tsx
+// Minimal example with only 4 videos
+const partialVideoFiles = {
+  'NCBSC_front': 'https://cdn.example.com/front.mp4',
+  'TCBSC_back': 'https://cdn.example.com/back.mp4',
+  'NLBSC_left': 'https://s3.amazonaws.com/bucket/left.mp4',
+  'NRBSC_right': 'https://s3.amazonaws.com/bucket/right.mp4',
+  // Missing videos will show placeholder slots
+};
+```
+
+#### Integration Requirements (Minimal)
+For standalone usage, you only need:
+1. **React Components**: `OptimizedMultiVideoPlayer.tsx`, `VideoCard.tsx`
+2. **UI Dependencies**: Radix UI Dialog, Button components
+3. **Icons**: Lucide React
+4. **Video URLs**: HTTPS URLs accessible from browser
+
+No React Router or page structure required for standalone usage.
+
 ### 3. VideoCard with Modal Controls (Enhanced)  
 Individual video components with expandable fullscreen modals
 ```tsx
