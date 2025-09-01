@@ -571,8 +571,8 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
             />
           </div>
 
-          {/* Row 3: Left Side, Right Side */}
-          <div className="flex justify-center items-start gap-3">
+          {/* Row 3: Left Side, Back Center, Right Side */}
+          <div className="flex justify-center items-start gap-8">
             <VideoCard
               id="NLBSC_left"
               title="Left Side"
@@ -587,6 +587,26 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
               onLoadStart={() => {
                 if (videoTimes['NLBSC_left'] && videoRefs.current['NLBSC_left']) {
                   videoRefs.current['NLBSC_left']!.currentTime = videoTimes['NLBSC_left'];
+                }
+              }}
+              setVideoRef={setVideoRef}
+              videoTimes={videoTimes}
+              videoRefs={videoRefs}
+            />
+            <VideoCard
+              id="TCMVC_back"
+              title="Back Center"
+              src={srcFor('TCMVC_back')}
+              width="w-64"
+              isPlaying={isPlaying}
+              isExpanded={expandedVideo === 'TCMVC_back'}
+              onVideoClick={handleVideoClick}
+              onTimeUpdate={onTimeUpdateFor('TCMVC_back')}
+              onLoadedMetadata={handleVideoLoadedMetadata('TCMVC_back')}
+              onError={handleVideoError('TCMVC_back')}
+              onLoadStart={() => {
+                if (videoTimes['TCMVC_back'] && videoRefs.current['TCMVC_back']) {
+                  videoRefs.current['TCMVC_back']!.currentTime = videoTimes['TCMVC_back'];
                 }
               }}
               setVideoRef={setVideoRef}
@@ -615,31 +635,7 @@ const OptimizedMultiVideoPlayer: React.FC<OptimizedVideoPlayerProps> = ({
             />
           </div>
 
-          {/* Row 4: Back Center (centered) */}
-          <div className="flex justify-center">
-            <VideoCard
-              id="TCMVC_back"
-              title="Back Center"
-              src={srcFor('TCMVC_back')}
-              width="w-64"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'TCMVC_back'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('TCMVC_back')}
-              onLoadedMetadata={handleVideoLoadedMetadata('TCMVC_back')}
-              onError={handleVideoError('TCMVC_back')}
-              onLoadStart={() => {
-                if (videoTimes['TCMVC_back'] && videoRefs.current['TCMVC_back']) {
-                  videoRefs.current['TCMVC_back']!.currentTime = videoTimes['TCMVC_back'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-          </div>
-
-          {/* Row 5: Back Left, Back Camera, Back Right */}
+          {/* Row 4: Back Left, Back Camera, Back Right */}
           <div className="flex justify-center items-start gap-3">
             <VideoCard
               id="NLMVC_back_left"
