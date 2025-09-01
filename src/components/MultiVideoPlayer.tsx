@@ -180,9 +180,10 @@ const MultiVideoPlayer: React.FC<VideoPlayerProps> = ({
     const el = videoRefs.current[id];
     if (!el) return;
     const t = el.currentTime || 0;
-    if (id === MASTER_ID) setCurrentTime(t);
+    // Update main time if this is the master video OR if this is the expanded video
+    if (id === MASTER_ID || id === expandedVideo) setCurrentTime(t);
     setVideoTimes(prev => ({ ...prev, [id]: t }));
-  }, []);
+  }, [MASTER_ID, expandedVideo]);
 
   const handleVideoClick = useCallback((videoId: string) => {
     // Store current video time before expanding
