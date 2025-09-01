@@ -318,7 +318,7 @@ const MultiVideoPlayer: React.FC = () => {
 
             {/* Row 2: Wide Center (centered and half size) */}
             <div className="flex justify-center h-20">
-              <div className="w-64">
+              <div className="w-80">
                 <Card
                   className={cn(
                     "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
@@ -397,7 +397,7 @@ const MultiVideoPlayer: React.FC = () => {
                 </Card>
               </div>
               <div className="flex justify-center flex-1">
-                <div className="w-64">
+                <div className="w-80">
                   <Card
                     className={cn(
                       "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
@@ -476,7 +476,7 @@ const MultiVideoPlayer: React.FC = () => {
 
             {/* Row 4: Back Center (centered and half size) */}
             <div className="flex justify-center h-20">
-              <div className="w-64">
+              <div className="w-80">
                 <Card
                   className={cn(
                     "relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video",
