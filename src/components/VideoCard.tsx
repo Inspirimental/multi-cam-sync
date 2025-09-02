@@ -288,7 +288,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
     <div className={width}>
       <Card
         className={cn(
-          'relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group h-full aspect-video',
+          'relative bg-video-bg border-video-border hover:border-primary transition-colors cursor-pointer group w-full aspect-video',
           isPlaying && 'animate-pulse-border'
         )}
         onClick={() => hasSrc && onVideoClick(id)}
