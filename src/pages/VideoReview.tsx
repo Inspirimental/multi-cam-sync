@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import OptimizedMultiVideoPlayer from '@/components/OptimizedMultiVideoPlayer';
 import { VideoStream } from '@/types/VideoTypes';
 
@@ -92,18 +92,6 @@ const VideoReview: React.FC = () => {
     navigate('/');
   };
 
-  const handleApprove = () => {
-    // In real app: make API call to approve stream
-    console.log('Approving stream:', streamId);
-    navigate('/');
-  };
-
-  const handleReject = () => {
-    // In real app: make API call to reject stream  
-    console.log('Rejecting stream:', streamId);
-    navigate('/');
-  };
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header with Back Button */}
@@ -127,23 +115,6 @@ const VideoReview: React.FC = () => {
             </div>
           </div>
 
-          {/* Approval Buttons */}
-          <div className="flex gap-2">
-            <Button
-              onClick={handleApprove}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Freigeben
-            </Button>
-            <Button
-              onClick={handleReject}
-              variant="destructive"
-            >
-              <XCircle className="h-4 w-4 mr-2" />
-              Ablehnen
-            </Button>
-          </div>
         </div>
       </div>
 
