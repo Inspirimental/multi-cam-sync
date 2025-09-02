@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Maximize2, Play, Pause, X, SkipBack, SkipForward, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatTime } from '@/utils/videoUtils';
+import Hls from 'hls.js';
 
 interface VideoCardProps {
   id: string;
@@ -45,6 +46,59 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   const [duration, setDuration] = useState(0);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const hasSrc = Boolean(src);
+  const hlsRef = useRef<Hls | null>(null);
+
+  // Initialize HLS for .m3u8 streams
+  useEffect(() => {
+    const video = videoRefs.current[id];
+    if (!video || !src) return;
+
+    // Check if this is an HLS stream
+    const isHLS = src.includes('.m3u8');
+    
+    if (isHLS && Hls.isSupported()) {
+      // Use HLS.js for Chrome and other browsers that don't support HLS natively
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+      }
+      
+      const hls = new Hls({
+        enableWorker: false,
+        lowLatencyMode: true,
+        fragLoadingMaxRetry: 1,
+        manifestLoadingMaxRetry: 1,
+      });
+      
+      hlsRef.current = hls;
+      hls.loadSource(src);
+      hls.attachMedia(video);
+      
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        console.error('[HLS Error]', id, data);
+        if (data.fatal) {
+          setHasError(true);
+        }
+      });
+      
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        console.log('[HLS] Manifest parsed for', id);
+      });
+      
+    } else if (isHLS && video.canPlayType('application/vnd.apple.mpegurl')) {
+      // Safari supports HLS natively
+      video.src = src;
+    } else if (!isHLS) {
+      // Regular video file
+      video.src = src;
+    }
+
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, [src, id, videoRefs]);
 
   const handlePlayPause = () => {
     const video = videoRefs.current[id];
@@ -253,9 +307,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
                 console.log('[video] playing', id);
                 setIsVideoPlaying(true);
               }}
-            >
-              <source src={src} type="application/x-mpegURL" />
-            </video>
+            />
 
             {/* Video Controls for Expanded View */}
             {isExpanded && (
