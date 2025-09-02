@@ -13,6 +13,7 @@ const mockVideoStreams: VideoStream[] = [
     date: '2024-01-15T08:00:00Z',
     status: 'pending',
     videoFiles: {
+      'NCBSC_front': 'https://sharing.timbeck.de/hls/NCBSC_front/index.m3u8',
       'TCBSC_back': 'https://sharing.timbeck.de/hls/TCBSC_back/index.m3u8',
       'TCMVC_back': 'https://sharing.timbeck.de/hls/TCMVC_back/index.m3u8',
       'NLBSC_left': 'https://sharing.timbeck.de/hls/NLBSC_left/index.m3u8',
@@ -31,6 +32,7 @@ const mockVideoStreams: VideoStream[] = [
     date: '2024-01-15T14:00:00Z',
     status: 'approved',
     videoFiles: {
+      'NCBSC_front': 'https://sharing.timbeck.de/hls/NCBSC_front/index.m3u8',
       'TCBSC_back': 'https://sharing.timbeck.de/hls/TCBSC_back/index.m3u8',
       'TCMVC_back': 'https://sharing.timbeck.de/hls/TCMVC_back/index.m3u8',
       'NLBSC_left': 'https://sharing.timbeck.de/hls/NLBSC_left/index.m3u8',
@@ -49,16 +51,14 @@ const mockVideoStreams: VideoStream[] = [
     date: '2024-01-16T09:00:00Z',
     status: 'rejected',
     videoFiles: {
+      // Beispiel für weniger Streams (nur 7 statt 11)
+      'NCBSC_front': 'https://sharing.timbeck.de/hls/NCBSC_front/index.m3u8',
       'TCBSC_back': 'https://sharing.timbeck.de/hls/TCBSC_back/index.m3u8',
-      'TCMVC_back': 'https://sharing.timbeck.de/hls/TCMVC_back/index.m3u8',
       'NLBSC_left': 'https://sharing.timbeck.de/hls/NLBSC_left/index.m3u8',
-      'NLMVC_back_left': 'https://sharing.timbeck.de/hls/NLMVC_back_left/index.m3u8',
-      'NLMVC_front_left': 'https://sharing.timbeck.de/hls/NLMVC_front_left/index.m3u8',
       'NRBSC_right': 'https://sharing.timbeck.de/hls/NRBSC_right/index.m3u8',
-      'NRMVC_back_right': 'https://sharing.timbeck.de/hls/NRMVC_back_right/index.m3u8',
-      'NRMVC_front_right': 'https://sharing.timbeck.de/hls/NRMVC_front_right/index.m3u8',
       'WCNVC_front': 'https://sharing.timbeck.de/hls/WCNVC_front/index.m3u8',
       'WCWVC_front': 'https://sharing.timbeck.de/hls/WCWVC_front/index.m3u8',
+      'TCMVC_back': 'https://sharing.timbeck.de/hls/TCMVC_back/index.m3u8',
     }
   }
 ];
