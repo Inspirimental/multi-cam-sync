@@ -65,13 +65,22 @@ export const VideoCard: React.FC<VideoCardProps> = ({
         hlsRef.current.destroy();
       }
       
+      const isCrossOrigin = (() => {
+        try {
+          const u = new URL(src, window.location.href);
+          return u.origin !== window.location.origin;
+        } catch {
+          return false;
+        }
+      })();
+      
       const hls = new Hls({
         enableWorker: false,
         lowLatencyMode: true,
         fragLoadingMaxRetry: 1,
         manifestLoadingMaxRetry: 1,
-        // Send credentials (cookies) for cross-origin HLS requests if the server expects auth
-        xhrSetup: (xhr) => { xhr.withCredentials = true; },
+        // Only send credentials for same-origin; cross-origin withCredentials often breaks CORS
+        xhrSetup: (xhr) => { xhr.withCredentials = !isCrossOrigin; },
       });
       
       hlsRef.current = hls;
