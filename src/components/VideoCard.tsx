@@ -70,15 +70,12 @@ export const VideoCard: React.FC<VideoCardProps> = ({
         lowLatencyMode: true,
         fragLoadingMaxRetry: 1,
         manifestLoadingMaxRetry: 1,
-        // Do NOT send credentials by default; many HLS servers use wildcard CORS which breaks with credentials in Chrome
-        xhrSetup: (xhr) => { xhr.withCredentials = false; },
+        // Send credentials (cookies) for cross-origin HLS requests if the server expects auth
+        xhrSetup: (xhr) => { xhr.withCredentials = true; },
       });
       
       hlsRef.current = hls;
-      const useProxy = import.meta.env && (import.meta.env as any).DEV;
-      const sourceUrl = useProxy && src.startsWith('https://sharing.timbeck.de/hls/')
-        ? '/hls-proxy/' + src.split('/hls/')[1]
-        : src;
+      const sourceUrl = src;
       console.log('[HLS] loading', sourceUrl);
       hls.loadSource(sourceUrl);
       hls.attachMedia(video);
@@ -96,13 +93,9 @@ export const VideoCard: React.FC<VideoCardProps> = ({
               try { hls.recoverMediaError(); } catch {}
               break;
             default:
-              // no-op in switch
-              break;
+              setHasError(true);
+              try { video.dispatchEvent(new Event('error')); } catch {}
           }
-
-          // Always mark as error to avoid the global loader getting stuck in Chrome
-          setHasError(true);
-          try { video.dispatchEvent(new Event('error')); } catch {}
         }
       });
       
@@ -313,7 +306,6 @@ export const VideoCard: React.FC<VideoCardProps> = ({
                 isExpanded && "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[61] max-w-[90vw] max-h-[90vh]"
               )}
               poster={thumbnail || undefined}
-              crossOrigin="anonymous"
               muted
               preload={isExpanded ? 'auto' : 'metadata'}
               playsInline
