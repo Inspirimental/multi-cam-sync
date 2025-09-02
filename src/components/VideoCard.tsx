@@ -77,11 +77,13 @@ export const VideoCard: React.FC<VideoCardProps> = ({
         console.error('[HLS Error]', id, data);
         if (data.fatal) {
           setHasError(true);
+          try { video.dispatchEvent(new Event('error')); } catch {}
         }
       });
       
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         console.log('[HLS] Manifest parsed for', id);
+        try { video.dispatchEvent(new Event('loadedmetadata')); } catch {}
       });
       
     } else if (isHLS && video.canPlayType('application/vnd.apple.mpegurl')) {
