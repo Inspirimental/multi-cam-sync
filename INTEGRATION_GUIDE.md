@@ -48,21 +48,21 @@ import OptimizedMultiVideoPlayer from './components/OptimizedMultiVideoPlayer';
 />
 ```
 
-### 3. HLS Video Configuration
-Updated video configuration for M3U8 streams:
+### 3. AWS S3 HLS Video Configuration
+Updated video configuration for AWS S3 M3U8 streams:
 ```tsx
-const hlsVideoFiles = {
-  'NCBSC_front': 'https://sharing.timbeck.de/hls/NCBSC_front/index.m3u8',
-  'TCBSC_back': 'https://sharing.timbeck.de/hls/TCBSC_back/index.m3u8',
-  'TCMVC_back': 'https://sharing.timbeck.de/hls/TCMVC_back/index.m3u8',
-  'NLBSC_left': 'https://sharing.timbeck.de/hls/NLBSC_left/index.m3u8',
-  'NLMVC_back_left': 'https://sharing.timbeck.de/hls/NLMVC_back_left/index.m3u8',
-  'NLMVC_front_left': 'https://sharing.timbeck.de/hls/NLMVC_front_left/index.m3u8',
-  'NRBSC_right': 'https://sharing.timbeck.de/hls/NRBSC_right/index.m3u8',
-  'NRMVC_back_right': 'https://sharing.timbeck.de/hls/NRMVC_back_right/index.m3u8',
-  'NRMVC_front_right': 'https://sharing.timbeck.de/hls/NRMVC_front_right/index.m3u8',
-  'WCNVC_front': 'https://sharing.timbeck.de/hls/WCNVC_front/index.m3u8',
-  'WCWVC_front': 'https://sharing.timbeck.de/hls/WCWVC_front/index.m3u8',
+const awsHlsVideoFiles = {
+  'NCBSC_front': 'https://d1234567890abcd.cloudfront.net/hls/NCBSC_front/index.m3u8',
+  'TCBSC_back': 'https://d1234567890abcd.cloudfront.net/hls/TCBSC_back/index.m3u8',
+  'TCMVC_back': 'https://d1234567890abcd.cloudfront.net/hls/TCMVC_back/index.m3u8',
+  'NLBSC_left': 'https://d1234567890abcd.cloudfront.net/hls/NLBSC_left/index.m3u8',
+  'NLMVC_back_left': 'https://d1234567890abcd.cloudfront.net/hls/NLMVC_back_left/index.m3u8',
+  'NLMVC_front_left': 'https://d1234567890abcd.cloudfront.net/hls/NLMVC_front_left/index.m3u8',
+  'NRBSC_right': 'https://d1234567890abcd.cloudfront.net/hls/NRBSC_right/index.m3u8',
+  'NRMVC_back_right': 'https://d1234567890abcd.cloudfront.net/hls/NRMVC_back_right/index.m3u8',
+  'NRMVC_front_right': 'https://d1234567890abcd.cloudfront.net/hls/NRMVC_front_right/index.m3u8',
+  'WCNVC_front': 'https://d1234567890abcd.cloudfront.net/hls/WCNVC_front/index.m3u8',
+  'WCWVC_front': 'https://d1234567890abcd.cloudfront.net/hls/WCWVC_front/index.m3u8',
 };
 ```
 
@@ -273,43 +273,97 @@ const YourStreamsList = () => {
 };
 ```
 
-### 3. HLS CDN Integration
-Ensure your HLS streams are accessible from the browser:
-- **HTTPS Required**: HLS URLs MUST use HTTPS protocol
-- **CORS Configuration**: Configure CORS on your CDN/server
-- **Segment Headers**: Enable proper HLS segment delivery
-- **CDN Setup**: Use CDN for better performance and global distribution
-- **Cache Headers**: Set appropriate cache headers for M3U8 playlists
-- **Content-Type**: Ensure proper HLS MIME types (application/x-mpegURL)
+### 3. AWS S3 HLS Integration
+Set up AWS S3 bucket with CloudFront for optimized HLS streaming:
 
-Example CORS configuration for HLS:
+#### S3 Bucket Setup
+1. **Create S3 Bucket**: Create a dedicated bucket for HLS streams
+2. **Public Read Access**: Configure bucket for public read access to HLS files
+3. **HTTPS Required**: All HLS streams must be served over HTTPS
+4. **CloudFront Distribution**: Set up CloudFront for global CDN distribution
+
+#### S3 CORS Configuration
+Add this CORS policy to your S3 bucket:
 ```json
 {
   "CORSRules": [
     {
       "AllowedHeaders": ["*"],
       "AllowedMethods": ["GET", "HEAD"],
-      "AllowedOrigins": ["https://your-app-domain.com"],
-      "ExposeHeaders": ["Content-Range", "Content-Length"]
+      "AllowedOrigins": ["*"],
+      "ExposeHeaders": ["Content-Range", "Content-Length", "Accept-Ranges"],
+      "MaxAgeSeconds": 3600
     }
   ]
 }
 ```
 
-### 4. HLS Stream Organization
-Organize your HLS structure like:
+#### S3 Bucket Policy
+Configure bucket policy for public HLS access:
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicReadGetObject",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::your-hls-bucket/*",
+      "Condition": {
+        "StringEquals": {
+          "s3:ExistingObjectTag/ContentType": ["application/x-mpegURL", "video/MP2T"]
+        }
+      }
+    }
+  ]
+}
 ```
-your-cdn/hls/
-  stream-2024-01-15-morning/
-    NCBSC_front/
-      index.m3u8
-      segment001.ts
-      segment002.ts
-      ...
-    TCBSC_back/
-      index.m3u8
-      segment001.ts
-      ...
+
+#### CloudFront Distribution Setup
+1. **Origin**: Point to your S3 bucket
+2. **Cache Behaviors**:
+   - `.m3u8` files: Cache for 60 seconds (short TTL for playlist updates)
+   - `.ts` files: Cache for 1 hour (segments don't change)
+3. **CORS Headers**: Enable CORS headers forwarding
+4. **Compression**: Enable Gzip compression for M3U8 files
+
+### 4. AWS S3 HLS Stream Organization
+Organize your HLS streams in S3 with this structure:
+```
+s3://your-hls-bucket/
+  hls/
+    stream-2024-01-15-morning/
+      NCBSC_front/
+        index.m3u8
+        segment001.ts
+        segment002.ts
+        segment003.ts
+        ...
+      TCBSC_back/
+        index.m3u8  
+        segment001.ts
+        segment002.ts
+        ...
+      TCMVC_back/
+        index.m3u8
+        segment001.ts
+        ...
+```
+
+#### AWS S3 Upload Example
+Use AWS CLI to upload HLS files:
+```bash
+# Upload with proper content types
+aws s3 sync ./hls-output/ s3://your-hls-bucket/hls/ \
+  --include "*.m3u8" \
+  --content-type "application/x-mpegURL" \
+  --cache-control "max-age=60"
+
+aws s3 sync ./hls-output/ s3://your-hls-bucket/hls/ \
+  --include "*.ts" \
+  --content-type "video/MP2T" \
+  --cache-control "max-age=3600"
 ```
 
 ## Deployment Requirements
