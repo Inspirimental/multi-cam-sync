@@ -47,7 +47,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const hasSrc = Boolean(src);
   const hlsRef = useRef<Hls | null>(null);
-
+  const triedCredsRef = useRef(false);
+  
   // Initialize HLS for .m3u8 streams
   useEffect(() => {
     const video = videoRefs.current[id];
@@ -73,45 +74,62 @@ export const VideoCard: React.FC<VideoCardProps> = ({
           return false;
         }
       })();
-      
-      const hls = new Hls({
-        enableWorker: false,
-        lowLatencyMode: true,
-        fragLoadingMaxRetry: 1,
-        manifestLoadingMaxRetry: 1,
-        // Only send credentials for same-origin; cross-origin withCredentials often breaks CORS
-        xhrSetup: (xhr) => { xhr.withCredentials = !isCrossOrigin; },
-      });
-      
-      hlsRef.current = hls;
-      const sourceUrl = src;
-      console.log('[HLS] loading', sourceUrl);
-      hls.loadSource(sourceUrl);
-      hls.attachMedia(video);
-      
-      hls.on(Hls.Events.ERROR, (event, data) => {
-        console.error('[HLS Error]', id, data);
-        if (data.fatal) {
-          switch (data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              console.warn('[HLS] NETWORK_ERROR -> retry startLoad', id);
-              try { hls.startLoad(); } catch {}
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              console.warn('[HLS] MEDIA_ERROR -> recoverMediaError', id);
-              try { hls.recoverMediaError(); } catch {}
-              break;
-            default:
-              setHasError(true);
-              try { video.dispatchEvent(new Event('error')); } catch {}
+
+      // Reset credential retry flag for this source
+      triedCredsRef.current = false;
+
+      const createAndAttachHls = (withCreds: boolean) => {
+        const hls = new Hls({
+          enableWorker: false,
+          lowLatencyMode: true,
+          fragLoadingMaxRetry: 1,
+          manifestLoadingMaxRetry: 1,
+          // Start without credentials for cross-origin; retry with credentials once if needed
+          xhrSetup: (xhr) => { xhr.withCredentials = withCreds; },
+        });
+
+        hlsRef.current = hls;
+        const sourceUrl = src;
+        console.log('[HLS] loading', sourceUrl, 'withCredentials=', withCreds);
+        hls.loadSource(sourceUrl);
+        hls.attachMedia(video);
+
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          console.error('[HLS Error]', id, data);
+          if (data.fatal) {
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                // If cross-origin and first attempt was without credentials, try once with credentials
+                if (isCrossOrigin && !withCreds && !triedCredsRef.current) {
+                  console.warn('[HLS] NETWORK_ERROR -> retry with credentials', id);
+                  triedCredsRef.current = true;
+                  try { hls.destroy(); } catch {}
+                  createAndAttachHls(true);
+                  return;
+                }
+                try { hls.startLoad(); } catch {}
+                setHasError(true);
+                try { video.dispatchEvent(new Event('error')); } catch {}
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                console.warn('[HLS] MEDIA_ERROR -> recoverMediaError', id);
+                try { hls.recoverMediaError(); } catch {}
+                break;
+              default:
+                setHasError(true);
+                try { video.dispatchEvent(new Event('error')); } catch {}
+            }
           }
-        }
-      });
-      
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        console.log('[HLS] Manifest parsed for', id);
-        try { video.dispatchEvent(new Event('loadedmetadata')); } catch {}
-      });
+        });
+
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          console.log('[HLS] Manifest parsed for', id);
+          try { video.dispatchEvent(new Event('loadedmetadata')); } catch {}
+        });
+      };
+
+      // Same-origin -> with credentials, Cross-origin -> start without credentials
+      createAndAttachHls(!isCrossOrigin);
       
     } else if (!isHLS) {
       // Regular video file
@@ -315,10 +333,10 @@ export const VideoCard: React.FC<VideoCardProps> = ({
                 isExpanded && "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[61] max-w-[90vw] max-h-[90vh]"
               )}
               poster={thumbnail || undefined}
+              crossOrigin="anonymous"
               muted
               preload={isExpanded ? 'auto' : 'metadata'}
               playsInline
-              disablePictureInPicture
               onLoadedMetadata={handleOnLoadedMetadata}
               onLoadedData={handleOnLoadedMetadata}
               onTimeUpdate={handleTimeUpdate}
