@@ -10,7 +10,7 @@ import { VideoPlayerProps, VideoFile, VideoConfig } from '@/types/VideoTypes';
 import { formatTime } from '@/utils/videoUtils';
 
 const defaultVideoConfigs: VideoConfig[] = [
-  { id: 'NCBSC_front', name: 'NCBSC_front.m3u8', title: 'Front Camera', position: 'front', src: '/videos/NCBSC_front.m3u8' },
+  { id: 'NCBSC_front', name: 'NCBSC_front.m3u8', title: 'Front Camera', position: 'front', src: 'https://sharing.timbeck.de/hls/NCBSC_front/index.m3u8' },
   { id: 'TCBSC_back', name: 'TCBSC_back.m3u8', title: 'Back Camera', position: 'back', src: '/videos/TCBSC_back.m3u8' },
   { id: 'TCMVC_back', name: 'TCMVC_back.m3u8', title: 'Back Center', position: 'back', src: '/videos/TCMVC_back.m3u8' },
   { id: 'NLBSC_left', name: 'NLBSC_left.m3u8', title: 'Left Side', position: 'side', src: '/videos/NLBSC_left.m3u8' },
@@ -46,7 +46,7 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
   const [loadedVideoCount, setLoadedVideoCount] = useState(0);
   const [allVideosLoaded, setAllVideosLoaded] = useState(false);
   const hasExternalVideos = Object.keys(videoFiles).length > 0;
-  const srcFor = useCallback((id: string) => loadedVideos[id] || (hasExternalVideos ? (videoConfigs.find(v => v.id === id)?.src || '') : ''), [loadedVideos, hasExternalVideos, videoConfigs]);
+  const srcFor = useCallback((id: string) => loadedVideos[id] || (videoConfigs.find(v => v.id === id)?.src || ''), [loadedVideos, videoConfigs]);
   const totalToLoad = videoConfigs.filter(v => Boolean(srcFor(v.id))).length;
 
   const setVideoRef = useCallback((id: string) => (ref: HTMLVideoElement | null) => {
