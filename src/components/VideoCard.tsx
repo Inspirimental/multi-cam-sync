@@ -85,8 +85,19 @@ export const VideoCard: React.FC<VideoCardProps> = ({
       hls.on(Hls.Events.ERROR, (event, data) => {
         console.error('[HLS Error]', id, data);
         if (data.fatal) {
-          setHasError(true);
-          try { video.dispatchEvent(new Event('error')); } catch {}
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              console.warn('[HLS] NETWORK_ERROR -> retry startLoad', id);
+              try { hls.startLoad(); } catch {}
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              console.warn('[HLS] MEDIA_ERROR -> recoverMediaError', id);
+              try { hls.recoverMediaError(); } catch {}
+              break;
+            default:
+              setHasError(true);
+              try { video.dispatchEvent(new Event('error')); } catch {}
+          }
         }
       });
       
