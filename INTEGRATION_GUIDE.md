@@ -3,26 +3,24 @@
 ## Overview
 This video review system provides a complete solution for reviewing multi-video streams with **HLS streaming support**. The system features a page-based architecture with a dedicated review page, flexible 7-11 video grid layout, and advanced video controls for frame-accurate analysis.
 
-## Architecture Changes (v3.0)
+## System Features & Architecture
 
-### 🎥 HLS Streaming Support
-The system now supports **HTTP Live Streaming (HLS)** with M3U8 playlists:
+### 🎥 HLS Streaming & Video Management
 - **Primary Format**: HLS (M3U8) for optimized streaming performance
-- **Fallback Support**: MP4 for legacy compatibility
+- **Fallback Support**: MP4 for legacy compatibility  
 - **Adaptive Bitrate**: Automatic quality adjustment based on bandwidth
-- **Robust Stream Handling**: Gracefully handles missing streams (7-11 videos)
-
-### 🔄 Flexible Video Grid
-The video grid automatically adapts to available streams:
-- **Full Layout**: 11 cameras in optimized 4-row arrangement
-- **Reduced Layout**: 7 cameras with automatic layout adjustment
+- **Flexible Stream Count**: Supports 7-11 video streams with intelligent layout
 - **Smart Fallback**: System continues working even with missing camera feeds
 
-### 🎮 Enhanced User Experience
+### 🎮 Enhanced User Experience & Controls
 - **Dedicated Review Page**: Clean interface without approval buttons
-- **Sticky Navigation**: Better header with back navigation
-- **Modal Video Player**: Full-featured expandable video controls
-- **Frame-Perfect Navigation**: 1/30 second precision for detailed analysis
+- **Modal Video Player**: Full-featured expandable video controls with:
+  - Play/Pause Control (Space bar or button)
+  - Frame Navigation (Left/Right arrows - 1/30 second precision)  
+  - 10-Second Jumping (Fast forward/backward buttons)
+  - Interactive Progress Bar (Click anywhere to jump to time)
+  - Time Display (Current time / Total duration)
+- **Optimized Video Layout**: Intelligent grid system adapting to stream count
 
 ## Core Components (Updated)
 
@@ -123,19 +121,7 @@ const reducedHLSStreams = {
 };
 ```
 
-## Enhanced Features
-
-### 🎮 Advanced Video Controls (Modal)
-When a video is expanded to fullscreen modal:
-- **Play/Pause Control**: Space bar or button
-- **Frame Navigation**: Left/Right arrows (1/30 second precision)  
-- **10-Second Jumping**: Fast forward/backward buttons
-- **Interactive Progress Bar**: Click anywhere to jump to time
-- **Time Display**: Current time / Total duration
-- **Close Button**: Return to grid view
-
-### 🎯 Optimized Video Layout (Updated)
-**Intelligent Flexible Grid System**:
+### 🎯 Intelligent Video Layout System
 ```
 Full Layout (11 streams):
 Row 1: [Front Left] [Front Camera] [Front Right]
@@ -366,43 +352,24 @@ aws s3 sync ./hls-output/ s3://your-hls-bucket/hls/ \
   --cache-control "max-age=3600"
 ```
 
-## Deployment Requirements
+## Deployment & Environment Setup
 
-### Required Files to Transfer
-Copy these files to your project:
-
-#### Page Components (Updated)
-- `src/pages/Index.tsx` - Main streams overview page
-- `src/pages/VideoReview.tsx` - **Updated**: Simplified review page without approval buttons
-- `src/pages/NotFound.tsx` - 404 error page for routing
-- `src/App.tsx` - Router configuration
-
-#### Core Components (HLS Ready)
-- `src/components/OptimizedMultiVideoPlayer.tsx` - **HLS Enhanced**: Flexible 7-11 video grid
-- `src/components/VideoCard.tsx` - **HLS Enhanced**: Individual video cards with HLS support
-- `src/components/VideoStreamExample.tsx` - Navigation integration example
-- `src/types/VideoTypes.ts` - TypeScript interfaces
-- `src/utils/videoUtils.ts` - Video utility functions
-
-#### UI Components (shadcn/ui)
-- `src/components/ui/dialog.tsx` - Modal dialog component  
-- `src/components/ui/button.tsx` - Button component with variants
-- `src/components/ui/card.tsx` - Card layout component
-- `src/lib/utils.ts` - Utility functions for styling
-
-### Environment Setup
-The player requires these dependencies:
-- **React 18+** with TypeScript support
-- **Tailwind CSS 3.0+** for styling
-- **Radix UI components** for modals, buttons, and UI elements
-- **Lucide React** for icons
-- **Class Variance Authority** (cva) for component variants
-
-Install required packages:
+### Required Dependencies
+The player requires these packages (install via npm/yarn):
 ```bash
 npm install @radix-ui/react-dialog @radix-ui/react-slot
 npm install lucide-react class-variance-authority clsx tailwind-merge
+npm install react-router-dom hls.js
 ```
+
+### Required Components
+**Core Files to Copy**:
+- `src/pages/Index.tsx` - Main streams overview page
+- `src/pages/VideoReview.tsx` - Simplified review page  
+- `src/components/OptimizedMultiVideoPlayer.tsx` - HLS multi-video grid
+- `src/components/VideoCard.tsx` - Individual video cards with HLS support
+- `src/types/VideoTypes.ts` - TypeScript interfaces
+- `src/utils/videoUtils.ts` - Video utility functions
 
 ## Testing
 
@@ -421,10 +388,10 @@ npm install lucide-react class-variance-authority clsx tailwind-merge
 - Verify **10-second seeking** buttons work correctly with HLS
 - Check **frame-by-frame** navigation precision
 
-### Performance Benchmarks (HLS)
-#### HLS Multi-Stream System
-- **Recommended**: 7-11 HLS streams with adaptive bitrate
-- **Network**: Minimum 25 Mbps for smooth multi-stream HLS playback
-- **Hardware**: 4+ CPU cores, 4GB+ RAM, modern GPU recommended
-- **Browser**: Chrome 80+ (best HLS support), Firefox 75+, Safari 13+ (native HLS)
-- **Mobile**: Optimized for modern phones and tablets with HLS support
+### System Requirements & Performance
+#### Hardware Recommendations
+- **CPU**: 4+ cores for optimal multi-stream performance
+- **RAM**: 4GB+ for smooth 7-11 video playback
+- **Network**: Minimum 25 Mbps for multi-stream HLS
+- **Browser**: Chrome 80+, Firefox 75+, Safari 13+ (native HLS), Edge 80+
+- **Mobile**: iOS Safari 13+, Chrome Mobile 80+
