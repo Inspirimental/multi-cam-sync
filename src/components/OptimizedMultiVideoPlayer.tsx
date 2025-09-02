@@ -78,9 +78,9 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
       const videoElements: HTMLVideoElement[] = Object.values(videoRefs.current).filter(Boolean) as HTMLVideoElement[];
       if (videoElements.length === 0) return;
 
-      // Synchronize to master or first available
-      const masterVideo = videoRefs.current[MASTER_ID] || videoElements[0];
-      const syncTime = masterVideo.currentTime;
+      // Synchronize to expanded video if available, otherwise to master
+      const referenceVideo = expandedVideo ? videoRefs.current[expandedVideo] : videoRefs.current[MASTER_ID] || videoElements[0];
+      const syncTime = referenceVideo?.currentTime || 0;
       videoElements.forEach(v => { try { v.currentTime = syncTime; } catch {} });
 
       // Ensure readiness
@@ -102,7 +102,7 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
         setIsPlaying(true);
       }
     }
-  }, [isPlaying, MASTER_ID]);
+  }, [isPlaying, MASTER_ID, expandedVideo]);
 
   const handleSeek = useCallback((seconds: number) => {
     const newTime = Math.max(0, Math.min(duration, currentTime + seconds));
