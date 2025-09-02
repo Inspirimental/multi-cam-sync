@@ -75,7 +75,11 @@ export const VideoCard: React.FC<VideoCardProps> = ({
       });
       
       hlsRef.current = hls;
-      hls.loadSource(src);
+      const sourceUrl = src.startsWith('https://sharing.timbeck.de/hls/')
+        ? '/hls-proxy/' + src.split('/hls/')[1]
+        : src;
+      console.log('[HLS] loading', sourceUrl);
+      hls.loadSource(sourceUrl);
       hls.attachMedia(video);
       
       hls.on(Hls.Events.ERROR, (event, data) => {
