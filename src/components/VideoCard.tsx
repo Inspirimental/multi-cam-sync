@@ -47,7 +47,6 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const hasSrc = Boolean(src);
   const hlsRef = useRef<Hls | null>(null);
-  const triedCredsRef = useRef(false);
   
   // Initialize HLS for .m3u8 streams
   useEffect(() => {
