@@ -55,9 +55,12 @@ export const VideoCard: React.FC<VideoCardProps> = ({
 
     // Check if this is an HLS stream
     const isHLS = src.includes('.m3u8');
-    
-    if (isHLS && Hls.isSupported()) {
-      // Use HLS.js for Chrome and other browsers that don't support HLS natively
+
+    // Prefer native HLS (Safari) first to avoid CORS issues with XHR
+    if (isHLS && video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = src;
+    } else if (isHLS && Hls.isSupported()) {
+      // Use Hls.js for browsers without native HLS support
       if (hlsRef.current) {
         hlsRef.current.destroy();
       }
@@ -67,6 +70,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({
         lowLatencyMode: true,
         fragLoadingMaxRetry: 1,
         manifestLoadingMaxRetry: 1,
+        // Do not send credentials by default; adjust if your server requires it
+        xhrSetup: (xhr) => { xhr.withCredentials = false; },
       });
       
       hlsRef.current = hls;
@@ -86,9 +91,6 @@ export const VideoCard: React.FC<VideoCardProps> = ({
         try { video.dispatchEvent(new Event('loadedmetadata')); } catch {}
       });
       
-    } else if (isHLS && video.canPlayType('application/vnd.apple.mpegurl')) {
-      // Safari supports HLS natively
-      video.src = src;
     } else if (!isHLS) {
       // Regular video file
       video.src = src;
@@ -294,6 +296,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
               muted
               preload={isExpanded ? 'auto' : 'metadata'}
               playsInline
+              crossOrigin="anonymous"
               disablePictureInPicture
               onLoadedMetadata={handleOnLoadedMetadata}
               onLoadedData={handleOnLoadedMetadata}
