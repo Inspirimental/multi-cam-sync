@@ -10,17 +10,16 @@ import { VideoPlayerProps, VideoFile, VideoConfig } from '@/types/VideoTypes';
 import { formatTime } from '@/utils/videoUtils';
 
 const defaultVideoConfigs: VideoConfig[] = [
-  { id: 'NCBSC_front', name: 'NCBSC_front.mp4', title: 'Front Camera', position: 'front', src: '/videos/NCBSC_front.mp4' },
-  { id: 'TCBSC_back', name: 'TCBSC_back.mp4', title: 'Back Camera', position: 'back', src: '/videos/TCBSC_back.mp4' },
-  { id: 'TCMVC_back', name: 'TCMVC_back.mp4', title: 'Back Center', position: 'back', src: '/videos/TCMVC_back.mp4' },
-  { id: 'NLBSC_left', name: 'NLBSC_left.mp4', title: 'Left Side', position: 'side', src: '/videos/NLBSC_left.mp4' },
-  { id: 'NLMVC_back_left', name: 'NLMVC_back_left.mp4', title: 'Back Left', position: 'side', src: '/videos/NLMVC_back_left.mp4' },
-  { id: 'NLMVC_front_left', name: 'NLMVC_front_left.mp4', title: 'Front Left', position: 'side', src: '/videos/NLMVC_front_left.mp4' },
-  { id: 'NRBSC_right', name: 'NRBSC_right.mp4', title: 'Right Side', position: 'side', src: '/videos/NRBSC_right.mp4' },
-  { id: 'NRMVC_back_right', name: 'NRMVC_back_right.mp4', title: 'Back Right', position: 'side', src: '/videos/NRMVC_back_right.mp4' },
-  { id: 'NRMVC_front_right', name: 'NRMVC_front_right.mp4', title: 'Front Right', position: 'side', src: '/videos/NRMVC_front_right.mp4' },
-  { id: 'WCNVC_front', name: 'WCNVC_front.mp4', title: 'Wide Front', position: 'front', src: '/videos/WCNVC_front.mp4' },
-  { id: 'WCWVC_front', name: 'WCWVC_front.mp4', title: 'Wide Center', position: 'front', src: '/videos/WCWVC_front.mp4' },
+  { id: 'TCBSC_back', name: 'TCBSC_back.m3u8', title: 'Back Camera', position: 'back', src: '/videos/TCBSC_back.m3u8' },
+  { id: 'TCMVC_back', name: 'TCMVC_back.m3u8', title: 'Back Center', position: 'back', src: '/videos/TCMVC_back.m3u8' },
+  { id: 'NLBSC_left', name: 'NLBSC_left.m3u8', title: 'Left Side', position: 'side', src: '/videos/NLBSC_left.m3u8' },
+  { id: 'NLMVC_back_left', name: 'NLMVC_back_left.m3u8', title: 'Back Left', position: 'side', src: '/videos/NLMVC_back_left.m3u8' },
+  { id: 'NLMVC_front_left', name: 'NLMVC_front_left.m3u8', title: 'Front Left', position: 'side', src: '/videos/NLMVC_front_left.m3u8' },
+  { id: 'NRBSC_right', name: 'NRBSC_right.m3u8', title: 'Right Side', position: 'side', src: '/videos/NRBSC_right.m3u8' },
+  { id: 'NRMVC_back_right', name: 'NRMVC_back_right.m3u8', title: 'Back Right', position: 'side', src: '/videos/NRMVC_back_right.m3u8' },
+  { id: 'NRMVC_front_right', name: 'NRMVC_front_right.m3u8', title: 'Front Right', position: 'side', src: '/videos/NRMVC_front_right.m3u8' },
+  { id: 'WCNVC_front', name: 'WCNVC_front.m3u8', title: 'Wide Front', position: 'front', src: '/videos/WCNVC_front.m3u8' },
+  { id: 'WCWVC_front', name: 'WCWVC_front.m3u8', title: 'Wide Center', position: 'front', src: '/videos/WCWVC_front.m3u8' },
 ];
 
 const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({ 
@@ -320,7 +319,6 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
 
   const videoLayout = [
     { id: 'NLMVC_front_left', title: 'Front Left', size: 'small' },
-    { id: 'NCBSC_front', title: 'Front Camera', size: 'large' },
     { id: 'NRMVC_front_right', title: 'Front Right', size: 'small' },
     { id: 'WCWVC_front', title: 'Wide Center', size: 'medium', span: 'center' },
     { id: 'NLBSC_left', title: 'Left Side', size: 'small' },
@@ -361,13 +359,13 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
       <div className="relative flex-1">
         {/* Always render the grid; expand by reusing the same DOM video element via CSS */}
         <div className="flex flex-col gap-3 max-w-6xl mx-auto mb-6 animate-fade-in">
-          {/* Row 1: Front Left, Front Camera, Front Right */}
-          <div className="flex justify-center items-start gap-3">
+          {/* Row 1: Front Left and Front Right (no center camera) */}
+          <div className="flex justify-center items-start gap-8">
             <VideoCard
               id="NLMVC_front_left"
               title="Front Left"
               src={srcFor('NLMVC_front_left')}
-              width="w-32"
+              width="w-48"
               isPlaying={isPlaying}
               isExpanded={expandedVideo === 'NLMVC_front_left'}
               onVideoClick={handleVideoClick}
@@ -384,30 +382,10 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
               videoRefs={videoRefs}
             />
             <VideoCard
-              id="NCBSC_front"
-              title="Front Camera"
-              src={srcFor('NCBSC_front')}
-              width="w-96"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'NCBSC_front'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('NCBSC_front')}
-              onLoadedMetadata={handleVideoLoadedMetadata('NCBSC_front')}
-              onError={handleVideoError('NCBSC_front')}
-              onLoadStart={() => {
-                if (videoTimes['NCBSC_front'] && videoRefs.current['NCBSC_front']) {
-                  videoRefs.current['NCBSC_front']!.currentTime = videoTimes['NCBSC_front'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-            <VideoCard
               id="NRMVC_front_right"
               title="Front Right"
               src={srcFor('NRMVC_front_right')}
-              width="w-32"
+              width="w-48"
               isPlaying={isPlaying}
               isExpanded={expandedVideo === 'NRMVC_front_right'}
               onVideoClick={handleVideoClick}

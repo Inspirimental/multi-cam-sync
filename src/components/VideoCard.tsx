@@ -254,7 +254,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
                 setIsVideoPlaying(true);
               }}
             >
-              <source src={src} type="video/mp4" />
+              <source src={src} type="application/x-mpegURL" />
             </video>
 
             {/* Video Controls for Expanded View */}
