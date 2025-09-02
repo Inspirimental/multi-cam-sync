@@ -237,7 +237,7 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
   }, [totalToLoad]);
 
   // Removed redundant firstVideo listeners to prevent desynchronization with expanded/master source
-
+  
   useEffect(() => {
     Object.keys(loadedVideos).forEach((id) => {
       const v = videoRefs.current[id];
@@ -248,6 +248,35 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
     setAllVideosLoaded(totalToLoad === 0);
     setIsPlaying(false);
   }, [loadedVideos, totalToLoad]);
+
+  // Failsafe: ensure loader does not hang forever if videos neither load nor error (e.g., CORS/HLS recovery loops)
+  useEffect(() => {
+    if (totalToLoad === 0) return;
+    const timeout = window.setTimeout(() => {
+      const ids = videoConfigs
+        .filter(v => Boolean(srcFor(v.id)))
+        .map(v => v.id);
+
+      let added = 0;
+      ids.forEach((id) => {
+        if (!countedRef.current[id]) {
+          countedRef.current[id] = true;
+          added += 1;
+          console.warn('[video] timeout counted as loaded', id);
+        }
+      });
+
+      if (added > 0) {
+        setLoadedVideoCount((prev) => {
+          const newCount = prev + added;
+          if (newCount >= totalToLoad) setAllVideosLoaded(true);
+          return newCount;
+        });
+      }
+    }, 5000);
+
+    return () => window.clearTimeout(timeout);
+  }, [totalToLoad, srcFor, videoConfigs]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
