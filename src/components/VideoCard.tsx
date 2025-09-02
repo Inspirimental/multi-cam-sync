@@ -95,9 +95,13 @@ export const VideoCard: React.FC<VideoCardProps> = ({
               try { hls.recoverMediaError(); } catch {}
               break;
             default:
-              setHasError(true);
-              try { video.dispatchEvent(new Event('error')); } catch {}
+              // no-op in switch
+              break;
           }
+
+          // Always mark as error to avoid the global loader getting stuck in Chrome
+          setHasError(true);
+          try { video.dispatchEvent(new Event('error')); } catch {}
         }
       });
       
