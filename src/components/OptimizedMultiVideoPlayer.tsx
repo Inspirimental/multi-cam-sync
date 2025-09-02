@@ -161,11 +161,13 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
       }
     }
     
-    // Update main time based on active video
-    if (id === (expandedVideo || MASTER_ID)) setCurrentTime(t);
+    // Drive the global progress with the expanded video, or with any advancing video if no expanded one
+    const epsilon = 0.05; // ~3 frames at 60fps
+    const shouldDrive = id === (expandedVideo || MASTER_ID) || (!expandedVideo && t > currentTime + epsilon);
+    if (shouldDrive) setCurrentTime(t);
     
     setVideoTimes(prev => ({ ...prev, [id]: t }));
-  }, [MASTER_ID, expandedVideo, duration]);
+  }, [MASTER_ID, expandedVideo, duration, currentTime]);
 
   // Seamless video expansion with explicit stop requirement
   const handleVideoClick = useCallback((videoId: string) => {
