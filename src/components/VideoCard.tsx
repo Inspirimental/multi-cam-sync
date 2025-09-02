@@ -343,7 +343,10 @@ export const VideoCard: React.FC<VideoCardProps> = ({
                 </Button>
 
                 {/* Video Controls */}
-                <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[62] bg-black/80 rounded-lg p-4 min-w-96">
+                <div 
+                  className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[62] bg-black/80 rounded-lg p-4 min-w-96"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   {/* Progress Bar */}
                   <div className="mb-3">
                     <input
@@ -352,6 +355,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
                       max={duration || 0}
                       value={currentTime}
                       onChange={handleSeek}
+                      onClick={(e) => e.stopPropagation()}
                       className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
                     />
                   </div>
