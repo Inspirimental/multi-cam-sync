@@ -70,8 +70,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({
         lowLatencyMode: true,
         fragLoadingMaxRetry: 1,
         manifestLoadingMaxRetry: 1,
-        // Do not send credentials by default; adjust if your server requires it
-        xhrSetup: (xhr) => { xhr.withCredentials = false; },
+        // Send credentials (cookies) for cross-origin HLS requests if the server expects auth
+        xhrSetup: (xhr) => { xhr.withCredentials = true; },
       });
       
       hlsRef.current = hls;
