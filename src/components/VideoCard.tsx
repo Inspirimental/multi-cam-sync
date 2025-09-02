@@ -296,7 +296,6 @@ export const VideoCard: React.FC<VideoCardProps> = ({
               muted
               preload={isExpanded ? 'auto' : 'metadata'}
               playsInline
-              crossOrigin="anonymous"
               disablePictureInPicture
               onLoadedMetadata={handleOnLoadedMetadata}
               onLoadedData={handleOnLoadedMetadata}
