@@ -10,17 +10,17 @@ import { VideoPlayerProps, VideoFile, VideoConfig, CloudFrontApiResponse } from 
 import { formatTime } from '@/utils/videoUtils';
 
 const defaultVideoConfigs: VideoConfig[] = [
-  { id: 'NCBSC_front', name: 'NCBSC_front.m3u8', title: 'Front Camera', position: 'front', src: 'https://sharing.timbeck.de/hls/NCBSC_front/index.m3u8' },
-  { id: 'TCBSC_back', name: 'TCBSC_back.m3u8', title: 'Back Camera', position: 'back', src: '/videos/TCBSC_back.m3u8' },
-  { id: 'TCMVC_back', name: 'TCMVC_back.m3u8', title: 'Back Center', position: 'back', src: '/videos/TCMVC_back.m3u8' },
-  { id: 'NLBSC_left', name: 'NLBSC_left.m3u8', title: 'Left Side', position: 'side', src: '/videos/NLBSC_left.m3u8' },
-  { id: 'NLMVC_back_left', name: 'NLMVC_back_left.m3u8', title: 'Back Left', position: 'side', src: '/videos/NLMVC_back_left.m3u8' },
-  { id: 'NLMVC_front_left', name: 'NLMVC_front_left.m3u8', title: 'Front Left', position: 'side', src: '/videos/NLMVC_front_left.m3u8' },
-  { id: 'NRBSC_right', name: 'NRBSC_right.m3u8', title: 'Right Side', position: 'side', src: '/videos/NRBSC_right.m3u8' },
-  { id: 'NRMVC_back_right', name: 'NRMVC_back_right.m3u8', title: 'Back Right', position: 'side', src: '/videos/NRMVC_back_right.m3u8' },
-  { id: 'NRMVC_front_right', name: 'NRMVC_front_right.m3u8', title: 'Front Right', position: 'side', src: '/videos/NRMVC_front_right.m3u8' },
-  { id: 'WCNVC_front', name: 'WCNVC_front.m3u8', title: 'Wide Front', position: 'front', src: '/videos/WCNVC_front.m3u8' },
-  { id: 'WCWVC_front', name: 'WCWVC_front.m3u8', title: 'Wide Center', position: 'front', src: '/videos/WCWVC_front.m3u8' },
+  { id: 'NCBSC_front', name: 'NCBSC_front.m3u8', title: 'Front Camera', position: 'front', src: 'https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_front/index.m3u8' },
+  { id: 'TCBSC_back', name: 'TCBSC_back.m3u8', title: 'Back Camera', position: 'back', src: 'https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_back/index.m3u8' },
+  { id: 'TCMVC_back', name: 'TCMVC_back.m3u8', title: 'Back Center', position: 'back', src: 'https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_back_center/index.m3u8' },
+  { id: 'NLBSC_left', name: 'NLBSC_left.m3u8', title: 'Left Side', position: 'side', src: 'https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_left/index.m3u8' },
+  { id: 'NLMVC_back_left', name: 'NLMVC_back_left.m3u8', title: 'Back Left', position: 'side', src: 'https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_back_left/index.m3u8' },
+  { id: 'NLMVC_front_left', name: 'NLMVC_front_left.m3u8', title: 'Front Left', position: 'side', src: 'https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_front_left/index.m3u8' },
+  { id: 'NRBSC_right', name: 'NRBSC_right.m3u8', title: 'Right Side', position: 'side', src: 'https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_right/index.m3u8' },
+  { id: 'NRMVC_back_right', name: 'NRMVC_back_right.m3u8', title: 'Back Right', position: 'side', src: 'https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_back_right/index.m3u8' },
+  { id: 'NRMVC_front_right', name: 'NRMVC_front_right.m3u8', title: 'Front Right', position: 'side', src: 'https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_front_right/index.m3u8' },
+  { id: 'WCNVC_front', name: 'WCNVC_front.m3u8', title: 'Wide Front', position: 'front', src: 'https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_wide_front/index.m3u8' },
+  { id: 'WCWVC_front', name: 'WCWVC_front.m3u8', title: 'Wide Center', position: 'front', src: 'https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_wide_center/index.m3u8' },
 ];
 
 const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({ 
