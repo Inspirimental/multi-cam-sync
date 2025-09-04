@@ -74,15 +74,17 @@ export const VideoCard: React.FC<VideoCardProps> = ({
         }
       })();
 
-      // Simple HLS setup without credentials for cross-origin
+      // Check if this is a CloudFront URL that needs signed cookies
+      const isCloudFront = src.includes('cloudfront.net') || src.includes('.amazonaws.com');
+      
       const hls = new Hls({
         enableWorker: false,
         lowLatencyMode: true,
         fragLoadingMaxRetry: 1,
         manifestLoadingMaxRetry: 1,
         xhrSetup: (xhr) => { 
-          // No credentials for cross-origin streams to avoid CORS blocks
-          xhr.withCredentials = false; 
+          // Enable credentials for CloudFront signed cookies
+          xhr.withCredentials = isCloudFront;
         },
       });
       
@@ -321,6 +323,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
               muted
               preload={isExpanded ? 'auto' : 'metadata'}
               playsInline
+              crossOrigin={src.includes('cloudfront.net') || src.includes('.amazonaws.com') ? 'use-credentials' : undefined}
               onLoadedMetadata={handleOnLoadedMetadata}
               onLoadedData={handleOnLoadedMetadata}
               onTimeUpdate={handleTimeUpdate}
