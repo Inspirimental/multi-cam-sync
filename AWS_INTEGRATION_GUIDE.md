@@ -1,60 +1,14 @@
-# AWS CloudFront Video Streaming Integration Guide
+# AWS CloudFront Player Integration
 
-## Überblick
+## Benötigte Dateien
 
-Diese Anwendung ist ein Multi-Video-Player, der speziell für die Integration mit AWS CloudFront HLS-Streams entwickelt wurde. Das System unterstützt die Wiedergabe von bis zu 11 synchronisierten Kamera-Streams mit optimierter Performance und Benutzerfreundlichkeit.
-
-## Architektur
-
-```
-Frontend (React/TypeScript)
-    ↓
-CloudFront API Response
-    ↓
-HLS.js Video Player
-    ↓
-AWS CloudFront Distribution
-    ↓
-S3 Bucket (HLS Segments)
-```
-
-## Benötigte Dateien für vollständige Integration
-
-### Core Player Komponenten
-```
-src/
-├── components/
-│   ├── OptimizedMultiVideoPlayer.tsx    # Haupt-Player Komponente
-│   ├── VideoCard.tsx                     # Einzelne Video-Kachel
-│   ├── VideoStreamHeader.tsx             # Stream Header/Info
-│   ├── VideoPlayerControls.tsx           # Transport Controls
-│   ├── VideoGridLayout.tsx               # Grid Layout Manager
-│   ├── VideoFileImporter.tsx             # File Import (optional)
-│   └── LoadingModal.tsx                  # Loading Indicator
-├── hooks/
-│   ├── useVideoSync.tsx                  # Video Synchronisation
-│   └── useCloudFrontData.tsx             # CloudFront API Integration
-├── utils/
-│   ├── videoUtils.ts                     # Zeit-Formatierung etc.
-│   └── videoGridUtils.ts                 # Grid-Layout Utilities
-├── types/
-│   └── VideoTypes.ts                     # TypeScript Definitionen
-└── data/
-    └── mockVideoStreams.ts               # Mock-Daten (für Testing)
-```
-
-### Page Integration
-```
-src/pages/
-└── VideoReview.tsx                       # Beispiel-Integration
-```
-
-### Minimale Integration (nur Player):
+### Minimale Integration:
 - `OptimizedMultiVideoPlayer.tsx`
 - `VideoCard.tsx` 
 - `useVideoSync.tsx`
 - `VideoTypes.ts`
 - `videoUtils.ts`
+- HLS.js dependency (`npm install hls.js`)
 
 ## CloudFront API Integration
 
@@ -85,106 +39,11 @@ Die Anwendung erwartet folgende JSON-Struktur von der CloudFront API:
 }
 ```
 
-### Unterstützte Camera Positions
+## Player Integration
 
-Das System unterstützt insgesamt **11 Kamera-Positionen**. Im aktuellen Beispiel sind **9 aktiv**, **2 fehlen**.
-
-#### Vollständige Kamera-Position Übersicht:
-
-| Camera Position | Titel | Grid Position | Größe | Status |
-|----------------|-------|---------------|-------|--------|
-| `FLMVC_back_left` | Front Left | Row 1, Left | Small (w-32) | ✅ **Aktiv** |
-| `FLNVC_front` | Front Camera | Row 1, Center | Large (w-96) | ✅ **Aktiv** |
-| `FRMVC_back_right` | Front Right | Row 1, Right | Small (w-32) | ✅ **Aktiv** |
-| `FLOBC_front` | Wide Center | Row 2, Left | Medium (w-48) | ✅ **Aktiv** |
-| `NCMVC_front` | Wide Front | Row 2, Right | Medium (w-48) | ✅ **Aktiv** |
-| `FLBSC_down` | Left Side | Row 3, Left | Small (w-32) | ✅ **Aktiv** |
-| `BCMVC_back` | Back Center | Row 3, Center | Medium (w-64) | ✅ **Aktiv** |
-| `FRBSC_down` | Right Side | Row 3, Right | Small (w-32) | ✅ **Aktiv** |
-| `BCBSC_back` | Back Camera | Row 4, Center | Large (w-96) | ✅ **Aktiv** |
-| `NLMVC_front_left` | Extra Front Left | Row 1, Left Alt | Small (w-32) | ❌ **Fehlt** |
-| `NRMVC_front_right` | Extra Front Right | Row 1, Right Alt | Small (w-32) | ❌ **Fehlt** |
-
-#### Fehlende Positionen für vollständige 11-Stream-Konfiguration:
-1. **`NLMVC_front_left`** - Extra Front Left Camera
-2. **`NRMVC_front_right`** - Extra Front Right Camera
-
-#### Erweiterte Grid-Anordnung (11 Streams):
-```
-Row 1: [NLMVC_front_left] [FLNVC_front] [NRMVC_front_right]
-       [FLMVC_back_left]              [FRMVC_back_right]
-                        (5 Videos)
-
-Row 2: [FLOBC_front] [NCMVC_front]
-                (2 Videos)
-
-Row 3: [FLBSC_down] [BCMVC_back] [FRBSC_down]
-                (3 Videos)
-
-Row 4: [BCBSC_back]
-          (1 Video)
-```
-
-#### Mapping für AWS Kollege:
-```json
-{
-  "missing_streams": [
-    {
-      "camera_position": "NLMVC_front_left",
-      "description": "Extra Front Left Camera",
-      "grid_position": "Row 1, Alt Left",
-      "size": "w-32"
-    },
-    {
-      "camera_position": "NRMVC_front_right", 
-      "description": "Extra Front Right Camera",
-      "grid_position": "Row 1, Alt Right",
-      "size": "w-32"
-    }
-  ]
-}
-```
-
-## HLS Stream Konfiguration
-
-### Voraussetzungen für CloudFront
-
-1. **S3 Bucket Setup**:
-   ```
-   bucket-name/
-   ├── vehicle_id/
-   │   ├── session_id_camera_position/
-   │   │   ├── master.m3u8
-   │   │   ├── playlist_*.m3u8
-   │   │   └── segment_*.ts
-   ```
-
-2. **CloudFront Distribution**:
-   - Origin: S3 Bucket
-   - Behavior: `/hls/*` → S3 Origin
-   - CORS Headers aktiviert
-   - Signed Cookies Support (optional)
-
-### HLS.js Konfiguration
-
-```javascript
-const hlsConfig = {
-  enableWorker: false,
-  lowLatencyMode: true,
-  fragLoadingMaxRetry: 1,
-  manifestLoadingMaxRetry: 1,
-  xhrSetup: (xhr) => { 
-    xhr.withCredentials = false; // Für Cross-Origin ohne Credentials
-  }
-};
-```
-
-## Implementierungsdetails
-
-### 1. API Integration (VideoReview.tsx)
+### 1. CloudFront Data Hook verwenden
 
 ```typescript
-// Verwendung des CloudFront Data Hooks
 import { useCloudFrontData } from '@/hooks/useCloudFrontData';
 
 const { cloudFrontData, loading, error } = useCloudFrontData({ 
@@ -193,188 +52,22 @@ const { cloudFrontData, loading, error } = useCloudFrontData({
 });
 ```
 
-### 2. Player Integration
+### 2. Player einbinden
 
 ```typescript
-// Minimale Integration
 import OptimizedMultiVideoPlayer from '@/components/OptimizedMultiVideoPlayer';
 
 <OptimizedMultiVideoPlayer
-  videoFiles={currentStream.videoFiles}
   cloudFrontData={cloudFrontData}
   onClose={handleBack}
   streamName={currentStream.name}
 />
 ```
 
-### 3. Video Configuration
-
-Die Anwendung priorisiert CloudFront-Daten automatisch:
-
-```typescript
-// Aus videoGridUtils.ts
-export const createVideoConfigs = (videoFiles, cloudFrontData) => {
-  // Priorität 1: CloudFront Streams
-  if (cloudFrontData?.streams && cloudFrontData.streams.length > 0) {
-    return cloudFrontData.streams.map((stream) => ({
-      id: stream.camera_position,
-      name: `${stream.camera_position}.m3u8`,
-      title: stream.camera_position.replace(/_/g, ' '),
-      src: stream.hls_manifest_url
-    }));
-  }
-  
-  // Fallback: Default Konfiguration
-  return defaultVideoConfigs;
-};
-```
-
-### 4. Keyboard Controls
+### 3. Keyboard Controls
 
 - **Leertaste**: Play/Pause
-- **←**: Frame zurück (1/30 Sekunde)
+- **←**: Frame zurück (1/30 Sekunde)  
 - **→**: Frame vor (1/30 Sekunde)
 
-### 5. Error Handling
-
-- **HLS Errors**: Automatische Wiederherstellung bei Netzwerk-/Media-Fehlern
-- **CORS Issues**: Deaktivierte Credentials für Cross-Origin Requests
-- **Timeout Protection**: 5-Sekunden-Timeout für hängende Video-Loads
-
-## Performance Optimierungen
-
-### 1. Video Loading
-- Progressive Loading mit Metadata-Priorität
-- Automatische Thumbnail-Generierung
-- Lazy Loading für nicht-sichtbare Videos
-
-### 2. Synchronisation
-- Master-Video-Konzept für Zeitsteuerung
-- Frame-genaue Synchronisation (30fps)
-- Optimierte Seek-Performance
-
-### 3. Memory Management
-- HLS Instance Cleanup bei Component Unmount
-- Thumbnail Canvas Optimierung
-- Video Element Recycling
-
-## Security Considerations
-
-### Signed Cookies (Optional)
-
-Wenn Signed Cookies verwendet werden:
-
-```json
-{
-  "signed_cookies": {
-    "CloudFront-Policy": "eyJ...",
-    "CloudFront-Signature": "abc...",
-    "CloudFront-Key-Pair-Id": "APKAI..."
-  }
-}
-```
-
-Die Cookies werden automatisch für alle HLS-Requests verwendet.
-
-### CORS Configuration
-
-CloudFront Behavior:
-```
-Allowed Methods: GET, HEAD, OPTIONS
-Allowed Headers: *
-Allowed Origins: https://yourdomain.com
-Cached Headers: Authorization, Origin
-```
-
-## Monitoring & Logging
-
-### Frontend Logs
-- HLS Loading Events: `[HLS] loading <url>`
-- Error Events: `[HLS Error] <camera_id> <error_data>`
-- Performance: `[video] timeout counted as loaded <id>`
-
-### Metriken
-- Video Load Success Rate
-- Average Load Time
-- Stream Quality Metrics
-- Error Rate per Camera Position
-
-## Deployment Checklist
-
-### Frontend Dateien (Vollständige Integration)
-- [ ] Alle Core-Komponenten kopiert
-- [ ] Hooks implementiert (`useVideoSync`, `useCloudFrontData`)
-- [ ] Utilities eingebunden (`videoUtils`, `videoGridUtils`)
-- [ ] TypeScript-Typen definiert (`VideoTypes.ts`)
-- [ ] HLS.js Dependency installiert (`npm install hls.js`)
-- [ ] Tailwind/shadcn UI Komponenten verfügbar
-
-### Minimale Integration (nur Player)
-- [ ] `OptimizedMultiVideoPlayer.tsx`
-- [ ] `VideoCard.tsx`
-- [ ] `useVideoSync.tsx` 
-- [ ] `VideoTypes.ts`
-- [ ] `videoUtils.ts`
-- [ ] HLS.js installiert
-
-### AWS Infrastructure
-- [ ] S3 Bucket mit korrekter Struktur
-- [ ] CloudFront Distribution konfiguriert
-- [ ] CORS Headers gesetzt
-- [ ] Signed Cookies aktiviert (optional)
-- [ ] Monitoring/Logging aktiviert
-
-### API Endpoints
-- [ ] GET `/api/streams/{streamId}` implementiert
-- [ ] Error Handling für nicht-existierende Streams
-- [ ] Rate Limiting konfiguriert
-- [ ] Authentication/Authorization
-
-### Frontend
-- [ ] Umgebungsvariablen gesetzt
-- [ ] Error Boundaries implementiert
-- [ ] Performance Monitoring aktiviert
-- [ ] Browser Kompatibilität getestet
-
-## Troubleshooting
-
-### Häufige Probleme
-
-1. **Videos laden nicht**:
-   - CORS Konfiguration prüfen
-   - HLS Manifest URL validieren
-   - CloudFront Cache-Status überprüfen
-
-2. **Synchronisation Probleme**:
-   - Alle Videos haben gleiche Framerate?
-   - Master-Video Auswahl korrekt?
-   - Netzwerk-Latenz berücksichtigen
-
-3. **Performance Issues**:
-   - Anzahl gleichzeitiger Streams reduzieren
-   - Video-Auflösung optimieren
-   - Browser-Cache leeren
-
-### Debug Commands
-
-```javascript
-// Console Commands für Debugging
-window.videoDebug = {
-  getCurrentTimes: () => Object.values(videoRefs.current).map(v => v?.currentTime),
-  getReadyStates: () => Object.values(videoRefs.current).map(v => v?.readyState),
-  forceSync: (time) => Object.values(videoRefs.current).forEach(v => v.currentTime = time)
-};
-```
-
-## Kontakt & Support
-
-Für weitere Fragen zur AWS-Integration:
-- Prüfen Sie die CloudFront Access Logs
-- Validieren Sie die HLS Manifest-Dateien
-- Testen Sie einzelne Streams isoliert
-
----
-
-**Version**: 1.0  
-**Letzte Aktualisierung**: $(date)  
-**Kompatibilität**: AWS CloudFront, HLS.js 1.6+
+Der Player verwendet automatisch die HLS-URLs aus der CloudFront API Response.
