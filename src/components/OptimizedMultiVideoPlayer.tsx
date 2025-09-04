@@ -1,27 +1,14 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Play, Pause, SkipBack, SkipForward, ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { X } from 'lucide-react';
 import VideoFileImporter from './VideoFileImporter';
-import { VideoCard } from './VideoCard';
 import { LoadingModal } from './LoadingModal';
-import { VideoPlayerProps, VideoFile, VideoConfig, CloudFrontApiResponse } from '@/types/VideoTypes';
-import { formatTime } from '@/utils/videoUtils';
-
-const defaultVideoConfigs: VideoConfig[] = [
-  { id: 'NCBSC_front', name: 'NCBSC_front.m3u8', title: 'Front Camera', position: 'front', src: 'https://sharing.timbeck.de/hls/NCBSC_front/index.m3u8' },
-  { id: 'TCBSC_back', name: 'TCBSC_back.m3u8', title: 'Back Camera', position: 'back', src: 'https://sharing.timbeck.de/hls/TCBSC_back/index.m3u8' },
-  { id: 'TCMVC_back', name: 'TCMVC_back.m3u8', title: 'Back Center', position: 'back', src: 'https://sharing.timbeck.de/hls/TCMVC_back/index.m3u8' },
-  { id: 'NLBSC_left', name: 'NLBSC_left.m3u8', title: 'Left Side', position: 'side', src: 'https://sharing.timbeck.de/hls/NLBSC_left/index.m3u8' },
-  { id: 'NLMVC_back_left', name: 'NLMVC_back_left.m3u8', title: 'Back Left', position: 'side', src: 'https://sharing.timbeck.de/hls/NLMVC_back_left/index.m3u8' },
-  { id: 'NLMVC_front_left', name: 'NLMVC_front_left.m3u8', title: 'Front Left', position: 'side', src: 'https://sharing.timbeck.de/hls/NLMVC_front_left/index.m3u8' },
-  { id: 'NRBSC_right', name: 'NRBSC_right.m3u8', title: 'Right Side', position: 'side', src: 'https://sharing.timbeck.de/hls/NRBSC_right/index.m3u8' },
-  { id: 'NRMVC_back_right', name: 'NRMVC_back_right.m3u8', title: 'Back Right', position: 'side', src: 'https://sharing.timbeck.de/hls/NRMVC_back_right/index.m3u8' },
-  { id: 'NRMVC_front_right', name: 'NRMVC_front_right.m3u8', title: 'Front Right', position: 'side', src: 'https://sharing.timbeck.de/hls/NRMVC_front_right/index.m3u8' },
-  { id: 'WCNVC_front', name: 'WCNVC_front.m3u8', title: 'Wide Front', position: 'front', src: 'https://sharing.timbeck.de/hls/WCNVC_front/index.m3u8' },
-  { id: 'WCWVC_front', name: 'WCWVC_front.m3u8', title: 'Wide Center', position: 'front', src: 'https://sharing.timbeck.de/hls/WCWVC_front/index.m3u8' },
-];
+import { VideoStreamHeader } from './VideoStreamHeader';
+import { VideoPlayerControls } from './VideoPlayerControls';
+import { VideoGridLayout } from './VideoGridLayout';
+import { VideoPlayerProps } from '@/types/VideoTypes';
+import { createVideoConfigs } from '@/utils/videoGridUtils';
+import { useVideoSync } from '@/hooks/useVideoSync';
 
 const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({ 
   videoFiles = {}, 
@@ -29,166 +16,39 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
   onClose, 
   streamName = "Vehicle Camera Monitor"
 }) => {
-  // Create video configs - prioritize CloudFront data
-  const videoConfigs = (() => {
-    // If CloudFront data is available, use it directly
-    if (cloudFrontData?.streams && cloudFrontData.streams.length > 0) {
-      return cloudFrontData.streams.map((stream, index) => ({
-        id: stream.camera_position,
-        name: `${stream.camera_position}.m3u8`,
-        title: stream.camera_position.replace(/_/g, ' '),
-        position: stream.camera_position.includes('front') ? 'front' as const : 
-                 stream.camera_position.includes('back') ? 'back' as const : 'side' as const,
-        src: stream.hls_manifest_url
-      }));
-    }
-    
-    // Fallback: Use default configs with video files if provided
-    return defaultVideoConfigs.map(config => {
-      let src = config.src;
-      
-      // Use direct video files mapping if available
-      if (videoFiles[config.id]) {
-        src = videoFiles[config.id];
-      }
-      return { ...config, src };
-    });
-  })();
-
-  const MASTER_ID = videoConfigs[0].id;
-  const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
-  const countedRef = useRef<{ [key: string]: boolean }>({});
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [expandedVideo, setExpandedVideo] = useState<string | null>(null);
   const [loadedVideos, setLoadedVideos] = useState<{ [key: string]: string }>({});
-  const [videoTimes, setVideoTimes] = useState<{ [key: string]: number }>({});
-  const [loadedVideoCount, setLoadedVideoCount] = useState(0);
-  const [allVideosLoaded, setAllVideosLoaded] = useState(false);
+  
+  // Create video configs - prioritize CloudFront data
+  const videoConfigs = createVideoConfigs(videoFiles, cloudFrontData);
+
+  // Video synchronization and state management
+  const {
+    videoRefs,
+    countedRef,
+    isPlaying,
+    setIsPlaying,
+    currentTime,
+    setCurrentTime,
+    duration,
+    setDuration,
+    videoTimes,
+    setVideoTimes,
+    loadedVideoCount,
+    setLoadedVideoCount,
+    allVideosLoaded,
+    setAllVideosLoaded,
+    setVideoRef,
+    handlePlayPause,
+    handleSeek,
+    handleFrameStep,
+    handleProgressBarClick,
+    onTimeUpdateFor
+  } = useVideoSync({ videoConfigs, expandedVideo });
+
   const hasExternalVideos = Object.keys(videoFiles).length > 0;
   const srcFor = useCallback((id: string) => loadedVideos[id] || (videoConfigs.find(v => v.id === id)?.src || ''), [loadedVideos, videoConfigs]);
   const totalToLoad = videoConfigs.filter(v => Boolean(srcFor(v.id))).length;
-
-  const setVideoRef = useCallback((id: string) => (ref: HTMLVideoElement | null) => {
-    videoRefs.current[id] = ref;
-  }, []);
-
-  // Improved synchronization function
-  const syncAllVideos = useCallback((targetTime: number) => {
-    // Sync all videos for optimal playback
-    Object.values(videoRefs.current).forEach(video => {
-      if (video) {
-        video.currentTime = targetTime;
-      }
-    });
-  }, []);
-
-  // Enhanced play/pause with performance-aware synchronization
-  const handlePlayPause = useCallback(async () => {
-    if (isPlaying) {
-      // Pause all videos
-      setIsPlaying(false);
-      Object.values(videoRefs.current).forEach(video => {
-        if (video) {
-          video.pause();
-        }
-      });
-    } else {
-      // Play logic - play all available grid videos
-      const videoElements: HTMLVideoElement[] = Object.values(videoRefs.current).filter(Boolean) as HTMLVideoElement[];
-      if (videoElements.length === 0) return;
-
-      // Synchronize to expanded video if available, otherwise to master
-      const referenceVideo = expandedVideo ? videoRefs.current[expandedVideo] : videoRefs.current[MASTER_ID] || videoElements[0];
-      const syncTime = referenceVideo?.currentTime || 0;
-      videoElements.forEach(v => { try { v.currentTime = syncTime; } catch {} });
-
-      // Ensure readiness
-      await Promise.all(videoElements.map(v => new Promise<void>((resolve) => {
-        if (v.readyState >= 2) return resolve();
-        const onCanPlay = () => { v.removeEventListener('canplay', onCanPlay); resolve(); };
-        v.addEventListener('canplay', onCanPlay);
-      })));
-
-      // Start all
-      const playPromises = videoElements.map(v => v.play().catch(err => {
-        console.warn('Video failed to play', err);
-      }));
-
-      try {
-        await Promise.allSettled(playPromises);
-        setIsPlaying(true);
-      } catch {
-        setIsPlaying(true);
-      }
-    }
-  }, [isPlaying, MASTER_ID, expandedVideo]);
-
-  const handleSeek = useCallback((seconds: number) => {
-    const newTime = Math.max(0, Math.min(duration, currentTime + seconds));
-    setCurrentTime(newTime);
-    syncAllVideos(newTime);
-  }, [currentTime, duration, syncAllVideos]);
-
-  // Progress bar click navigation
-  const handleProgressBarClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    if (duration === 0) return;
-    
-    const progressBar = event.currentTarget;
-    const rect = progressBar.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const progressWidth = rect.width;
-    
-    const percentage = Math.max(0, Math.min(1, clickX / progressWidth));
-    const newTime = percentage * duration;
-    
-    setCurrentTime(newTime);
-    syncAllVideos(newTime);
-    
-    if (isPlaying) {
-      // Brief pause and resume for sync
-      const targetVideos = Object.values(videoRefs.current);
-      targetVideos.forEach(v => {
-        if (v) v.pause();
-      });
-      
-      setTimeout(() => {
-        targetVideos.forEach(v => {
-          if (v) {
-            v.play().catch(console.warn);
-          }
-        });
-      }, 50);
-    }
-  }, [duration, syncAllVideos, isPlaying]);
-
-  const handleFrameStep = useCallback((direction: number) => {
-    const frameRate = 30;
-    const frameTime = 1 / frameRate;
-    handleSeek(direction * frameTime);
-  }, [handleSeek]);
-
-  const onTimeUpdateFor = useCallback((id: string) => () => {
-    const el = videoRefs.current[id];
-    if (!el) return;
-    const t = el.currentTime || 0;
-
-    // Ensure duration is set as soon as it's known
-    const dur = el.duration;
-    if (typeof dur === 'number' && isFinite(dur) && dur > 0) {
-      if (duration === 0 || (id === MASTER_ID && dur !== duration)) {
-        setDuration(dur);
-      }
-    }
-    
-    // Drive the global progress with the expanded video, or with any advancing video if no expanded one
-    const epsilon = 0.05; // ~3 frames at 60fps
-    const shouldDrive = id === (expandedVideo || MASTER_ID) || (!expandedVideo && t > currentTime + epsilon);
-    if (shouldDrive) setCurrentTime(t);
-    
-    setVideoTimes(prev => ({ ...prev, [id]: t }));
-  }, [MASTER_ID, expandedVideo, duration, currentTime]);
 
   // Seamless video expansion with explicit stop requirement
   const handleVideoClick = useCallback((videoId: string) => {
@@ -214,7 +74,7 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
 
     // Update displayed time
     setCurrentTime(videoCurrentTime);
-  }, [expandedVideo, currentTime]);
+  }, [expandedVideo, currentTime, videoRefs, setIsPlaying, setCurrentTime]);
 
   const handleVideoLoad = useCallback((videoId: string, file: File) => {
     const url = URL.createObjectURL(file);
@@ -229,8 +89,8 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
     const el = (e.currentTarget as HTMLVideoElement | null);
     const dur = el?.duration;
     if (el && typeof dur === 'number' && isFinite(dur) && dur > 0) {
-      // Prefer MASTER_ID duration; otherwise set once if not set yet
-      if (videoId === MASTER_ID) {
+      // Prefer first video duration; otherwise set once if not set yet
+      if (videoConfigs[0] && videoId === videoConfigs[0].id) {
         setDuration(dur);
         console.log('[duration] set from MASTER', dur);
       } else if (duration === 0) {
@@ -245,7 +105,7 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
       if (newCount >= totalToLoad) setAllVideosLoaded(true);
       return newCount;
     });
-  }, [MASTER_ID, totalToLoad, duration]);
+  }, [videoConfigs, totalToLoad, duration, countedRef, setDuration, setLoadedVideoCount, setAllVideosLoaded]);
 
   // Count errors as finished to avoid blocking the loader forever
   const handleVideoError = useCallback((videoId: string) => (_e: React.SyntheticEvent<HTMLVideoElement>) => {
@@ -257,131 +117,7 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
       if (newCount >= totalToLoad) setAllVideosLoaded(true);
       return newCount;
     });
-  }, [totalToLoad]);
-
-  // Removed redundant firstVideo listeners to prevent desynchronization with expanded/master source
-  
-  useEffect(() => {
-    Object.keys(loadedVideos).forEach((id) => {
-      const v = videoRefs.current[id];
-      if (v) v.load();
-    });
-    countedRef.current = {};
-    setLoadedVideoCount(0);
-    setAllVideosLoaded(totalToLoad === 0);
-    setIsPlaying(false);
-  }, [loadedVideos, totalToLoad]);
-
-  // Failsafe: ensure loader does not hang forever if videos neither load nor error (e.g., CORS/HLS recovery loops)
-  useEffect(() => {
-    if (totalToLoad === 0) return;
-    const timeout = window.setTimeout(() => {
-      const ids = videoConfigs
-        .filter(v => Boolean(srcFor(v.id)))
-        .map(v => v.id);
-
-      let added = 0;
-      ids.forEach((id) => {
-        if (!countedRef.current[id]) {
-          countedRef.current[id] = true;
-          added += 1;
-          console.warn('[video] timeout counted as loaded', id);
-        }
-      });
-
-      if (added > 0) {
-        setLoadedVideoCount((prev) => {
-          const newCount = prev + added;
-          if (newCount >= totalToLoad) setAllVideosLoaded(true);
-          return newCount;
-        });
-      }
-    }, 5000);
-
-    return () => window.clearTimeout(timeout);
-  }, [totalToLoad, srcFor, videoConfigs]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' || e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
-        e.preventDefault();
-      }
-
-      switch (e.code) {
-        case 'Space':
-          handlePlayPause();
-          break;
-        case 'ArrowLeft':
-          handleFrameStep(-1);
-          break;
-        case 'ArrowRight':
-          handleFrameStep(1);
-          break;
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [handlePlayPause, handleFrameStep]);
-
-  // Auto-resume safeguards and synchronization helpers
-  useEffect(() => {
-    const attach = (v: HTMLVideoElement) => {
-      const onPause = () => {
-        if (isPlaying && !v.ended) {
-          v.play().catch(() => {});
-        }
-      };
-      const onWaiting = () => {
-        if (isPlaying && !v.ended) {
-          v.play().catch(() => {});
-        }
-      };
-      v.addEventListener('pause', onPause);
-      v.addEventListener('waiting', onWaiting);
-      return () => {
-        v.removeEventListener('pause', onPause);
-        v.removeEventListener('waiting', onWaiting);
-      };
-    };
-
-    const cleanups: Array<() => void> = [];
-    Object.values(videoRefs.current).forEach(v => { if (v) cleanups.push(attach(v)); });
-    return () => { cleanups.forEach(fn => fn()); };
-  }, [isPlaying, expandedVideo]);
-
-  // Playback watchdog: keep videos running without forcing time sync
-  useEffect(() => {
-    let interval: number | undefined;
-    if (isPlaying) {
-      interval = window.setInterval(() => {
-        const vids = (Object.values(videoRefs.current).filter(Boolean) as HTMLVideoElement[]);
-        vids.forEach(v => {
-          if (v.paused && !v.ended) {
-            v.play().catch(() => {});
-          }
-        });
-      }, 1000);
-    }
-    return () => {
-      if (interval) window.clearInterval(interval);
-    };
-  }, [isPlaying]);
-
-  const videoLayout = [
-    { id: 'NLMVC_front_left', title: 'Front Left', size: 'small' },
-    { id: 'NRMVC_front_right', title: 'Front Right', size: 'small' },
-    { id: 'WCWVC_front', title: 'Wide Center', size: 'medium', span: 'center' },
-    { id: 'NLBSC_left', title: 'Left Side', size: 'small' },
-    { id: 'WCNVC_front', title: 'Wide Front', size: 'medium' },
-    { id: 'NRBSC_right', title: 'Right Side', size: 'small' },
-    { id: 'TCMVC_back', title: 'Back Center', size: 'medium', span: 'center' },
-    { id: 'NLMVC_back_left', title: 'Back Left', size: 'small' },
-    { id: 'TCBSC_back', title: 'Back Camera', size: 'large' },
-    { id: 'NRMVC_back_right', title: 'Back Right', size: 'small' },
-  ];
+  }, [totalToLoad, countedRef, setLoadedVideoCount, setAllVideosLoaded]);
 
   return (
     <div className="w-full bg-background space-y-4">
@@ -391,6 +127,13 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
         totalVideos={totalToLoad}
       />
       
+      <VideoStreamHeader
+        streamName={streamName}
+        cloudFrontData={cloudFrontData}
+        currentTime={currentTime}
+        duration={duration}
+      />
+
       {/* Video File Importer */}
       {Object.keys(videoFiles).length === 0 && (
         <VideoFileImporter
@@ -400,208 +143,23 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
         />
       )}
 
-      {/* Multi-Video Grid - High Performance */}
+      {/* Multi-Video Grid */}
       <div className="relative flex-1">
-        {/* Always render the grid; expand by reusing the same DOM video element via CSS */}
-        <div className="flex flex-col gap-3 max-w-6xl mx-auto mb-6 animate-fade-in">
-          {/* Row 1: Front Left, Front Camera, Front Right */}
-          <div className="flex justify-center items-start gap-3">
-            <VideoCard
-              id="FLMVC_back_left"
-              title="Front Left"
-              src={srcFor('FLMVC_back_left')}
-              width="w-32"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'FLMVC_back_left'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('FLMVC_back_left')}
-              onLoadedMetadata={handleVideoLoadedMetadata('FLMVC_back_left')}
-              onError={handleVideoError('FLMVC_back_left')}
-              onLoadStart={() => {
-                if (videoTimes['FLMVC_back_left'] && videoRefs.current['FLMVC_back_left']) {
-                  videoRefs.current['FLMVC_back_left']!.currentTime = videoTimes['FLMVC_back_left'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-            <VideoCard
-              id="FLNVC_front"
-              title="Front Camera"
-              src={srcFor('FLNVC_front')}
-              width="w-96"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'FLNVC_front'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('FLNVC_front')}
-              onLoadedMetadata={handleVideoLoadedMetadata('FLNVC_front')}
-              onError={handleVideoError('FLNVC_front')}
-              onLoadStart={() => {
-                if (videoTimes['FLNVC_front'] && videoRefs.current['FLNVC_front']) {
-                  videoRefs.current['FLNVC_front']!.currentTime = videoTimes['FLNVC_front'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-            <VideoCard
-              id="FRMVC_back_right"
-              title="Front Right"
-              src={srcFor('FRMVC_back_right')}
-              width="w-32"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'FRMVC_back_right'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('FRMVC_back_right')}
-              onLoadedMetadata={handleVideoLoadedMetadata('FRMVC_back_right')}
-              onError={handleVideoError('FRMVC_back_right')}
-              onLoadStart={() => {
-                if (videoTimes['FRMVC_back_right'] && videoRefs.current['FRMVC_back_right']) {
-                  videoRefs.current['FRMVC_back_right']!.currentTime = videoTimes['FRMVC_back_right'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-          </div>
+        <VideoGridLayout
+          videoConfigs={videoConfigs}
+          isPlaying={isPlaying}
+          expandedVideo={expandedVideo}
+          videoTimes={videoTimes}
+          videoRefs={videoRefs}
+          onVideoClick={handleVideoClick}
+          onTimeUpdateFor={onTimeUpdateFor}
+          onVideoLoadedMetadata={handleVideoLoadedMetadata}
+          onVideoError={handleVideoError}
+          setVideoRef={setVideoRef}
+          srcFor={srcFor}
+        />
 
-          {/* Row 2: Wide Cameras */}
-          <div className="flex justify-center items-start gap-3">
-            <VideoCard
-              id="FLOBC_front"
-              title="Wide Center"
-              src={srcFor('FLOBC_front')}
-              width="w-48"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'FLOBC_front'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('FLOBC_front')}
-              onLoadedMetadata={handleVideoLoadedMetadata('FLOBC_front')}
-              onError={handleVideoError('FLOBC_front')}
-              onLoadStart={() => {
-                if (videoTimes['FLOBC_front'] && videoRefs.current['FLOBC_front']) {
-                  videoRefs.current['FLOBC_front']!.currentTime = videoTimes['FLOBC_front'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-            <VideoCard
-              id="NCMVC_front"
-              title="Wide Front"
-              src={srcFor('NCMVC_front')}
-              width="w-48"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'NCMVC_front'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('NCMVC_front')}
-              onLoadedMetadata={handleVideoLoadedMetadata('NCMVC_front')}
-              onError={handleVideoError('NCMVC_front')}
-              onLoadStart={() => {
-                if (videoTimes['NCMVC_front'] && videoRefs.current['NCMVC_front']) {
-                  videoRefs.current['NCMVC_front']!.currentTime = videoTimes['NCMVC_front'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-          </div>
-
-          {/* Row 3: Left Side, Back Center, Right Side */}
-          <div className="flex justify-center items-start gap-8">
-            <VideoCard
-              id="FLBSC_down"
-              title="Left Side"
-              src={srcFor('FLBSC_down')}
-              width="w-32"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'FLBSC_down'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('FLBSC_down')}
-              onLoadedMetadata={handleVideoLoadedMetadata('FLBSC_down')}
-              onError={handleVideoError('FLBSC_down')}
-              onLoadStart={() => {
-                if (videoTimes['FLBSC_down'] && videoRefs.current['FLBSC_down']) {
-                  videoRefs.current['FLBSC_down']!.currentTime = videoTimes['FLBSC_down'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-            <VideoCard
-              id="BCMVC_back"
-              title="Back Center"
-              src={srcFor('BCMVC_back')}
-              width="w-64"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'BCMVC_back'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('BCMVC_back')}
-              onLoadedMetadata={handleVideoLoadedMetadata('BCMVC_back')}
-              onError={handleVideoError('BCMVC_back')}
-              onLoadStart={() => {
-                if (videoTimes['BCMVC_back'] && videoRefs.current['BCMVC_back']) {
-                  videoRefs.current['BCMVC_back']!.currentTime = videoTimes['BCMVC_back'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-            <VideoCard
-              id="FRBSC_down"
-              title="Right Side"
-              src={srcFor('FRBSC_down')}
-              width="w-32"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'FRBSC_down'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('FRBSC_down')}
-              onLoadedMetadata={handleVideoLoadedMetadata('FRBSC_down')}
-              onError={handleVideoError('FRBSC_down')}
-              onLoadStart={() => {
-                if (videoTimes['FRBSC_down'] && videoRefs.current['FRBSC_down']) {
-                  videoRefs.current['FRBSC_down']!.currentTime = videoTimes['FRBSC_down'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-          </div>
-
-          {/* Row 4: Back Camera - Centered */}
-          <div className="flex justify-center items-start gap-3">
-            <VideoCard
-              id="BCBSC_back"
-              title="Back Camera"
-              src={srcFor('BCBSC_back')}
-              width="w-96"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'BCBSC_back'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('BCBSC_back')}
-              onLoadedMetadata={handleVideoLoadedMetadata('BCBSC_back')}
-              onError={handleVideoError('BCBSC_back')}
-              onLoadStart={() => {
-                if (videoTimes['BCBSC_back'] && videoRefs.current['BCBSC_back']) {
-                  videoRefs.current['BCBSC_back']!.currentTime = videoTimes['BCBSC_back'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-          </div>
-        </div>
-
-        {/* Close button when expanded (since click toggles too) */}
+        {/* Close button when expanded */}
         {expandedVideo && (
           <Button
             variant="ghost"
@@ -615,75 +173,15 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
       </div>
 
       {/* Transport Controls */}
-      <Card className="p-4 bg-control-bg border-control-border">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleSeek(-10)}
-              className="h-8 w-8 text-foreground hover:bg-control-hover"
-            >
-              <SkipBack className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handlePlayPause}
-              className="h-10 w-10 text-foreground hover:bg-control-hover"
-            >
-              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleSeek(10)}
-              className="h-8 w-8 text-foreground hover:bg-control-hover"
-            >
-              <SkipForward className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="flex-1 flex items-center gap-4">
-            <div className="text-sm text-muted-foreground min-w-[60px]">
-              {formatTime(currentTime)}
-            </div>
-            
-            <div 
-              className="flex-1 h-2 bg-muted rounded-full cursor-pointer relative"
-              onClick={handleProgressBarClick}
-            >
-              <div 
-                className="h-full bg-primary rounded-full transition-all duration-150"
-                style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
-              />
-            </div>
-            
-            <div className="text-sm text-muted-foreground min-w-[60px] text-right">
-              {formatTime(duration)}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleFrameStep(-1)}
-              className="h-8 w-8 text-foreground hover:bg-control-hover"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleFrameStep(1)}
-              className="h-8 w-8 text-foreground hover:bg-control-hover"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </Card>
+      <VideoPlayerControls
+        isPlaying={isPlaying}
+        currentTime={currentTime}
+        duration={duration}
+        onPlayPause={handlePlayPause}
+        onSeek={handleSeek}
+        onFrameStep={handleFrameStep}
+        onProgressBarClick={handleProgressBarClick}
+      />
     </div>
   );
 };
