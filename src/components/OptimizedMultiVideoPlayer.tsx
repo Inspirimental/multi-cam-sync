@@ -119,6 +119,72 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
     });
   }, [totalToLoad, countedRef, setLoadedVideoCount, setAllVideosLoaded]);
 
+  // Keyboard controls
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' || e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+        e.preventDefault();
+      }
+
+      switch (e.code) {
+        case 'Space':
+          handlePlayPause();
+          break;
+        case 'ArrowLeft':
+          handleFrameStep(-1);
+          break;
+        case 'ArrowRight':
+          handleFrameStep(1);
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handlePlayPause, handleFrameStep]);
+
+  // Reset loaded videos when configs change
+  useEffect(() => {
+    Object.keys(loadedVideos).forEach((id) => {
+      const v = videoRefs.current[id];
+      if (v) v.load();
+    });
+    countedRef.current = {};
+    setLoadedVideoCount(0);
+    setAllVideosLoaded(totalToLoad === 0);
+  }, [loadedVideos, totalToLoad, setLoadedVideoCount, setAllVideosLoaded]);
+
+  // Failsafe timeout for hanging video loads
+  useEffect(() => {
+    if (totalToLoad === 0) return;
+    const timeout = window.setTimeout(() => {
+      const ids = videoConfigs
+        .filter(v => Boolean(srcFor(v.id)))
+        .map(v => v.id);
+
+      let added = 0;
+      ids.forEach((id) => {
+        if (!countedRef.current[id]) {
+          countedRef.current[id] = true;
+          added += 1;
+          console.warn('[video] timeout counted as loaded', id);
+        }
+      });
+
+      if (added > 0) {
+        setLoadedVideoCount((prev) => {
+          const newCount = prev + added;
+          if (newCount >= totalToLoad) setAllVideosLoaded(true);
+          return newCount;
+        });
+      }
+    }, 5000);
+
+    return () => window.clearTimeout(timeout);
+  }, [totalToLoad, srcFor, videoConfigs, countedRef, setLoadedVideoCount, setAllVideosLoaded]);
+
   return (
     <div className="w-full bg-background space-y-4">
       <LoadingModal

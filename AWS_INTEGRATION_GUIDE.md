@@ -18,6 +18,44 @@ AWS CloudFront Distribution
 S3 Bucket (HLS Segments)
 ```
 
+## Benötigte Dateien für vollständige Integration
+
+### Core Player Komponenten
+```
+src/
+├── components/
+│   ├── OptimizedMultiVideoPlayer.tsx    # Haupt-Player Komponente
+│   ├── VideoCard.tsx                     # Einzelne Video-Kachel
+│   ├── VideoStreamHeader.tsx             # Stream Header/Info
+│   ├── VideoPlayerControls.tsx           # Transport Controls
+│   ├── VideoGridLayout.tsx               # Grid Layout Manager
+│   ├── VideoFileImporter.tsx             # File Import (optional)
+│   └── LoadingModal.tsx                  # Loading Indicator
+├── hooks/
+│   ├── useVideoSync.tsx                  # Video Synchronisation
+│   └── useCloudFrontData.tsx             # CloudFront API Integration
+├── utils/
+│   ├── videoUtils.ts                     # Zeit-Formatierung etc.
+│   └── videoGridUtils.ts                 # Grid-Layout Utilities
+├── types/
+│   └── VideoTypes.ts                     # TypeScript Definitionen
+└── data/
+    └── mockVideoStreams.ts               # Mock-Daten (für Testing)
+```
+
+### Page Integration
+```
+src/pages/
+└── VideoReview.tsx                       # Beispiel-Integration
+```
+
+### Minimale Integration (nur Player):
+- `OptimizedMultiVideoPlayer.tsx`
+- `VideoCard.tsx` 
+- `useVideoSync.tsx`
+- `VideoTypes.ts`
+- `videoUtils.ts`
+
 ## CloudFront API Integration
 
 ### API Response Format
@@ -146,31 +184,58 @@ const hlsConfig = {
 ### 1. API Integration (VideoReview.tsx)
 
 ```typescript
-// Mock-Implementation - ersetzen durch echte API
-const fetchCloudFrontData = async () => {
-  const response = await fetch(`/api/streams/${streamId}`);
-  const data: CloudFrontApiResponse = await response.json();
-  setCloudFrontData(data);
+// Verwendung des CloudFront Data Hooks
+import { useCloudFrontData } from '@/hooks/useCloudFrontData';
+
+const { cloudFrontData, loading, error } = useCloudFrontData({ 
+  streamId, 
+  currentStream 
+});
+```
+
+### 2. Player Integration
+
+```typescript
+// Minimale Integration
+import OptimizedMultiVideoPlayer from '@/components/OptimizedMultiVideoPlayer';
+
+<OptimizedMultiVideoPlayer
+  videoFiles={currentStream.videoFiles}
+  cloudFrontData={cloudFrontData}
+  onClose={handleBack}
+  streamName={currentStream.name}
+/>
+```
+
+### 3. Video Configuration
+
+Die Anwendung priorisiert CloudFront-Daten automatisch:
+
+```typescript
+// Aus videoGridUtils.ts
+export const createVideoConfigs = (videoFiles, cloudFrontData) => {
+  // Priorität 1: CloudFront Streams
+  if (cloudFrontData?.streams && cloudFrontData.streams.length > 0) {
+    return cloudFrontData.streams.map((stream) => ({
+      id: stream.camera_position,
+      name: `${stream.camera_position}.m3u8`,
+      title: stream.camera_position.replace(/_/g, ' '),
+      src: stream.hls_manifest_url
+    }));
+  }
+  
+  // Fallback: Default Konfiguration
+  return defaultVideoConfigs;
 };
 ```
 
-### 2. Video Configuration
+### 4. Keyboard Controls
 
-Die Anwendung priorisiert CloudFront-Daten:
+- **Leertaste**: Play/Pause
+- **←**: Frame zurück (1/30 Sekunde)
+- **→**: Frame vor (1/30 Sekunde)
 
-```typescript
-// Priorität 1: CloudFront Streams
-if (cloudFrontData?.streams) {
-  return cloudFrontData.streams.map((stream) => ({
-    id: stream.camera_position,
-    name: `${stream.camera_position}.m3u8`,
-    title: stream.camera_position.replace(/_/g, ' '),
-    src: stream.hls_manifest_url
-  }));
-}
-```
-
-### 3. Error Handling
+### 5. Error Handling
 
 - **HLS Errors**: Automatische Wiederherstellung bei Netzwerk-/Media-Fehlern
 - **CORS Issues**: Deaktivierte Credentials für Cross-Origin Requests
@@ -235,6 +300,22 @@ Cached Headers: Authorization, Origin
 - Error Rate per Camera Position
 
 ## Deployment Checklist
+
+### Frontend Dateien (Vollständige Integration)
+- [ ] Alle Core-Komponenten kopiert
+- [ ] Hooks implementiert (`useVideoSync`, `useCloudFrontData`)
+- [ ] Utilities eingebunden (`videoUtils`, `videoGridUtils`)
+- [ ] TypeScript-Typen definiert (`VideoTypes.ts`)
+- [ ] HLS.js Dependency installiert (`npm install hls.js`)
+- [ ] Tailwind/shadcn UI Komponenten verfügbar
+
+### Minimale Integration (nur Player)
+- [ ] `OptimizedMultiVideoPlayer.tsx`
+- [ ] `VideoCard.tsx`
+- [ ] `useVideoSync.tsx` 
+- [ ] `VideoTypes.ts`
+- [ ] `videoUtils.ts`
+- [ ] HLS.js installiert
 
 ### AWS Infrastructure
 - [ ] S3 Bucket mit korrekter Struktur
