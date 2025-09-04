@@ -49,19 +49,63 @@ Die Anwendung erwartet folgende JSON-Struktur von der CloudFront API:
 
 ### Unterstützte Camera Positions
 
-Das System mappt folgende Kamera-Positionen zu spezifischen Grid-Positionen:
+Das System unterstützt insgesamt **11 Kamera-Positionen**. Im aktuellen Beispiel sind **9 aktiv**, **2 fehlen**.
 
-| Camera Position | Titel | Grid Position | Größe |
-|----------------|-------|---------------|-------|
-| `FLMVC_back_left` | Front Left | Row 1, Left | Small (w-32) |
-| `FLNVC_front` | Front Camera | Row 1, Center | Large (w-96) |
-| `FRMVC_back_right` | Front Right | Row 1, Right | Small (w-32) |
-| `FLOBC_front` | Wide Center | Row 2, Left | Medium (w-48) |
-| `NCMVC_front` | Wide Front | Row 2, Right | Medium (w-48) |
-| `FLBSC_down` | Left Side | Row 3, Left | Small (w-32) |
-| `BCMVC_back` | Back Center | Row 3, Center | Medium (w-64) |
-| `FRBSC_down` | Right Side | Row 3, Right | Small (w-32) |
-| `BCBSC_back` | Back Camera | Row 4, Center | Large (w-96) |
+#### Vollständige Kamera-Position Übersicht:
+
+| Camera Position | Titel | Grid Position | Größe | Status |
+|----------------|-------|---------------|-------|--------|
+| `FLMVC_back_left` | Front Left | Row 1, Left | Small (w-32) | ✅ **Aktiv** |
+| `FLNVC_front` | Front Camera | Row 1, Center | Large (w-96) | ✅ **Aktiv** |
+| `FRMVC_back_right` | Front Right | Row 1, Right | Small (w-32) | ✅ **Aktiv** |
+| `FLOBC_front` | Wide Center | Row 2, Left | Medium (w-48) | ✅ **Aktiv** |
+| `NCMVC_front` | Wide Front | Row 2, Right | Medium (w-48) | ✅ **Aktiv** |
+| `FLBSC_down` | Left Side | Row 3, Left | Small (w-32) | ✅ **Aktiv** |
+| `BCMVC_back` | Back Center | Row 3, Center | Medium (w-64) | ✅ **Aktiv** |
+| `FRBSC_down` | Right Side | Row 3, Right | Small (w-32) | ✅ **Aktiv** |
+| `BCBSC_back` | Back Camera | Row 4, Center | Large (w-96) | ✅ **Aktiv** |
+| `NLMVC_front_left` | Extra Front Left | Row 1, Left Alt | Small (w-32) | ❌ **Fehlt** |
+| `NRMVC_front_right` | Extra Front Right | Row 1, Right Alt | Small (w-32) | ❌ **Fehlt** |
+
+#### Fehlende Positionen für vollständige 11-Stream-Konfiguration:
+1. **`NLMVC_front_left`** - Extra Front Left Camera
+2. **`NRMVC_front_right`** - Extra Front Right Camera
+
+#### Erweiterte Grid-Anordnung (11 Streams):
+```
+Row 1: [NLMVC_front_left] [FLNVC_front] [NRMVC_front_right]
+       [FLMVC_back_left]              [FRMVC_back_right]
+                        (5 Videos)
+
+Row 2: [FLOBC_front] [NCMVC_front]
+                (2 Videos)
+
+Row 3: [FLBSC_down] [BCMVC_back] [FRBSC_down]
+                (3 Videos)
+
+Row 4: [BCBSC_back]
+          (1 Video)
+```
+
+#### Mapping für AWS Kollege:
+```json
+{
+  "missing_streams": [
+    {
+      "camera_position": "NLMVC_front_left",
+      "description": "Extra Front Left Camera",
+      "grid_position": "Row 1, Alt Left",
+      "size": "w-32"
+    },
+    {
+      "camera_position": "NRMVC_front_right", 
+      "description": "Extra Front Right Camera",
+      "grid_position": "Row 1, Alt Right",
+      "size": "w-32"
+    }
+  ]
+}
+```
 
 ## HLS Stream Konfiguration
 
