@@ -29,27 +29,31 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
   onClose, 
   streamName = "Vehicle Camera Monitor"
 }) => {
-  // Merge external video files with default config, prioritizing CloudFront data
-  const videoConfigs = defaultVideoConfigs.map(config => {
-    let src = config.src;
+  // Create video configs - prioritize CloudFront data
+  const videoConfigs = (() => {
+    // If CloudFront data is available, use it directly
+    if (cloudFrontData?.streams && cloudFrontData.streams.length > 0) {
+      return cloudFrontData.streams.map((stream, index) => ({
+        id: stream.camera_position,
+        name: `${stream.camera_position}.m3u8`,
+        title: stream.camera_position.replace(/_/g, ' '),
+        position: stream.camera_position.includes('front') ? 'front' as const : 
+                 stream.camera_position.includes('back') ? 'back' as const : 'side' as const,
+        src: stream.hls_manifest_url
+      }));
+    }
     
-    // Priority 1: CloudFront streams
-    if (cloudFrontData?.streams) {
-      const cloudFrontStream = cloudFrontData.streams.find(
-        stream => stream.camera_position === config.id
-      );
-      if (cloudFrontStream?.hls_manifest_url) {
-        src = cloudFrontStream.hls_manifest_url;
+    // Fallback: Use default configs with video files if provided
+    return defaultVideoConfigs.map(config => {
+      let src = config.src;
+      
+      // Use direct video files mapping if available
+      if (videoFiles[config.id]) {
+        src = videoFiles[config.id];
       }
-    }
-    
-    // Priority 2: Direct video files mapping
-    if (videoFiles[config.id]) {
-      src = videoFiles[config.id];
-    }
-    
-    return { ...config, src };
-  });
+      return { ...config, src };
+    });
+  })();
 
   const MASTER_ID = videoConfigs[0].id;
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
