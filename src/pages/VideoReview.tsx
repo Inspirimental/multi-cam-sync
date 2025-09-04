@@ -86,29 +86,98 @@ const VideoReview: React.FC = () => {
         // In real implementation, this would be your actual API endpoint
         // const response = await fetch(`/api/streams/${streamId}`);
         
-        // Mock CloudFront API response for demonstration
+        // Mock CloudFront API response with corrected URLs
         const mockCloudFrontResponse: CloudFrontApiResponse = {
-          cohort_id: `INC#${currentStream.name.replace(/\s+/g, '_')}#${Date.now()}000000000`,
-          vehicle_id: currentStream.id.toUpperCase(),
+          cohort_id: "INC#ZRH_LCR_10024#1752756048000000000",
+          vehicle_id: "ZRH_LCR_10024",
           original_session_id: "",
-          streams: Object.keys(currentStream.videoFiles).map((key, index) => ({
-            camera_position: key,
-            unique_session_id: `${Date.now()}000000000_${key}`,
-            hls_manifest_url: currentStream.videoFiles[key],
-            mp4_url: null,
-            thumbnail_url: null,
-            duration: null,
-            resolution: "Auto"
-          })),
-          total_streams: Object.keys(currentStream.videoFiles).length,
+          streams: [
+            {
+              camera_position: "BCBSC_back",
+              unique_session_id: "1752756048000000000_camera",
+              hls_manifest_url: "https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_camera/1752756048000000000_camera_BCBSC_back/1752756048000000000_camera_BCBSC_back_master.m3u8",
+              mp4_url: null,
+              thumbnail_url: null,
+              duration: null,
+              resolution: "Auto"
+            },
+            {
+              camera_position: "BCMVC_back",
+              unique_session_id: "1752756048000000000_camera",
+              hls_manifest_url: "https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_camera/1752756048000000000_camera_BCMVC_back/1752756048000000000_camera_BCMVC_back_master.m3u8",
+              mp4_url: null,
+              thumbnail_url: null,
+              duration: null,
+              resolution: "Auto"
+            },
+            {
+              camera_position: "FLBSC_down",
+              unique_session_id: "1752756048000000000_camera",
+              hls_manifest_url: "https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_camera/1752756048000000000_camera_FLBSC_down/1752756048000000000_camera_FLBSC_down_master.m3u8",
+              mp4_url: null,
+              thumbnail_url: null,
+              duration: null,
+              resolution: "Auto"
+            },
+            {
+              camera_position: "FLMVC_back_left",
+              unique_session_id: "1752756048000000000_camera",
+              hls_manifest_url: "https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_camera/1752756048000000000_camera_FLMVC_back_left/1752756048000000000_camera_FLMVC_back_left_master.m3u8",
+              mp4_url: null,
+              thumbnail_url: null,
+              duration: null,
+              resolution: "Auto"
+            },
+            {
+              camera_position: "FLNVC_front",
+              unique_session_id: "1752756048000000000_camera",
+              hls_manifest_url: "https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_camera/1752756048000000000_camera_FLNVC_front/1752756048000000000_camera_FLNVC_front_master.m3u8",
+              mp4_url: null,
+              thumbnail_url: null,
+              duration: null,
+              resolution: "Auto"
+            },
+            {
+              camera_position: "FLOBC_front",
+              unique_session_id: "1752756048000000000_camera",
+              hls_manifest_url: "https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_camera/1752756048000000000_camera_FLOBC_front/1752756048000000000_camera_FLOBC_front_master.m3u8",
+              mp4_url: null,
+              thumbnail_url: null,
+              duration: null,
+              resolution: "Auto"
+            },
+            {
+              camera_position: "FRBSC_down",
+              unique_session_id: "1752756048000000000_camera",
+              hls_manifest_url: "https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_camera/1752756048000000000_camera_FRBSC_down/1752756048000000000_camera_FRBSC_down_master.m3u8",
+              mp4_url: null,
+              thumbnail_url: null,
+              duration: null,
+              resolution: "Auto"
+            },
+            {
+              camera_position: "FRMVC_back_right",
+              unique_session_id: "1752756048000000000_camera",
+              hls_manifest_url: "https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_camera/1752756048000000000_camera_FRMVC_back_right/1752756048000000000_camera_FRMVC_back_right_master.m3u8",
+              mp4_url: null,
+              thumbnail_url: null,
+              duration: null,
+              resolution: "Auto"
+            },
+            {
+              camera_position: "NCMVC_front",
+              unique_session_id: "1752756048000000000_camera",
+              hls_manifest_url: "https://app.weride.iamo.ai/hls/ZRH_LCR_10024/1752756048000000000_camera/1752756048000000000_camera_NCMVC_front/1752756048000000000_camera_NCMVC_front_master.m3u8",
+              mp4_url: null,
+              thumbnail_url: null,
+              duration: null,
+              resolution: "Auto"
+            }
+          ],
+          total_streams: 9,
           processing_status: "completed",
-          signed_cookies: {
-            // In real implementation, these would be actual CloudFront signed cookies
-            // "CloudFront-Policy": "eyJ...",
-            // "CloudFront-Signature": "abc...",
-            // "CloudFront-Key-Pair-Id": "APKAI..."
-          },
-          expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
+          signed_cookies: {},
+          expires_at: 1756973730
         };
         
         setCloudFrontData(mockCloudFrontResponse);
