@@ -423,241 +423,271 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
       <div className="relative flex-1">
         {/* Always render the grid; expand by reusing the same DOM video element via CSS */}
         <div className="flex flex-col gap-3 max-w-6xl mx-auto mb-6 animate-fade-in">
-          {/* Row 1: Front Left, Front Camera, Front Right */}
-          <div className="flex justify-center items-start gap-3">
-            <VideoCard
-              id="NLMVC_front_left"
-              title="Front Left"
-              src={srcFor('NLMVC_front_left')}
-              width="w-32"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'NLMVC_front_left'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('NLMVC_front_left')}
-              onLoadedMetadata={handleVideoLoadedMetadata('NLMVC_front_left')}
-              onError={handleVideoError('NLMVC_front_left')}
-              onLoadStart={() => {
-                if (videoTimes['NLMVC_front_left'] && videoRefs.current['NLMVC_front_left']) {
-                  videoRefs.current['NLMVC_front_left']!.currentTime = videoTimes['NLMVC_front_left'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-            <VideoCard
-              id="NCBSC_front"
-              title="Front Camera"
-              src={srcFor('NCBSC_front')}
-              width="w-96"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'NCBSC_front'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('NCBSC_front')}
-              onLoadedMetadata={handleVideoLoadedMetadata('NCBSC_front')}
-              onError={handleVideoError('NCBSC_front')}
-              onLoadStart={() => {
-                if (videoTimes['NCBSC_front'] && videoRefs.current['NCBSC_front']) {
-                  videoRefs.current['NCBSC_front']!.currentTime = videoTimes['NCBSC_front'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-            <VideoCard
-              id="NRMVC_front_right"
-              title="Front Right"
-              src={srcFor('NRMVC_front_right')}
-              width="w-32"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'NRMVC_front_right'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('NRMVC_front_right')}
-              onLoadedMetadata={handleVideoLoadedMetadata('NRMVC_front_right')}
-              onError={handleVideoError('NRMVC_front_right')}
-              onLoadStart={() => {
-                if (videoTimes['NRMVC_front_right'] && videoRefs.current['NRMVC_front_right']) {
-                  videoRefs.current['NRMVC_front_right']!.currentTime = videoTimes['NRMVC_front_right'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-          </div>
+          {cloudFrontData?.streams?.length ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {videoConfigs.map((cfg) => (
+                <VideoCard
+                  key={cfg.id}
+                  id={cfg.id}
+                  title={cfg.title}
+                  src={srcFor(cfg.id)}
+                  width="w-full"
+                  isPlaying={isPlaying}
+                  isExpanded={expandedVideo === cfg.id}
+                  onVideoClick={handleVideoClick}
+                  onTimeUpdate={onTimeUpdateFor(cfg.id)}
+                  onLoadedMetadata={handleVideoLoadedMetadata(cfg.id)}
+                  onError={handleVideoError(cfg.id)}
+                  onLoadStart={() => {
+                    if (videoTimes[cfg.id] && videoRefs.current[cfg.id]) {
+                      videoRefs.current[cfg.id]!.currentTime = videoTimes[cfg.id];
+                    }
+                  }}
+                  setVideoRef={setVideoRef}
+                  videoTimes={videoTimes}
+                  videoRefs={videoRefs}
+                />
+              ))}
+            </div>
+          ) : (
+            <>
+              {/* Row 1: Front Left, Front Camera, Front Right */}
+              <div className="flex justify-center items-start gap-3">
+                <VideoCard
+                  id="NLMVC_front_left"
+                  title="Front Left"
+                  src={srcFor('NLMVC_front_left')}
+                  width="w-32"
+                  isPlaying={isPlaying}
+                  isExpanded={expandedVideo === 'NLMVC_front_left'}
+                  onVideoClick={handleVideoClick}
+                  onTimeUpdate={onTimeUpdateFor('NLMVC_front_left')}
+                  onLoadedMetadata={handleVideoLoadedMetadata('NLMVC_front_left')}
+                  onError={handleVideoError('NLMVC_front_left')}
+                  onLoadStart={() => {
+                    if (videoTimes['NLMVC_front_left'] && videoRefs.current['NLMVC_front_left']) {
+                      videoRefs.current['NLMVC_front_left']!.currentTime = videoTimes['NLMVC_front_left'];
+                    }
+                  }}
+                  setVideoRef={setVideoRef}
+                  videoTimes={videoTimes}
+                  videoRefs={videoRefs}
+                />
+                <VideoCard
+                  id="NCBSC_front"
+                  title="Front Camera"
+                  src={srcFor('NCBSC_front')}
+                  width="w-96"
+                  isPlaying={isPlaying}
+                  isExpanded={expandedVideo === 'NCBSC_front'}
+                  onVideoClick={handleVideoClick}
+                  onTimeUpdate={onTimeUpdateFor('NCBSC_front')}
+                  onLoadedMetadata={handleVideoLoadedMetadata('NCBSC_front')}
+                  onError={handleVideoError('NCBSC_front')}
+                  onLoadStart={() => {
+                    if (videoTimes['NCBSC_front'] && videoRefs.current['NCBSC_front']) {
+                      videoRefs.current['NCBSC_front']!.currentTime = videoTimes['NCBSC_front'];
+                    }
+                  }}
+                  setVideoRef={setVideoRef}
+                  videoTimes={videoTimes}
+                  videoRefs={videoRefs}
+                />
+                <VideoCard
+                  id="NRMVC_front_right"
+                  title="Front Right"
+                  src={srcFor('NRMVC_front_right')}
+                  width="w-32"
+                  isPlaying={isPlaying}
+                  isExpanded={expandedVideo === 'NRMVC_front_right'}
+                  onVideoClick={handleVideoClick}
+                  onTimeUpdate={onTimeUpdateFor('NRMVC_front_right')}
+                  onLoadedMetadata={handleVideoLoadedMetadata('NRMVC_front_right')}
+                  onError={handleVideoError('NRMVC_front_right')}
+                  onLoadStart={() => {
+                    if (videoTimes['NRMVC_front_right'] && videoRefs.current['NRMVC_front_right']) {
+                      videoRefs.current['NRMVC_front_right']!.currentTime = videoTimes['NRMVC_front_right'];
+                    }
+                  }}
+                  setVideoRef={setVideoRef}
+                  videoTimes={videoTimes}
+                  videoRefs={videoRefs}
+                />
+              </div>
 
-          {/* Row 2: Wide Center and Wide Front (side by side, smaller) */}
-          <div className="flex justify-center items-start gap-3">
-            <VideoCard
-              id="WCWVC_front"
-              title="Wide Center"
-              src={srcFor('WCWVC_front')}
-              width="w-48"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'WCWVC_front'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('WCWVC_front')}
-              onLoadedMetadata={handleVideoLoadedMetadata('WCWVC_front')}
-              onError={handleVideoError('WCWVC_front')}
-              onLoadStart={() => {
-                if (videoTimes['WCWVC_front'] && videoRefs.current['WCWVC_front']) {
-                  videoRefs.current['WCWVC_front']!.currentTime = videoTimes['WCWVC_front'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-            <VideoCard
-              id="WCNVC_front"
-              title="Wide Front"
-              src={srcFor('WCNVC_front')}
-              width="w-48"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'WCNVC_front'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('WCNVC_front')}
-              onLoadedMetadata={handleVideoLoadedMetadata('WCNVC_front')}
-              onError={handleVideoError('WCNVC_front')}
-              onLoadStart={() => {
-                if (videoTimes['WCNVC_front'] && videoRefs.current['WCNVC_front']) {
-                  videoRefs.current['WCNVC_front']!.currentTime = videoTimes['WCNVC_front'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-          </div>
+              {/* Row 2: Wide Center and Wide Front (side by side, smaller) */}
+              <div className="flex justify-center items-start gap-3">
+                <VideoCard
+                  id="WCWVC_front"
+                  title="Wide Center"
+                  src={srcFor('WCWVC_front')}
+                  width="w-48"
+                  isPlaying={isPlaying}
+                  isExpanded={expandedVideo === 'WCWVC_front'}
+                  onVideoClick={handleVideoClick}
+                  onTimeUpdate={onTimeUpdateFor('WCWVC_front')}
+                  onLoadedMetadata={handleVideoLoadedMetadata('WCWVC_front')}
+                  onError={handleVideoError('WCWVC_front')}
+                  onLoadStart={() => {
+                    if (videoTimes['WCWVC_front'] && videoRefs.current['WCWVC_front']) {
+                      videoRefs.current['WCWVC_front']!.currentTime = videoTimes['WCWVC_front'];
+                    }
+                  }}
+                  setVideoRef={setVideoRef}
+                  videoTimes={videoTimes}
+                  videoRefs={videoRefs}
+                />
+                <VideoCard
+                  id="WCNVC_front"
+                  title="Wide Front"
+                  src={srcFor('WCNVC_front')}
+                  width="w-48"
+                  isPlaying={isPlaying}
+                  isExpanded={expandedVideo === 'WCNVC_front'}
+                  onVideoClick={handleVideoClick}
+                  onTimeUpdate={onTimeUpdateFor('WCNVC_front')}
+                  onLoadedMetadata={handleVideoLoadedMetadata('WCNVC_front')}
+                  onError={handleVideoError('WCNVC_front')}
+                  onLoadStart={() => {
+                    if (videoTimes['WCNVC_front'] && videoRefs.current['WCNVC_front']) {
+                      videoRefs.current['WCNVC_front']!.currentTime = videoTimes['WCNVC_front'];
+                    }
+                  }}
+                  setVideoRef={setVideoRef}
+                  videoTimes={videoTimes}
+                  videoRefs={videoRefs}
+                />
+              </div>
 
-          {/* Row 3: Left Side, Back Center, Right Side */}
-          <div className="flex justify-center items-start gap-8">
-            <VideoCard
-              id="NLBSC_left"
-              title="Left Side"
-              src={srcFor('NLBSC_left')}
-              width="w-32"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'NLBSC_left'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('NLBSC_left')}
-              onLoadedMetadata={handleVideoLoadedMetadata('NLBSC_left')}
-              onError={handleVideoError('NLBSC_left')}
-              onLoadStart={() => {
-                if (videoTimes['NLBSC_left'] && videoRefs.current['NLBSC_left']) {
-                  videoRefs.current['NLBSC_left']!.currentTime = videoTimes['NLBSC_left'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-            <VideoCard
-              id="TCMVC_back"
-              title="Back Center"
-              src={srcFor('TCMVC_back')}
-              width="w-64"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'TCMVC_back'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('TCMVC_back')}
-              onLoadedMetadata={handleVideoLoadedMetadata('TCMVC_back')}
-              onError={handleVideoError('TCMVC_back')}
-              onLoadStart={() => {
-                if (videoTimes['TCMVC_back'] && videoRefs.current['TCMVC_back']) {
-                  videoRefs.current['TCMVC_back']!.currentTime = videoTimes['TCMVC_back'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-            <VideoCard
-              id="NRBSC_right"
-              title="Right Side"
-              src={srcFor('NRBSC_right')}
-              width="w-32"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'NRBSC_right'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('NRBSC_right')}
-              onLoadedMetadata={handleVideoLoadedMetadata('NRBSC_right')}
-              onError={handleVideoError('NRBSC_right')}
-              onLoadStart={() => {
-                if (videoTimes['NRBSC_right'] && videoRefs.current['NRBSC_right']) {
-                  videoRefs.current['NRBSC_right']!.currentTime = videoTimes['NRBSC_right'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-          </div>
+              {/* Row 3: Left Side, Back Center, Right Side */}
+              <div className="flex justify-center items-start gap-8">
+                <VideoCard
+                  id="NLBSC_left"
+                  title="Left Side"
+                  src={srcFor('NLBSC_left')}
+                  width="w-32"
+                  isPlaying={isPlaying}
+                  isExpanded={expandedVideo === 'NLBSC_left'}
+                  onVideoClick={handleVideoClick}
+                  onTimeUpdate={onTimeUpdateFor('NLBSC_left')}
+                  onLoadedMetadata={handleVideoLoadedMetadata('NLBSC_left')}
+                  onError={handleVideoError('NLBSC_left')}
+                  onLoadStart={() => {
+                    if (videoTimes['NLBSC_left'] && videoRefs.current['NLBSC_left']) {
+                      videoRefs.current['NLBSC_left']!.currentTime = videoTimes['NLBSC_left'];
+                    }
+                  }}
+                  setVideoRef={setVideoRef}
+                  videoTimes={videoTimes}
+                  videoRefs={videoRefs}
+                />
+                <VideoCard
+                  id="TCMVC_back"
+                  title="Back Center"
+                  src={srcFor('TCMVC_back')}
+                  width="w-64"
+                  isPlaying={isPlaying}
+                  isExpanded={expandedVideo === 'TCMVC_back'}
+                  onVideoClick={handleVideoClick}
+                  onTimeUpdate={onTimeUpdateFor('TCMVC_back')}
+                  onLoadedMetadata={handleVideoLoadedMetadata('TCMVC_back')}
+                  onError={handleVideoError('TCMVC_back')}
+                  onLoadStart={() => {
+                    if (videoTimes['TCMVC_back'] && videoRefs.current['TCMVC_back']) {
+                      videoRefs.current['TCMVC_back']!.currentTime = videoTimes['TCMVC_back'];
+                    }
+                  }}
+                  setVideoRef={setVideoRef}
+                  videoTimes={videoTimes}
+                  videoRefs={videoRefs}
+                />
+                <VideoCard
+                  id="NRBSC_right"
+                  title="Right Side"
+                  src={srcFor('NRBSC_right')}
+                  width="w-32"
+                  isPlaying={isPlaying}
+                  isExpanded={expandedVideo === 'NRBSC_right'}
+                  onVideoClick={handleVideoClick}
+                  onTimeUpdate={onTimeUpdateFor('NRBSC_right')}
+                  onLoadedMetadata={handleVideoLoadedMetadata('NRBSC_right')}
+                  onError={handleVideoError('NRBSC_right')}
+                  onLoadStart={() => {
+                    if (videoTimes['NRBSC_right'] && videoRefs.current['NRBSC_right']) {
+                      videoRefs.current['NRBSC_right']!.currentTime = videoTimes['NRBSC_right'];
+                    }
+                  }}
+                  setVideoRef={setVideoRef}
+                  videoTimes={videoTimes}
+                  videoRefs={videoRefs}
+                />
+              </div>
 
-          {/* Row 4: Back Left, Back Camera, Back Right */}
-          <div className="flex justify-center items-start gap-3">
-            <VideoCard
-              id="NLMVC_back_left"
-              title="Back Left"
-              src={srcFor('NLMVC_back_left')}
-              width="w-32"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'NLMVC_back_left'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('NLMVC_back_left')}
-              onLoadedMetadata={handleVideoLoadedMetadata('NLMVC_back_left')}
-              onError={handleVideoError('NLMVC_back_left')}
-              onLoadStart={() => {
-                if (videoTimes['NLMVC_back_left'] && videoRefs.current['NLMVC_back_left']) {
-                  videoRefs.current['NLMVC_back_left']!.currentTime = videoTimes['NLMVC_back_left'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-            <VideoCard
-              id="TCBSC_back"
-              title="Back Camera"
-              src={srcFor('TCBSC_back')}
-              width="w-96"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'TCBSC_back'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('TCBSC_back')}
-              onLoadedMetadata={handleVideoLoadedMetadata('TCBSC_back')}
-              onError={handleVideoError('TCBSC_back')}
-              onLoadStart={() => {
-                if (videoTimes['TCBSC_back'] && videoRefs.current['TCBSC_back']) {
-                  videoRefs.current['TCBSC_back']!.currentTime = videoTimes['TCBSC_back'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-            <VideoCard
-              id="NRMVC_back_right"
-              title="Back Right"
-              src={srcFor('NRMVC_back_right')}
-              width="w-32"
-              isPlaying={isPlaying}
-              isExpanded={expandedVideo === 'NRMVC_back_right'}
-              onVideoClick={handleVideoClick}
-              onTimeUpdate={onTimeUpdateFor('NRMVC_back_right')}
-              onLoadedMetadata={handleVideoLoadedMetadata('NRMVC_back_right')}
-              onError={handleVideoError('NRMVC_back_right')}
-              onLoadStart={() => {
-                if (videoTimes['NRMVC_back_right'] && videoRefs.current['NRMVC_back_right']) {
-                  videoRefs.current['NRMVC_back_right']!.currentTime = videoTimes['NRMVC_back_right'];
-                }
-              }}
-              setVideoRef={setVideoRef}
-              videoTimes={videoTimes}
-              videoRefs={videoRefs}
-            />
-          </div>
+              {/* Row 4: Back Left, Back Camera, Back Right */}
+              <div className="flex justify-center items-start gap-3">
+                <VideoCard
+                  id="NLMVC_back_left"
+                  title="Back Left"
+                  src={srcFor('NLMVC_back_left')}
+                  width="w-32"
+                  isPlaying={isPlaying}
+                  isExpanded={expandedVideo === 'NLMVC_back_left'}
+                  onVideoClick={handleVideoClick}
+                  onTimeUpdate={onTimeUpdateFor('NLMVC_back_left')}
+                  onLoadedMetadata={handleVideoLoadedMetadata('NLMVC_back_left')}
+                  onError={handleVideoError('NLMVC_back_left')}
+                  onLoadStart={() => {
+                    if (videoTimes['NLMVC_back_left'] && videoRefs.current['NLMVC_back_left']) {
+                      videoRefs.current['NLMVC_back_left']!.currentTime = videoTimes['NLMVC_back_left'];
+                    }
+                  }}
+                  setVideoRef={setVideoRef}
+                  videoTimes={videoTimes}
+                  videoRefs={videoRefs}
+                />
+                <VideoCard
+                  id="TCBSC_back"
+                  title="Back Camera"
+                  src={srcFor('TCBSC_back')}
+                  width="w-96"
+                  isPlaying={isPlaying}
+                  isExpanded={expandedVideo === 'TCBSC_back'}
+                  onVideoClick={handleVideoClick}
+                  onTimeUpdate={onTimeUpdateFor('TCBSC_back')}
+                  onLoadedMetadata={handleVideoLoadedMetadata('TCBSC_back')}
+                  onError={handleVideoError('TCBSC_back')}
+                  onLoadStart={() => {
+                    if (videoTimes['TCBSC_back'] && videoRefs.current['TCBSC_back']) {
+                      videoRefs.current['TCBSC_back']!.currentTime = videoTimes['TCBSC_back'];
+                    }
+                  }}
+                  setVideoRef={setVideoRef}
+                  videoTimes={videoTimes}
+                  videoRefs={videoRefs}
+                />
+                <VideoCard
+                  id="NRMVC_back_right"
+                  title="Back Right"
+                  src={srcFor('NRMVC_back_right')}
+                  width="w-32"
+                  isPlaying={isPlaying}
+                  isExpanded={expandedVideo === 'NRMVC_back_right'}
+                  onVideoClick={handleVideoClick}
+                  onTimeUpdate={onTimeUpdateFor('NRMVC_back_right')}
+                  onLoadedMetadata={handleVideoLoadedMetadata('NRMVC_back_right')}
+                  onError={handleVideoError('NRMVC_back_right')}
+                  onLoadStart={() => {
+                    if (videoTimes['NRMVC_back_right'] && videoRefs.current['NRMVC_back_right']) {
+                      videoRefs.current['NRMVC_back_right']!.currentTime = videoTimes['NRMVC_back_right'];
+                    }
+                  }}
+                  setVideoRef={setVideoRef}
+                  videoTimes={videoTimes}
+                  videoRefs={videoRefs}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         {/* Close button when expanded (since click toggles too) */}
