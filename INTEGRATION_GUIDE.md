@@ -259,46 +259,28 @@ const YourStreamsList = () => {
 };
 ```
 
-### 3. AWS S3 HLS Integration
-Set up AWS S3 bucket with CloudFront for optimized HLS streaming:
+## AWS CloudFront + S3 Setup für HLS Streams mit Signed Cookies
 
-#### S3 Bucket Setup
-1. **Create S3 Bucket**: Create a dedicated bucket for HLS streams
-2. **Public Read Access**: Configure bucket for public read access to HLS files
-3. **HTTPS Required**: All HLS streams must be served over HTTPS
-4. **CloudFront Distribution**: Set up CloudFront for global CDN distribution
+Für die Implementierung mit AWS CloudFront, S3 und Signed Cookies ist folgende Konfiguration erforderlich:
 
-#### S3 CORS Configuration
-Add this CORS policy to your S3 bucket:
-```json
-{
-  "CORSRules": [
-    {
-      "AllowedHeaders": ["*"],
-      "AllowedMethods": ["GET", "HEAD"],
-      "AllowedOrigins": ["*"],
-      "ExposeHeaders": ["Content-Range", "Content-Length", "Accept-Ranges"],
-      "MaxAgeSeconds": 3600
-    }
-  ]
-}
-```
+### 1. S3 Bucket Konfiguration (Privat)
 
-#### S3 Bucket Policy
-Configure bucket policy for public HLS access:
-```json
+```bash
+# Bucket Policy für CloudFront (Privater Zugriff)
 {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "PublicReadGetObject",
+      "Sid": "AllowCloudFrontServicePrincipal",
       "Effect": "Allow",
-      "Principal": "*",
+      "Principal": {
+        "Service": "cloudfront.amazonaws.com"
+      },
       "Action": "s3:GetObject",
       "Resource": "arn:aws:s3:::your-hls-bucket/*",
       "Condition": {
         "StringEquals": {
-          "s3:ExistingObjectTag/ContentType": ["application/x-mpegURL", "video/MP2T"]
+          "AWS:SourceArn": "arn:aws:cloudfront::account-id:distribution/distribution-id"
         }
       }
     }
@@ -306,15 +288,115 @@ Configure bucket policy for public HLS access:
 }
 ```
 
-#### CloudFront Distribution Setup
-1. **Origin**: Point to your S3 bucket
-2. **Cache Behaviors**:
-   - `.m3u8` files: Cache for 60 seconds (short TTL for playlist updates)
-   - `.ts` files: Cache for 1 hour (segments don't change)
-3. **CORS Headers**: Enable CORS headers forwarding
-4. **Compression**: Enable Gzip compression for M3U8 files
+**Wichtig**: Der S3 Bucket muss privat sein - kein öffentlicher Zugriff!
 
-### 4. AWS S3 HLS Stream Organization
+### 2. CloudFront Distribution mit Signed Cookies
+
+```bash
+# CloudFront Distribution Settings
+Origin:
+  - Domain: your-hls-bucket.s3.amazonaws.com
+  - Origin Access Control: Enabled
+  - Path Pattern: /hls/*
+
+Behaviors:
+  - Viewer Protocol Policy: Redirect HTTP to HTTPS
+  - Allowed HTTP Methods: GET, HEAD, OPTIONS
+  - Cache Policy: Caching Optimized for HLS
+  - Origin Request Policy: CORS-S3Origin
+  - Restrict Viewer Access: Yes (Trusted Signers)
+
+CORS Headers:
+  - Access-Control-Allow-Origin: https://your-domain.com
+  - Access-Control-Allow-Methods: GET, HEAD, OPTIONS
+  - Access-Control-Allow-Headers: Range
+  - Access-Control-Allow-Credentials: true
+
+Trusted Key Groups:
+  - Create a key group with your public key
+  - Enable signed cookies for the distribution
+```
+
+### 3. CloudFront Signed Cookies Setup
+
+```typescript
+// Server-side: Generate signed cookies (Node.js/Lambda)
+import AWS from 'aws-sdk';
+
+const cloudfront = new AWS.CloudFront.Signer(
+  process.env.CLOUDFRONT_KEY_PAIR_ID!,
+  process.env.CLOUDFRONT_PRIVATE_KEY!
+);
+
+const signedCookies = cloudfront.getSignedCookie({
+  url: 'https://your-cloudfront-domain.net/hls/*',
+  expires: Math.floor(Date.now() / 1000) + (60 * 60), // 1 hour
+});
+
+// Cookies werden automatisch im Browser gesetzt
+```
+
+### 4. API Endpoint Structure
+
+Die Anwendung erwartet folgende API-Antwort mit CloudFront-Daten:
+
+```json
+{
+  "cohort_id": "INC#ZRH_LCR_10024#1752756048000000000",
+  "vehicle_id": "ZRH_LCR_10024",
+  "original_session_id": "",
+  "streams": [
+    {
+      "camera_position": "NCBSC_front",
+      "unique_session_id": "1752756048000000000_camera",
+      "hls_manifest_url": "https://your-cloudfront-domain.net/hls/ZRH_LCR_10024/1752756048000000000_camera/index.m3u8",
+      "mp4_url": null,
+      "thumbnail_url": null,
+      "duration": null,
+      "resolution": "Auto"
+    },
+    {
+      "camera_position": "TCBSC_back",
+      "unique_session_id": "1752756048000000000_back",
+      "hls_manifest_url": "https://your-cloudfront-domain.net/hls/ZRH_LCR_10024/1752756048000000000_back/index.m3u8",
+      "mp4_url": null,
+      "thumbnail_url": null,
+      "duration": null,
+      "resolution": "Auto"
+    }
+  ],
+  "total_streams": 2,
+  "processing_status": "completed",
+  "signed_cookies": {
+    "CloudFront-Policy": "eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIj...",
+    "CloudFront-Signature": "abcdef123456...",
+    "CloudFront-Key-Pair-Id": "APKAIX..."
+  },
+  "expires_at": 1756973730
+}
+```
+
+### 5. Frontend Implementation
+
+Die Frontend-Implementierung wurde erweitert um CloudFront-Unterstützung:
+
+```typescript
+// VideoReview Komponente fetcht CloudFront-Daten
+const fetchCloudFrontData = async (streamId: string) => {
+  const response = await fetch(`/api/streams/${streamId}`);
+  const data: CloudFrontApiResponse = await response.json();
+  
+  // Signed Cookies werden automatisch vom Browser verwaltet
+  return data;
+};
+
+// OptimizedMultiVideoPlayer unterstützt CloudFront-Streams
+<OptimizedMultiVideoPlayer
+  cloudFrontData={cloudFrontApiResponse}
+  streamName={streamName}
+  onClose={handleClose}
+/>
+```
 Organize your HLS streams in S3 with this structure:
 ```
 s3://your-hls-bucket/

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import VideoFileImporter from './VideoFileImporter';
 import { VideoCard } from './VideoCard';
 import { LoadingModal } from './LoadingModal';
-import { VideoPlayerProps, VideoFile, VideoConfig } from '@/types/VideoTypes';
+import { VideoPlayerProps, VideoFile, VideoConfig, CloudFrontApiResponse } from '@/types/VideoTypes';
 import { formatTime } from '@/utils/videoUtils';
 
 const defaultVideoConfigs: VideoConfig[] = [
@@ -25,14 +25,31 @@ const defaultVideoConfigs: VideoConfig[] = [
 
 const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({ 
   videoFiles = {}, 
+  cloudFrontData,
   onClose, 
   streamName = "Vehicle Camera Monitor"
 }) => {
-  // Merge external video files with default config
-  const videoConfigs = defaultVideoConfigs.map(config => ({
-    ...config,
-    src: videoFiles[config.id] || config.src
-  }));
+  // Merge external video files with default config, prioritizing CloudFront data
+  const videoConfigs = defaultVideoConfigs.map(config => {
+    let src = config.src;
+    
+    // Priority 1: CloudFront streams
+    if (cloudFrontData?.streams) {
+      const cloudFrontStream = cloudFrontData.streams.find(
+        stream => stream.camera_position === config.id
+      );
+      if (cloudFrontStream?.hls_manifest_url) {
+        src = cloudFrontStream.hls_manifest_url;
+      }
+    }
+    
+    // Priority 2: Direct video files mapping
+    if (videoFiles[config.id]) {
+      src = videoFiles[config.id];
+    }
+    
+    return { ...config, src };
+  });
 
   const MASTER_ID = videoConfigs[0].id;
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
@@ -372,7 +389,18 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
       
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">{streamName}</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{streamName}</h1>
+          {cloudFrontData && (
+            <div className="text-xs text-muted-foreground mt-1">
+              Vehicle: {cloudFrontData.vehicle_id} • Streams: {cloudFrontData.total_streams} • 
+              Status: {cloudFrontData.processing_status}
+              {cloudFrontData.expires_at && (
+                <> • Expires: {new Date(cloudFrontData.expires_at * 1000).toLocaleString('de-DE')}</>
+              )}
+            </div>
+          )}
+        </div>
         <div className="text-sm text-muted-foreground">
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
