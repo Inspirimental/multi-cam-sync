@@ -391,25 +391,6 @@ const OptimizedMultiVideoPlayer: React.FC<VideoPlayerProps> = ({
         totalVideos={totalToLoad}
       />
       
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{streamName}</h1>
-          {cloudFrontData && (
-            <div className="text-xs text-muted-foreground mt-1">
-              Vehicle: {cloudFrontData.vehicle_id} • Streams: {cloudFrontData.total_streams} • 
-              Status: {cloudFrontData.processing_status}
-              {cloudFrontData.expires_at && (
-                <> • Expires: {new Date(cloudFrontData.expires_at * 1000).toLocaleString('de-DE')}</>
-              )}
-            </div>
-          )}
-        </div>
-        <div className="text-sm text-muted-foreground">
-          {formatTime(currentTime)} / {formatTime(duration)}
-        </div>
-      </div>
-
       {/* Video File Importer */}
       {Object.keys(videoFiles).length === 0 && (
         <VideoFileImporter
