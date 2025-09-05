@@ -280,6 +280,13 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   };
 
   const handleError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+    console.error('[video] error details', id, {
+      error: e.currentTarget.error,
+      networkState: e.currentTarget.networkState,
+      readyState: e.currentTarget.readyState,
+      src: e.currentTarget.src,
+      currentSrc: e.currentTarget.currentSrc
+    });
     setHasError(true);
     onError?.(e);
   };
