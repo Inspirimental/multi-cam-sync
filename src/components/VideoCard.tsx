@@ -83,8 +83,15 @@ export const VideoCard: React.FC<VideoCardProps> = ({
         fragLoadingMaxRetry: 1,
         manifestLoadingMaxRetry: 1,
         xhrSetup: (xhr) => { 
-          // Enable credentials for CloudFront signed cookies
+          // Enable credentials for CloudFront signed cookies (for XHR loader)
           xhr.withCredentials = isCloudFront;
+        },
+        fetchSetup: (context: any, init: any) => {
+          // Ensure credentials are sent when Fetch loader is used (manifests, segments, keys)
+          return new Request(context.url, {
+            ...init,
+            credentials: isCloudFront ? 'include' : 'same-origin',
+          });
         },
       });
       
