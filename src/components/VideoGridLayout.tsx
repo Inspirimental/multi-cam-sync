@@ -34,19 +34,19 @@ export const VideoGridLayout: React.FC<VideoGridLayoutProps> = ({
       {/* Row 1: Front Left, Front Camera, Front Right */}
       <div className="flex justify-center items-start gap-3">
         <VideoCard
-          id="FLMVC_back_left"
+          id="NLMVC_front_left"
           title="Front Left"
-          src={srcFor('FLMVC_back_left')}
+          src={srcFor('NLMVC_front_left')}
           width="w-32"
           isPlaying={isPlaying}
-          isExpanded={expandedVideo === 'FLMVC_back_left'}
+          isExpanded={expandedVideo === 'NLMVC_front_left'}
           onVideoClick={onVideoClick}
-          onTimeUpdate={onTimeUpdateFor('FLMVC_back_left')}
-          onLoadedMetadata={onVideoLoadedMetadata('FLMVC_back_left')}
-          onError={onVideoError('FLMVC_back_left')}
+          onTimeUpdate={onTimeUpdateFor('NLMVC_front_left')}
+          onLoadedMetadata={onVideoLoadedMetadata('NLMVC_front_left')}
+          onError={onVideoError('NLMVC_front_left')}
           onLoadStart={() => {
-            if (videoTimes['FLMVC_back_left'] && videoRefs.current['FLMVC_back_left']) {
-              videoRefs.current['FLMVC_back_left']!.currentTime = videoTimes['FLMVC_back_left'];
+            if (videoTimes['NLMVC_front_left'] && videoRefs.current['NLMVC_front_left']) {
+              videoRefs.current['NLMVC_front_left']!.currentTime = videoTimes['NLMVC_front_left'];
             }
           }}
           setVideoRef={setVideoRef}
@@ -74,19 +74,19 @@ export const VideoGridLayout: React.FC<VideoGridLayoutProps> = ({
           videoRefs={videoRefs}
         />
         <VideoCard
-          id="FRMVC_back_right"
+          id="NRMVC_front_right"
           title="Front Right"
-          src={srcFor('FRMVC_back_right')}
+          src={srcFor('NRMVC_front_right')}
           width="w-32"
           isPlaying={isPlaying}
-          isExpanded={expandedVideo === 'FRMVC_back_right'}
+          isExpanded={expandedVideo === 'NRMVC_front_right'}
           onVideoClick={onVideoClick}
-          onTimeUpdate={onTimeUpdateFor('FRMVC_back_right')}
-          onLoadedMetadata={onVideoLoadedMetadata('FRMVC_back_right')}
-          onError={onVideoError('FRMVC_back_right')}
+          onTimeUpdate={onTimeUpdateFor('NRMVC_front_right')}
+          onLoadedMetadata={onVideoLoadedMetadata('NRMVC_front_right')}
+          onError={onVideoError('NRMVC_front_right')}
           onLoadStart={() => {
-            if (videoTimes['FRMVC_back_right'] && videoRefs.current['FRMVC_back_right']) {
-              videoRefs.current['FRMVC_back_right']!.currentTime = videoTimes['FRMVC_back_right'];
+            if (videoTimes['NRMVC_front_right'] && videoRefs.current['NRMVC_front_right']) {
+              videoRefs.current['NRMVC_front_right']!.currentTime = videoTimes['NRMVC_front_right'];
             }
           }}
           setVideoRef={setVideoRef}
@@ -206,6 +206,26 @@ export const VideoGridLayout: React.FC<VideoGridLayoutProps> = ({
       {/* Row 4: Back Camera - Centered */}
       <div className="flex justify-center items-start gap-3">
         <VideoCard
+          id="FLMVC_back_left"
+          title="Back Left"
+          src={srcFor('FLMVC_back_left')}
+          width="w-32"
+          isPlaying={isPlaying}
+          isExpanded={expandedVideo === 'FLMVC_back_left'}
+          onVideoClick={onVideoClick}
+          onTimeUpdate={onTimeUpdateFor('FLMVC_back_left')}
+          onLoadedMetadata={onVideoLoadedMetadata('FLMVC_back_left')}
+          onError={onVideoError('FLMVC_back_left')}
+          onLoadStart={() => {
+            if (videoTimes['FLMVC_back_left'] && videoRefs.current['FLMVC_back_left']) {
+              videoRefs.current['FLMVC_back_left']!.currentTime = videoTimes['FLMVC_back_left'];
+            }
+          }}
+          setVideoRef={setVideoRef}
+          videoTimes={videoTimes}
+          videoRefs={videoRefs}
+        />
+        <VideoCard
           id="BCBSC_back"
           title="Back Camera"
           src={srcFor('BCBSC_back')}
@@ -219,6 +239,26 @@ export const VideoGridLayout: React.FC<VideoGridLayoutProps> = ({
           onLoadStart={() => {
             if (videoTimes['BCBSC_back'] && videoRefs.current['BCBSC_back']) {
               videoRefs.current['BCBSC_back']!.currentTime = videoTimes['BCBSC_back'];
+            }
+          }}
+          setVideoRef={setVideoRef}
+          videoTimes={videoTimes}
+          videoRefs={videoRefs}
+        />
+        <VideoCard
+          id="FRMVC_back_right"
+          title="Back Right"
+          src={srcFor('FRMVC_back_right')}
+          width="w-32"
+          isPlaying={isPlaying}
+          isExpanded={expandedVideo === 'FRMVC_back_right'}
+          onVideoClick={onVideoClick}
+          onTimeUpdate={onTimeUpdateFor('FRMVC_back_right')}
+          onLoadedMetadata={onVideoLoadedMetadata('FRMVC_back_right')}
+          onError={onVideoError('FRMVC_back_right')}
+          onLoadStart={() => {
+            if (videoTimes['FRMVC_back_right'] && videoRefs.current['FRMVC_back_right']) {
+              videoRefs.current['FRMVC_back_right']!.currentTime = videoTimes['FRMVC_back_right'];
             }
           }}
           setVideoRef={setVideoRef}
