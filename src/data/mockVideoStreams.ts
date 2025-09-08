@@ -141,9 +141,27 @@ export const createMockCloudFrontResponse = (streamName: string): CloudFrontApiR
       thumbnail_url: null,
       duration: null,
       resolution: "Auto"
+    },
+    {
+      camera_position: "NLMVC_front_left",
+      unique_session_id: "1752756048000000000_camera",
+      hls_manifest_url: "https://sharing.timbeck.de/hls/NLMVC_front_left/index.m3u8",
+      mp4_url: null,
+      thumbnail_url: null,
+      duration: null,
+      resolution: "Auto"
+    },
+    {
+      camera_position: "NRMVC_front_right",
+      unique_session_id: "1752756048000000000_camera",
+      hls_manifest_url: "https://sharing.timbeck.de/hls/NRMVC_front_right/index.m3u8",
+      mp4_url: null,
+      thumbnail_url: null,
+      duration: null,
+      resolution: "Auto"
     }
   ],
-  total_streams: 9,
+  total_streams: 11,
   processing_status: "completed",
   signed_cookies: {},
   expires_at: 1756973730
